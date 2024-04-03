@@ -16,7 +16,9 @@
     "baseUrl": ".",
     "paths": {
       "@beaver/core": ["core/src/index.ts"],
-      "@beaver/types": ["types/src/index.ts"]
+      "@beaver/shell-flow": ["shell-flow/src/index.ts"],
+      "@beaver/types": ["types/src/index.ts"],
+      "@beaver/utils": ["utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

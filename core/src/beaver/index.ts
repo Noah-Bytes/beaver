@@ -2,9 +2,9 @@ import type { IPluginManager } from '../types/plugin-types';
 import { PluginManager } from '../plugin/plugin-manager';
 
 export class Beaver {
-  plugin: IPluginManager;
+  pluginManager: IPluginManager;
 
   constructor() {
-    this.plugin = new PluginManager();
+    this.pluginManager = new PluginManager();
   }
 }

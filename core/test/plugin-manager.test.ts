@@ -5,7 +5,7 @@ describe('plugin 测试', () => {
   let pm: IPluginManager;
   beforeEach(() => {
     const beaver = new Beaver();
-    pm = beaver.plugin.toProxy();
+    pm = beaver.pluginManager.toProxy();
   });
   afterEach(() => {
     pm.destroy();

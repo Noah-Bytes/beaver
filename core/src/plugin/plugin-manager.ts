@@ -3,9 +3,11 @@ import {
   IPluginRegisterOptions,
   IPluginRuntime,
 } from '../types/plugin-types';
-import * as console from 'console';
 import { IPublicPlugin, IPublicPluginMeta } from '@beaver/types';
 import { PluginRuntime } from './plugin';
+import { consola } from 'consola';
+
+const logger = consola.withTag('preset:plugin-manager');
 
 export class PluginManager implements IPluginManager {
   private plugins: IPluginRuntime[] = [];
@@ -29,7 +31,7 @@ export class PluginManager implements IPluginManager {
     const sortedPluginIds = this.topologicalSort(graph);
 
     if (sortedPluginIds === null) {
-      console.error('Cannot load plugins due to a cyclic dependency.');
+      logger.error('Cannot load plugins due to a cyclic dependency.');
       return;
     }
 
@@ -37,10 +39,10 @@ export class PluginManager implements IPluginManager {
       try {
         await this.get(pluginName)!.init();
       } catch (e) /* istanbul ignore next */ {
-        console.error(
+        logger.error(
           `Failed to init plugin:${pluginName}, it maybe affect those plugins which depend on this.`,
         );
-        console.error(e);
+        logger.error(e);
       }
     }
   }
@@ -62,7 +64,7 @@ export class PluginManager implements IPluginManager {
       this.pluginMap.delete(pluginName);
       return true;
     } catch (e) {
-      console.error(`Failed to destroy plugin ${pluginName}.`, e);
+      logger.error(`Failed to destroy plugin ${pluginName}.`, e);
       throw new Error(`Failed to destroy plugin ${pluginName}.`);
     }
   }
@@ -79,7 +81,7 @@ export class PluginManager implements IPluginManager {
       if (!allowOverride) {
         throw new Error(`Plugin with name ${pluginName} exists`);
       } else {
-        console.log(
+        logger.log(
           'plugin override, originalPlugin with name ',
           pluginName,
           ' will be destroyed.',
@@ -120,7 +122,7 @@ export class PluginManager implements IPluginManager {
 
     this.plugins.push(pluginRuntime);
     this.pluginMap.set(pluginName, pluginRuntime);
-    console.log(
+    logger.log(
       `plugin registered with pluginName: ${pluginName}, config: `,
       options,
       'metadata:',
@@ -159,7 +161,7 @@ export class PluginManager implements IPluginManager {
         return true;
       }
 
-      console.log(`${depId} not exist`);
+      logger.log(`${depId} not exist`);
       return false;
     });
   }
