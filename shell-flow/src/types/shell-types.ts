@@ -1,7 +1,23 @@
-export interface IShellStartParams {
+export interface IShellRunOptions {
   cols?: number;
   rows?: number;
   sudo?: boolean;
+  path?: string;
+}
+
+export interface IShellRunParams {
+  message: string | string[];
+  venv?: string;
+  path?: string;
+  conda?:
+    | string
+    | {
+        args?: string;
+        skip?: boolean;
+        path?: string;
+        name?: string;
+        python?: string;
+      };
 }
 
 export interface IShellTypes {
@@ -29,12 +45,14 @@ export interface IShellTypes {
 
   kill(): void;
 
-  run(message: string): Promise<string>;
+  run(params: IShellRunParams, options?: IShellRunOptions): Promise<string>;
 
   /**
    * 初始化
    */
-  init(): void;
+  init(options?: IShellRunOptions): void;
+
+  isInit(): boolean;
 
   onShellData(func: (data: string) => void): () => void;
   onShellExit(func: (data: string) => void): () => void;

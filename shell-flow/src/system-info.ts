@@ -1,8 +1,16 @@
 import * as systemInfo from 'systeminformation';
 import { ISystemInfoTypes } from './types/system-info-types';
 import { Systeminformation } from 'systeminformation';
+import * as os from 'os';
 
 export class SystemInfo implements ISystemInfoTypes {
+  get platform(): 'win32' | 'linux' | 'darwin' {
+    return this._platform;
+  }
+  get arch(): 'x64' | 'arm64' {
+    return this._arch;
+  }
+  private readonly _platform: 'win32' | 'linux' | 'darwin';
   get shell(): string | undefined {
     return this._shell;
   }
@@ -45,7 +53,12 @@ export class SystemInfo implements ISystemInfoTypes {
     return this._GPUs;
   }
 
-  constructor() {}
+  constructor() {
+    this._platform = os.platform() as 'win32' | 'linux' | 'darwin';
+    this._arch = os.arch() as 'x64' | 'arm64';
+  }
+
+  private readonly _arch: 'x64' | 'arm64';
 
   private _os: Systeminformation.OsData | undefined;
   private _currentLoad: Systeminformation.CurrentLoadData | undefined;

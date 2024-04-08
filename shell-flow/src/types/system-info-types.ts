@@ -2,6 +2,16 @@ import { Systeminformation } from 'systeminformation';
 
 export interface ISystemInfoTypes {
   /**
+   * 平台
+   */
+  platform: 'win32' | 'linux' | 'darwin';
+
+  /**
+   * 电脑位数
+   */
+  arch: 'x64' | 'arm64';
+
+  /**
    * 显卡信息
    */
   graphics: Systeminformation.GraphicsData | undefined;
@@ -24,7 +34,7 @@ export interface ISystemInfoTypes {
   /**
    * 操作系统信息
    */
-  os: Systeminformation.OsData | undefined,
+  os: Systeminformation.OsData | undefined;
 
   /**
    * 内存信息

@@ -1,21 +1,17 @@
 {
-  "name": "shell-flow",
+  "name": "interceptor",
   "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "shell-flow/src",
+  "sourceRoot": "interceptor/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/shell-flow",
-        "main": "shell-flow/src/index.ts",
-        "tsConfig": "shell-flow/tsconfig.lib.json",
-        "assets": [
-          "shell-flow/*.md"
-        ]
+        "outputPath": "dist/interceptor",
+        "main": "interceptor/src/index.ts",
+        "tsConfig": "interceptor/tsconfig.lib.json",
+        "assets": ["interceptor/*.md"]
       }
     },
     "nx-release-publish": {
