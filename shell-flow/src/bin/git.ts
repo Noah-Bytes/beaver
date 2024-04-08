@@ -28,11 +28,13 @@ export class Git implements IBinModuleTypes {
   }
 
   async install(): Promise<void> {
-    await this.shell.run('conda install -y -c conda-forge git git-lfs');
+    await this.shell.run({
+      message: 'conda install -y -c conda-forge git git-lfs',
+    });
 
     if (isWin32()) {
-      const { homeDir, api } = this._ctx;
-      const gitConfigPath = path.resolve(homeDir, Git.GIT_CONFIG);
+      const { homeDir, api, absPath } = this._ctx;
+      const gitConfigPath = absPath(Git.GIT_CONFIG);
       if (!api.exists(gitConfigPath)) {
         await fs.promises.copyFile(
           path.resolve(__dirname, '..', 'gitconfig_template'),
@@ -54,6 +56,8 @@ export class Git implements IBinModuleTypes {
 
   async uninstall(): Promise<void> {
     const { bin } = this._ctx;
-    await this.shell.run('conda remove -y git git-lfs');
+    await this.shell.run({
+      message: 'conda remove -y git git-lfs',
+    });
   }
 }

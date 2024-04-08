@@ -1,21 +1,18 @@
 import { Shell } from '../../src/shell/shell';
+import { ShellFlow } from '../../src';
 
 describe('终端测试', () => {
-  const shell = new Shell(
+  const shellFlow = new ShellFlow(
     'Beaver',
     '/Users/taibai/workspace/beaver/beaver',
-    'test',
+    {
+      isMirror: true,
+    },
   );
-  const shell1 = new Shell(
-    'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
-    '并发',
-  );
-  const sync = new Shell(
-    'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
-    '同步',
-  );
+
+  const shell = new Shell('test', shellFlow);
+  const shell1 = new Shell('并发', shellFlow);
+  const sync = new Shell('同步', shellFlow);
 
   jest.setTimeout(20000);
 
@@ -23,12 +20,6 @@ describe('终端测试', () => {
     shell.init();
     shell1.init();
     sync.init();
-  });
-
-  afterAll(() => {
-    shell.kill();
-    shell1.kill();
-    sync.kill();
   });
 
   it('控制台输入', () => {

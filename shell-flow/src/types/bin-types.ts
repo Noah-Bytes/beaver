@@ -13,7 +13,7 @@ export interface IBinTypes {
    * 文件是否存在
    * @param path
    */
-  exists: (path: string) => boolean;
+  exists: (...p: string[]) => boolean;
 
   absPath: (...p: string[]) => string;
 
@@ -35,7 +35,7 @@ export interface IBinModuleTypes {
   init?: () => Promise<void>;
   exists?: (pattern: string) => Promise<boolean>;
   install: () => Promise<void>;
-  installed: () => boolean;
+  installed: () => boolean | Promise<boolean>;
   uninstall: () => Promise<void>;
   onstart?: () => string[];
 }

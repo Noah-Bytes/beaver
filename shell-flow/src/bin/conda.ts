@@ -126,7 +126,7 @@ export class Conda implements IBinModuleTypes {
   }
 
   async install(): Promise<void> {
-    const { systemInfo, bin } = this._ctx;
+    const { systemInfo, bin, options } = this._ctx;
 
     if (!Conda.URLS[systemInfo.platform]) {
       throw new Error(
@@ -170,6 +170,17 @@ export class Conda implements IBinModuleTypes {
         path: bin.dir,
       },
     );
+
+    // setting mirror
+    if (options?.isMirror) {
+      await this.shell.run({
+        message: [
+          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/',
+          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/',
+          'conda config --set show_channel_urls yes',
+        ],
+      });
+    }
 
     await this.shell.run({
       message: [

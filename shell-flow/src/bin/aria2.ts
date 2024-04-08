@@ -20,9 +20,13 @@ export class Aria2 implements IBinModuleTypes {
       const { bin } = this._ctx;
       const dest = 'aria2-1.36.0-win-64bit-build1.zip';
       await bin.download(Aria2.DOWNLOAD_URL, dest);
-      await this.shell.run(`7z x ${dest} -o aria2`);
+      await this.shell.run({
+        message: `7z x ${dest} -o aria2`,
+      });
     } else {
-      await this.shell.run('conda install -y -c conda-forge aria2');
+      await this.shell.run({
+        message: 'conda install -y -c conda-forge aria2',
+      });
     }
   }
 
@@ -43,6 +47,8 @@ export class Aria2 implements IBinModuleTypes {
       const { bin } = this._ctx;
       await bin.rm('aria2');
     }
-    await this.shell.run('brew remove aria2');
+    await this.shell.run({
+      message: 'brew remove aria2',
+    });
   }
 }

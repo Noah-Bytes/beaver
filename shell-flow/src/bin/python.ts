@@ -15,17 +15,17 @@ interface PlatformUrls {
 export class Python implements IBinModuleTypes {
   static URLS: PlatformUrls = {
     darwin: {
-      x64: 'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6+20220802-x86_64-apple-darwin-install_only.tar.gz',
+      x64: 'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6%2B20220802-x86_64-apple-darwin-install_only.tar.gz',
       arm64:
-        'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6+20220802-aarch64-apple-darwin-install_only.tar.gz',
+        'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6%2B20220802-aarch64-apple-darwin-install_only.tar.gz',
     },
     win32: {
-      x64: 'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6+20220802-x86_64-pc-windows-msvc-shared-install_only.tar.gz',
+      x64: 'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6%2B20220802-x86_64-pc-windows-msvc-shared-install_only.tar.gz',
     },
     linux: {
-      x64: 'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6+20220802-x86_64-unknown-linux-gnu-install_only.tar.gz',
+      x64: 'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6%2B20220802-x86_64-unknown-linux-gnu-install_only.tar.gz',
       arm64:
-        'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6+20220802-aarch64-unknown-linux-gnu-install_only.tar.gz',
+        'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6%2B20220802-aarch64-unknown-linux-gnu-install_only.tar.gz',
     },
   };
 
@@ -56,7 +56,7 @@ export class Python implements IBinModuleTypes {
     const downloadPath = bin.absPath(fileName);
 
     await fs.promises.mkdir(bin.dir, { recursive: true });
-    await bin.download(url, downloadPath);
+    await bin.download(url, fileName);
 
     try {
       const pythonPath = bin.absPath('python');

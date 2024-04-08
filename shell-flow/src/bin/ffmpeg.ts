@@ -12,7 +12,9 @@ export class Ffmpeg implements IBinModuleTypes {
   }
 
   async install(): Promise<void> {
-    await this.shell.run('conda install -y -c conda-forge ffmpeg');
+    await this.shell.run({
+      message: 'conda install -y -c conda-forge ffmpeg'
+    });
   }
 
   installed(): boolean {
@@ -24,6 +26,8 @@ export class Ffmpeg implements IBinModuleTypes {
   }
 
   async uninstall(): Promise<void> {
-    await this.shell.run('conda remove -y ffmpeg');
+    await this.shell.run({
+      message: 'conda remove -y ffmpeg'
+    });
   }
 }

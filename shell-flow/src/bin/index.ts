@@ -4,11 +4,11 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as fse from 'fs-extra';
 import { loader } from '../loader';
-import { removeFilenameFromUrl } from '@beaver/utils';
 import { Logger } from 'winston';
 import * as wget from 'wget-improved';
 import { createLogger } from '../logger';
 import { DownloaderHelper } from 'node-downloader-helper';
+import { mirrorUrl } from '../mirror';
 
 export class Bin implements IBinTypes {
   private readonly _dir: string;
@@ -16,7 +16,6 @@ export class Bin implements IBinTypes {
   readonly logger: Logger;
   private modules: IBinModuleTypes[] = [];
   private moduleMap: Map<string, IBinModuleTypes> = new Map();
-  private readonly mirror: { [key: string]: string } = require('./mirror.json');
   installed: { [p: string]: string[] } = {};
 
   get dir(): string {
@@ -68,13 +67,9 @@ export class Bin implements IBinTypes {
 
     const { options } = this._ctx;
     let targetURL = url;
-    const urlWithOutFileName = removeFilenameFromUrl(targetURL);
 
-    if (options?.isMirror && this.mirror[urlWithOutFileName]) {
-      targetURL = targetURL.replace(
-        urlWithOutFileName,
-        this.mirror[urlWithOutFileName],
-      );
+    if (options?.isMirror) {
+      targetURL = mirrorUrl(targetURL);
       this.logger.info('Using mirror: ' + targetURL);
     }
 
@@ -118,13 +113,9 @@ export class Bin implements IBinTypes {
 
     const { options } = this._ctx;
     let targetURL = url;
-    const urlWithOutFileName = removeFilenameFromUrl(targetURL);
 
-    if (options?.isMirror && this.mirror[urlWithOutFileName]) {
-      targetURL = targetURL.replace(
-        urlWithOutFileName,
-        this.mirror[urlWithOutFileName],
-      );
+    if (options?.isMirror) {
+      targetURL = mirrorUrl(targetURL);
       this.logger.info('Using mirror: ' + targetURL);
     }
 
@@ -158,9 +149,9 @@ export class Bin implements IBinTypes {
     this.logger.info(`mv success`);
   }
 
-  exists(src: string): boolean {
+  exists(...p: string[]): boolean {
     try {
-      fs.accessSync(this.absPath(src), fs.constants.F_OK);
+      fs.accessSync(this.absPath(...p), fs.constants.F_OK);
       return true;
     } catch (e) {
       return false;

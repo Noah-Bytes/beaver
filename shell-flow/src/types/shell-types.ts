@@ -3,6 +3,7 @@ export interface IShellRunOptions {
   rows?: number;
   sudo?: boolean;
   path?: string;
+  env?: { [key: string]: string };
 }
 
 export interface IShellRunParams {

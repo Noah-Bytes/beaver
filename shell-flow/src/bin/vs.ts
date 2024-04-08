@@ -115,7 +115,14 @@ export class Vs implements IBinModuleTypes {
     if (systemInfo.os?.release.startsWith('10')) {
       bin.logger.info(`running installer: $${Vs.FILTER_NAME}`);
 
-      const resp = await this.shell.run(this.cmd('install'), true);
+      const resp = await this.shell.run(
+        {
+          message: this.cmd('install'),
+        },
+        {
+          sudo: true,
+        },
+      );
       bin.logger.info(resp);
 
       bin.logger.info(`installed ${Vs.FILTER_NAME}`);
@@ -165,7 +172,14 @@ export class Vs implements IBinModuleTypes {
   async uninstall(): Promise<void> {
     const { bin } = this._ctx;
     if (isWin32()) {
-      const resp = await this.shell.run(this.cmd('uninstall'), true);
+      const resp = await this.shell.run(
+        {
+          message: this.cmd('uninstall'),
+        },
+        {
+          sudo: true,
+        },
+      );
       bin.logger.info(resp);
     }
   }

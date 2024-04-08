@@ -13,6 +13,7 @@ export class Torch implements IBinModuleTypes {
   }
 
   async install(): Promise<void> {
+    const { options } = this._ctx;
     const {
       systemInfo: { platform, GPUs },
     } = this._ctx;
@@ -51,7 +52,11 @@ export class Torch implements IBinModuleTypes {
         }
         break;
     }
-    await this.shell.run(cmd);
+    await this.shell.run({
+      message: options?.isMirror
+        ? `${cmd} -i https://pypi.mirrors.ustc.edu.cn/simple/`
+        : cmd,
+    });
   }
 
   installed(): boolean {
@@ -64,6 +69,8 @@ export class Torch implements IBinModuleTypes {
   }
 
   async uninstall(): Promise<void> {
-    await this.shell.run('pip3 uninstall torch torchvision torchaudio');
+    await this.shell.run({
+      message: 'pip3 uninstall torch torchvision torchaudio',
+    });
   }
 }

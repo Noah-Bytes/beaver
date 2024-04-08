@@ -1,0 +1,6 @@
+{
+  "https://repo.anaconda.com/miniconda": "https://mirrors4.tuna.tsinghua.edu.cn/anaconda/miniconda",
+  "https://github.com/indygreg/python-build-standalone/releases/download/20220802": "https://arteffix-github.oss-cn-hangzhou.aliyuncs.com/indygreg/python-build-standalone/releases/download/20220802",
+  "https://github.com/pinokiocomputer/python": "https://gitee.com/arteffix/python",
+  "https://nodejs.org/dist/v18.16.0": "https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/v18.16.0"
+}

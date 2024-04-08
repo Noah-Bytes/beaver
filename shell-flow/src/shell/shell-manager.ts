@@ -1,5 +1,5 @@
 import { IShellManagerTypes } from '../types/shell-manager-types';
-import {IShellRunParams, IShellTypes} from '../types/shell-types';
+import { IShellRunParams, IShellTypes } from '../types/shell-types';
 import { Shell } from './shell';
 import { IShellFlowTypes } from '../types/shell-flow-types';
 
@@ -13,7 +13,7 @@ export class ShellManager implements IShellManagerTypes {
   }
 
   createShell(name: string): IShellTypes {
-    const shell = new Shell(this._ctx.appName, this._ctx.homeDir, name);
+    const shell = new Shell(name, this._ctx);
     this._shells.push(shell);
     this._shellMap.set(name, shell);
     return shell;

@@ -4,7 +4,7 @@ import {
   IShellTypes,
 } from '../types/shell-types';
 import * as pty from 'node-pty';
-import { createModuleEventBus, IEventBus, isWin32, uuid } from '@beaver/utils';
+import { createModuleEventBus, IEventBus, isWin32 } from '@beaver/utils';
 import type { IPty } from 'node-pty';
 import * as sudoPrompt from 'sudo-prompt';
 import * as os from 'os';
@@ -13,6 +13,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { createLogger } from '@beaver/shell-flow';
 import { Logger } from 'winston';
+import { IShellFlowTypes } from '../types/shell-flow-types';
+import { mirrorUrl } from '../mirror';
+import { shellEnvSync } from 'shell-env';
 
 export class Shell implements IShellTypes {
   private readonly _name: string;
@@ -21,14 +24,16 @@ export class Shell implements IShellTypes {
   get name(): string {
     return this._name;
   }
-  private readonly homeDir: string;
   private readonly _terminal: string;
   private readonly _args: string[];
   private readonly _event_name_data;
   private readonly _event_name_exit;
-  private readonly appName: string;
   private ptyProcess: IPty | undefined;
   private readonly logger: Logger;
+  private readonly _ctx: IShellFlowTypes;
+  private readonly mirror: {
+    [key: string]: string;
+  } = require('../mirror.json');
   eventBus: IEventBus;
 
   get terminal(): string {
@@ -39,10 +44,9 @@ export class Shell implements IShellTypes {
     return this._args;
   }
 
-  constructor(appName: string, homedir: string, name?: string) {
-    this._name = name || uuid();
-    this.appName = appName;
-    this.homeDir = homedir;
+  constructor(name: string, ctx: IShellFlowTypes) {
+    this._name = name;
+    this._ctx = ctx;
 
     if (isWin32()) {
       this._terminal = 'powershell.exe';
@@ -83,40 +87,48 @@ export class Shell implements IShellTypes {
     /**
      * well known cache
      */
-    this.env['HF_HOME'] = path.resolve(homedir, 'cache', 'HF_HOME');
-    this.env['TORCH_HOME'] = path.resolve(homedir, 'cache', 'TORCH_HOME');
+    this.env['HF_HOME'] = path.resolve(ctx.homeDir, 'cache', 'HF_HOME');
+    this.env['TORCH_HOME'] = path.resolve(ctx.homeDir, 'cache', 'TORCH_HOME');
     this.env['HOMEBREW_CACHE'] = path.resolve(
-      homedir,
+      ctx.homeDir,
       'cache',
       'HOMEBREW_CACHE',
     );
     this.env['XDG_CACHE_HOME'] = path.resolve(
-      homedir,
+      ctx.homeDir,
       'cache',
       'XDG_CACHE_HOME',
     );
-    this.env['PIP_CACHE_DIR'] = path.resolve(homedir, 'cache', 'PIP_CACHE_DIR');
-    this.env['PIP_TMPDIR'] = path.resolve(homedir, 'cache', 'PIP_TMPDIR');
-    this.env['TMPDIR'] = path.resolve(homedir, 'cache', 'TMPDIR');
-    this.env['TEMP'] = path.resolve(homedir, 'cache', 'TEMP');
-    this.env['TMP'] = path.resolve(homedir, 'cache', 'TMP');
-    this.env['XDG_DATA_HOME'] = path.resolve(homedir, 'cache', 'XDG_DATA_HOME');
+    this.env['PIP_CACHE_DIR'] = path.resolve(
+      ctx.homeDir,
+      'cache',
+      'PIP_CACHE_DIR',
+    );
+    this.env['PIP_TMPDIR'] = path.resolve(ctx.homeDir, 'cache', 'PIP_TMPDIR');
+    this.env['TMPDIR'] = path.resolve(ctx.homeDir, 'cache', 'TMPDIR');
+    this.env['TEMP'] = path.resolve(ctx.homeDir, 'cache', 'TEMP');
+    this.env['TMP'] = path.resolve(ctx.homeDir, 'cache', 'TMP');
+    this.env['XDG_DATA_HOME'] = path.resolve(
+      ctx.homeDir,
+      'cache',
+      'XDG_DATA_HOME',
+    );
     this.env['XDG_CONFIG_HOME'] = path.resolve(
-      homedir,
+      ctx.homeDir,
       'cache',
       'XDG_CONFIG_HOME',
     );
     this.env['XDG_STATE_HOME'] = path.resolve(
-      homedir,
+      ctx.homeDir,
       'cache',
       'XDG_STATE_HOME',
     );
     this.env['GRADIO_TEMP_DIR'] = path.resolve(
-      homedir,
+      ctx.homeDir,
       'cache',
       'GRADIO_TEMP_DIR',
     );
-    this.env['PIP_CONFIG_FILE'] = path.resolve(homedir, 'pipconfig');
+    this.env['PIP_CONFIG_FILE'] = path.resolve(ctx.homeDir, 'pipconfig');
   }
 
   env: {
@@ -159,7 +171,10 @@ export class Shell implements IShellTypes {
       cols: options?.cols || 100,
       rows: options?.rows || 30,
       cwd: options?.path || process.cwd(),
-      env: this.env,
+      env: {
+        ...this.env,
+        ...this.parseEnv(options?.env),
+      },
     });
 
     this.ptyProcess.onData((data) => {
@@ -211,6 +226,7 @@ export class Shell implements IShellTypes {
 
     params = await this.activate(params);
     let msg = this.buildCmd(params);
+    msg = mirrorUrl(msg);
 
     this.logger.info(msg);
 
@@ -225,7 +241,7 @@ export class Shell implements IShellTypes {
         sudoPrompt.exec(
           msg,
           {
-            name: this.appName,
+            name: this._ctx.appName,
           },
           (error, stdout, stderr) => {
             if (error) {
@@ -265,11 +281,13 @@ export class Shell implements IShellTypes {
           const result = stream
             .replace(reg, '')
             // TODO 多余标记没有清除
-            .replace(Shell.END_FLAG, '');
+            .replaceAll(Shell.END_FLAG, '');
 
           if (exitStatus === 0) {
+            this.kill();
             resolve(result);
           } else {
+            this.kill();
             reject(new Error(result));
           }
         }
@@ -351,7 +369,11 @@ export class Shell implements IShellTypes {
           `conda activate ${condaName}`,
         ];
       } else {
-        let envs_path = path.resolve(this.homeDir, 'bin', 'miniconda/envs');
+        let envs_path = path.resolve(
+          this._ctx.homeDir,
+          'bin',
+          'miniconda/envs',
+        );
         let env_path = path.resolve(envs_path, condaName);
         let env_exists = Shell.exists(env_path);
         if (env_exists) {
@@ -412,5 +434,77 @@ export class Shell implements IShellTypes {
       .concat(venvActivation)
       .concat(params.message);
     return params;
+  }
+
+  private parseEnv(env?: { [key: string]: string }): { [key: string]: string } {
+    if (!env) {
+      return {};
+    }
+
+    let PATH_KEY;
+    if (env['Path']) {
+      PATH_KEY = 'Path';
+    } else if (env['PATH']) {
+      PATH_KEY = 'PATH';
+    }
+
+    const result: { [key: string]: string } = {};
+
+    if (isWin32()) {
+      // ignore
+    } else if (PATH_KEY) {
+      result[PATH_KEY] =
+        // shellEnvSync()['PATH'] ||
+        [
+          './node_modules/.bin',
+          '/.nodebrew/current/bin',
+          '/usr/local/bin',
+          this.env[PATH_KEY],
+        ].join(':');
+    }
+
+    for (let envKey in env) {
+      const val = env[envKey];
+
+      if (envKey.toLowerCase() === 'path' && PATH_KEY) {
+        // "path" is a special case => merge with process.env.PATH
+        if (env['path'] && Array.isArray(env['path'])) {
+          result[PATH_KEY] =
+            `${env['path'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
+        }
+        if (env['PATH'] && Array.isArray(env['PATH'])) {
+          result[PATH_KEY] =
+            `${env['PATH'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
+        }
+        if (env['Path'] && Array.isArray(env['Path'])) {
+          result[PATH_KEY] =
+            `${env['Path'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
+        }
+      } else if (Array.isArray(val)) {
+        if (env[envKey]) {
+          result[envKey] =
+            `${val.join(path.delimiter)}${path.delimiter}${env[envKey]}`;
+        } else {
+          result[envKey] = `${val.join(path.delimiter)}`;
+        }
+      } else {
+        // for the rest of attributes, simply set the values
+        result[envKey] = env[envKey];
+      }
+    }
+
+    for (let key in result) {
+      if (
+        !/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key) &&
+        key !== 'ProgramFiles(x86)'
+      ) {
+        delete result[key];
+      }
+      if (/[\r\n]/.test(result[key])) {
+        delete result[key];
+      }
+    }
+
+    return result;
   }
 }
