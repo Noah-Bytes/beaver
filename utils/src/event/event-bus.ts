@@ -1,4 +1,4 @@
-import * as EventEmitter from 'events';
+import { EventEmitter } from 'events';
 import { IPublicEvent } from '@beaver/types';
 import { consola } from 'consola';
 import type { ConsolaInstance } from 'consola/dist/core';

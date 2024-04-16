@@ -1,0 +1,10 @@
+{
+  "name": "arteffix-shell",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "arteffix-shell",
+  "projectType": "application",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project arteffix-shell --web",
+  "targets": {
+  }
+}

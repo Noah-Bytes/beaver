@@ -1,3 +1,9 @@
 {
-  "singleQuote": true
+  "singleQuote": true,
+  "tabWidth": 2,
+  "plugins": [
+    "@ianvs/prettier-plugin-sort-imports",
+    "prettier-plugin-organize-imports",
+    "prettier-plugin-tailwindcss"
+  ]
 }

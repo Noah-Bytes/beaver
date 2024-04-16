@@ -1,5 +1,5 @@
 import { ShellFlow } from '../../src';
-import { Py } from '../../src/bin/py';
+import { Py } from '../../src/bin/module/py';
 
 jest.setTimeout(1000000);
 

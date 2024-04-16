@@ -1,5 +1,5 @@
 import { ShellFlow } from '../../src';
-import { Conda } from '../../src/bin/conda';
+import { Conda } from '../../src/bin/module/conda';
 
 jest.setTimeout(1000000);
 

@@ -33,7 +33,7 @@ export interface IPluginRuntime {
 
 export interface IPluginManager {
   /**
-   * 可以通过 plugin api 获取其他插件 export 导出的内容
+   * 可以通过 plugin app 获取其他插件 export 导出的内容
    */
   [key: string]: any;
 

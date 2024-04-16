@@ -1,5 +1,5 @@
 import { ShellFlow } from '../../src';
-import {Git} from "../../src/bin/git";
+import {Git} from "../../src/bin/module/git";
 
 jest.setTimeout(1000000);
 

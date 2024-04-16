@@ -1,5 +1,5 @@
 import { ShellFlow } from '../../src';
-import { Puppeteer } from '../../src/bin/puppeteer';
+import { Puppeteer } from '../../src/bin/module/puppeteer';
 
 jest.setTimeout(1000000);
 

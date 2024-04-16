@@ -1,5 +1,5 @@
 import { ShellFlow } from '../../src';
-import { Node } from '../../src/bin/node';
+import { Node } from '../../src/bin/module/node';
 
 jest.setTimeout(1000000);
 

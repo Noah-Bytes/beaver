@@ -1,16 +1,13 @@
 import { ShellFlow } from '../../src';
-import { Torch } from '../../src/bin/torch';
+import { Torch } from '../../src/bin/module/torch';
 
 jest.setTimeout(1000000);
 
 describe('torch 测试', () => {
-  const shellFlow = new ShellFlow(
-    'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
-    {
-      isMirror: true,
-    },
-  );
+  const shellFlow = new ShellFlow('Beaver', {
+    homeDir: '/Users/taibai/workspace/beaver/beaver',
+    isMirror: true,
+  });
   const torch = new Torch(shellFlow);
 
   it('torch 安装', async () => {

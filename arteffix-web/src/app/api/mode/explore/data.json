@@ -1,0 +1,14 @@
+[
+  {
+    "title": "Stable Diffusion Forge",
+    "description": "Stable Diffusion WebUI Forge is a platform on top of Stable Diffusion WebUI (based on Gradio) to make development easier, optimize resource management, and speed up inference. https://github.com/lllyasviel/stable-diffusion-webui-forge?tab=readme-ov-file",
+    "icon": "https://img-blog.csdnimg.cn/direct/fa72e32522f24785b029e40dba244b81.png",
+    "git": "https://github.com/ArtEffix/stable-diffusion-webui-forge"
+  },
+  {
+    "title": "ComfyUI",
+    "description": "The most powerful and modular stable diffusion GUI and backend.",
+    "icon": "https://www.stablediffusion-cn.com/wp-content/uploads/2023/11/640.png",
+    "git": "https://github.com/ArtEffix/comfyui"
+  }
+]

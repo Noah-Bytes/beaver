@@ -1,4 +1,4 @@
-import {IShellRunParams, IShellTypes} from './shell-types';
+import { IShellMeta, IShellRunParams, IShellTypes } from './shell-types';
 
 export interface IShellManagerTypes {
   /**
@@ -12,6 +12,8 @@ export interface IShellManagerTypes {
    */
   getShells(): IShellTypes[];
 
+  getMates(): IShellMeta[];
+
   /**
    * 创建shell
    * @param name
@@ -23,6 +25,14 @@ export interface IShellManagerTypes {
    * @param name
    */
   removeShell(name: string): void;
+
+  pauseShell(name: string): void;
+
+  pauseAllShell(): void;
+
+  resumeShell(name: string): void;
+
+  resumeAllShell(): void;
 
   /**
    * 移除所有shell

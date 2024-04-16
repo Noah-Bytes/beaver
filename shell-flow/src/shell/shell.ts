@@ -1,23 +1,35 @@
+import { createLogger, ShellFlow } from '@beaver/shell-flow';
+import { IKey } from '@beaver/types';
+import { createModuleEventBus, IEventBus, isWin32 } from '@beaver/utils';
+import * as fs from 'fs';
+import type { IPty } from 'node-pty';
+import * as pty from 'node-pty';
+import * as os from 'os';
+import * as path from 'path';
+import * as process from 'process';
+// @ts-ignore
+import { shellPathSync } from 'shell-path';
+import * as sudoPrompt from 'sudo-prompt';
+import { Logger } from 'winston';
+import { mirrorUrl } from '../mirror';
 import {
+  IShellMeta,
   IShellRunOptions,
   IShellRunParams,
   IShellTypes,
 } from '../types/shell-types';
-import * as pty from 'node-pty';
-import { createModuleEventBus, IEventBus, isWin32 } from '@beaver/utils';
-import type { IPty } from 'node-pty';
-import * as sudoPrompt from 'sudo-prompt';
-import * as os from 'os';
-import * as process from 'process';
-import * as fs from 'fs';
-import * as path from 'path';
-import { createLogger } from '@beaver/shell-flow';
-import { Logger } from 'winston';
-import { IShellFlowTypes } from '../types/shell-flow-types';
-import { mirrorUrl } from '../mirror';
-import { shellEnvSync } from 'shell-env';
 
 export class Shell implements IShellTypes {
+  static STATUS = {
+    INIT: 0,
+    RUNNING: 1,
+    STOPPED: 2,
+    // 空闲
+    IDLE: -1,
+    KILLED: -2,
+  };
+  status: number = Shell.STATUS.INIT;
+
   private readonly _name: string;
   static END_FLAG = '; echo $?';
 
@@ -30,11 +42,12 @@ export class Shell implements IShellTypes {
   private readonly _event_name_exit;
   private ptyProcess: IPty | undefined;
   private readonly logger: Logger;
-  private readonly _ctx: IShellFlowTypes;
+  private readonly _ctx: ShellFlow;
   private readonly mirror: {
     [key: string]: string;
   } = require('../mirror.json');
   eventBus: IEventBus;
+  readonly groupName: string;
 
   get terminal(): string {
     return this._terminal;
@@ -44,9 +57,10 @@ export class Shell implements IShellTypes {
     return this._args;
   }
 
-  constructor(name: string, ctx: IShellFlowTypes) {
+  constructor(name: string, groupName: string, ctx: ShellFlow) {
     this._name = name;
     this._ctx = ctx;
+    this.groupName = groupName;
 
     if (isWin32()) {
       this._terminal = 'powershell.exe';
@@ -74,6 +88,18 @@ export class Shell implements IShellTypes {
 
     this.env = Object.assign({}, process.env);
 
+    if (this.env['PYTHONPATH']) {
+      delete this.env['PYTHONPATH'];
+    }
+
+    if (this.env['CMAKE_MAKE_PROGRAM']) {
+      delete this.env['CMAKE_MAKE_PROGRAM'];
+    }
+
+    if (this.env['CMAKE_GENERATOR']) {
+      delete this.env['CMAKE_GENERATOR'];
+    }
+
     /**
      * 定义 Shell 提示符的外观
      */
@@ -83,6 +109,13 @@ export class Shell implements IShellTypes {
      * 最大路径长度
      */
     this.env['CMAKE_OBJECT_PATH_MAX'] = '1024';
+
+    if (ctx.options?.isMirror) {
+      // 环境变量镜像设置
+      this.env['PIP_INDEX_URL'] = 'https://pypi.tuna.tsinghua.edu.cn/simple';
+      this.env['PIP_EXTRA_INDEX_URL'] =
+        'https://mirrors.aliyun.com/pypi/simple';
+    }
 
     /**
      * well known cache
@@ -151,33 +184,56 @@ export class Shell implements IShellTypes {
 
     this.ptyProcess.write(message);
   }
-  send(message: string, isRun = false) {
-    if (message.includes(`; echo $?`)) {
+  send(
+    message: string,
+    options: {
+      isRun?: boolean;
+      isFlag?: boolean;
+    },
+  ) {
+    if (options.isFlag && message.includes(`; echo $?`)) {
       throw new Error('Cannot contain reserved system commands');
     }
 
     this.write(message);
-    if (isRun) {
+    if (options.isFlag) {
       this.write(Shell.END_FLAG);
+    }
+    if (options.isRun) {
       this.write(os.EOL);
     }
   }
   clear(): void {
     this.ptyProcess?.clear();
   }
+
+  pause(): void {
+    this.status = Shell.STATUS.STOPPED;
+    this.ptyProcess?.pause();
+  }
+
+  resume(): void {
+    this.status = Shell.STATUS.RUNNING;
+    this.ptyProcess?.resume();
+  }
+
   init(options?: IShellRunOptions): void {
+    const { bin } = this._ctx;
+    const envs = bin.envs(options?.env);
+
     this.ptyProcess = pty.spawn(this._terminal, this.args, {
       name: this.name,
       cols: options?.cols || 100,
       rows: options?.rows || 30,
-      cwd: options?.path || process.cwd(),
+      cwd: options?.path || options?.cwd || process.cwd(),
       env: {
         ...this.env,
-        ...this.parseEnv(options?.env),
+        ...this.parseEnv(envs),
       },
     });
 
     this.ptyProcess.onData((data) => {
+      console.log(data);
       this.eventBus.emit(this._event_name_data, data);
     });
 
@@ -185,6 +241,8 @@ export class Shell implements IShellTypes {
       this.logger.info(`${this.name} shell exit`);
       this.eventBus.emit(this._event_name_exit, result);
     });
+
+    this.status = Shell.STATUS.IDLE;
   }
 
   isInit(): boolean {
@@ -198,6 +256,8 @@ export class Shell implements IShellTypes {
     }
 
     this.eventBus.removeAllListeners();
+
+    this.status = Shell.STATUS.KILLED;
 
     this.logger.info(`${this.name} shell killed`);
   }
@@ -216,6 +276,44 @@ export class Shell implements IShellTypes {
     };
   }
 
+  getMeta(): IShellMeta {
+    return {
+      status: this.status,
+      name: this.name,
+      groupName: this.groupName,
+      terminal: this._terminal,
+      args: this.args,
+      env: this.env,
+    };
+  }
+
+  async execute(
+    params: IShellRunParams,
+    options?: IShellRunOptions,
+  ): Promise<void> {
+    if (!this.isInit()) {
+      this.init(options);
+    }
+
+    const { options: ctxOptions, appName } = this._ctx;
+
+    params = await this.activate(params);
+    let msg = this.buildCmd(params);
+
+    if (ctxOptions?.isMirror) {
+      msg = mirrorUrl(msg);
+    }
+
+    this.logger.info(msg);
+
+    this.status = Shell.STATUS.RUNNING;
+
+    this.send(msg, {
+      isRun: true,
+      isFlag: false,
+    });
+  }
+
   async run(
     params: IShellRunParams,
     options?: IShellRunOptions,
@@ -224,11 +322,18 @@ export class Shell implements IShellTypes {
       this.init(options);
     }
 
+    const { options: ctxOptions, appName } = this._ctx;
+
     params = await this.activate(params);
     let msg = this.buildCmd(params);
-    msg = mirrorUrl(msg);
+
+    if (ctxOptions?.isMirror) {
+      msg = mirrorUrl(msg);
+    }
 
     this.logger.info(msg);
+
+    this.status = Shell.STATUS.RUNNING;
 
     if (options?.sudo) {
       await fs.promises.mkdir(this.env['TEMP']!, { recursive: true });
@@ -241,14 +346,17 @@ export class Shell implements IShellTypes {
         sudoPrompt.exec(
           msg,
           {
-            name: this._ctx.appName,
+            name: appName,
           },
           (error, stdout, stderr) => {
             if (error) {
+              this.status = Shell.STATUS.IDLE;
               reject(error);
             } else if (stderr) {
+              this.status = Shell.STATUS.IDLE;
               reject(stderr);
             } else {
+              this.status = Shell.STATUS.IDLE;
               resolve(stdout as string);
             }
           },
@@ -281,19 +389,24 @@ export class Shell implements IShellTypes {
           const result = stream
             .replace(reg, '')
             // TODO 多余标记没有清除
-            .replaceAll(Shell.END_FLAG, '');
+            .replace(new RegExp(Shell.END_FLAG, 'gm'), '');
+
+          this.kill();
 
           if (exitStatus === 0) {
-            this.kill();
+            this.status = Shell.STATUS.IDLE;
             resolve(result);
           } else {
-            this.kill();
+            this.status = Shell.STATUS.IDLE;
             reject(new Error(result));
           }
         }
       });
 
-      this.send(msg, true);
+      this.send(msg, {
+        isRun: true,
+        isFlag: true,
+      });
     });
   }
 
@@ -436,7 +549,7 @@ export class Shell implements IShellTypes {
     return params;
   }
 
-  private parseEnv(env?: { [key: string]: string }): { [key: string]: string } {
+  private parseEnv(env?: IKey<string | string[]>): IKey<string> {
     if (!env) {
       return {};
     }
@@ -454,7 +567,7 @@ export class Shell implements IShellTypes {
       // ignore
     } else if (PATH_KEY) {
       result[PATH_KEY] =
-        // shellEnvSync()['PATH'] ||
+        shellPathSync() ||
         [
           './node_modules/.bin',
           '/.nodebrew/current/bin',
@@ -463,33 +576,35 @@ export class Shell implements IShellTypes {
         ].join(':');
     }
 
-    for (let envKey in env) {
-      const val = env[envKey];
+    if (env) {
+      for (let envKey in env) {
+        const val = env[envKey];
 
-      if (envKey.toLowerCase() === 'path' && PATH_KEY) {
-        // "path" is a special case => merge with process.env.PATH
-        if (env['path'] && Array.isArray(env['path'])) {
-          result[PATH_KEY] =
-            `${env['path'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
-        }
-        if (env['PATH'] && Array.isArray(env['PATH'])) {
-          result[PATH_KEY] =
-            `${env['PATH'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
-        }
-        if (env['Path'] && Array.isArray(env['Path'])) {
-          result[PATH_KEY] =
-            `${env['Path'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
-        }
-      } else if (Array.isArray(val)) {
-        if (env[envKey]) {
-          result[envKey] =
-            `${val.join(path.delimiter)}${path.delimiter}${env[envKey]}`;
+        if (envKey.toLowerCase() === 'path' && PATH_KEY) {
+          // "path" is a special case => merge with process.env.PATH
+          if (env['path'] && Array.isArray(env['path'])) {
+            result[PATH_KEY] =
+              `${env['path'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
+          }
+          if (env['PATH'] && Array.isArray(env['PATH'])) {
+            result[PATH_KEY] =
+              `${env['PATH'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
+          }
+          if (env['Path'] && Array.isArray(env['Path'])) {
+            result[PATH_KEY] =
+              `${env['Path'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
+          }
+        } else if (Array.isArray(val)) {
+          if (env[envKey]) {
+            result[envKey] =
+              `${val.join(path.delimiter)}${path.delimiter}${env[envKey]}`;
+          } else {
+            result[envKey] = `${val.join(path.delimiter)}`;
+          }
         } else {
-          result[envKey] = `${val.join(path.delimiter)}`;
+          // for the rest of attributes, simply set the values
+          result[envKey] = val;
         }
-      } else {
-        // for the rest of attributes, simply set the values
-        result[envKey] = env[envKey];
       }
     }
 

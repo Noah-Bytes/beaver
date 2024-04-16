@@ -1,21 +1,35 @@
+import { ShellFlow } from '@beaver/shell-flow';
 import { IShellManagerTypes } from '../types/shell-manager-types';
 import { IShellRunParams, IShellTypes } from '../types/shell-types';
 import { Shell } from './shell';
-import { IShellFlowTypes } from '../types/shell-flow-types';
 
 export class ShellManager implements IShellManagerTypes {
-  private _shells: IShellTypes[] = [];
   private readonly _shellMap: Map<string, IShellTypes> = new Map();
-  private readonly _ctx: IShellFlowTypes;
+  private readonly _groupMap: Map<string, IShellTypes[]> = new Map();
+  private readonly _ctx: ShellFlow;
+  private readonly _defaultGroupName = 'default';
 
-  constructor(ctx: IShellFlowTypes) {
+  constructor(ctx: ShellFlow) {
     this._ctx = ctx;
+    this._groupMap.set(this._defaultGroupName, []);
   }
 
-  createShell(name: string): IShellTypes {
-    const shell = new Shell(name, this._ctx);
-    this._shells.push(shell);
+  createShell(
+    name: string,
+    groupName: string = this._defaultGroupName,
+  ): IShellTypes {
+    if (this._shellMap.has(name)) {
+      throw new Error(`${name} shell had`);
+    }
+
+    const shell = new Shell(name, groupName, this._ctx);
     this._shellMap.set(name, shell);
+
+    if (!this._groupMap.has(groupName)) {
+      this._groupMap.set(groupName, []);
+    }
+    this._groupMap.get(groupName)?.push(shell);
+
     return shell;
   }
 
@@ -23,25 +37,67 @@ export class ShellManager implements IShellManagerTypes {
     return this._shellMap.get(name);
   }
 
-  getShells(): IShellTypes[] {
-    return this._shells;
+  getShells(groupName: string = this._defaultGroupName): IShellTypes[] {
+    return this._groupMap.get(groupName) || [];
   }
 
-  removeAllShell(): void {
-    for (const shell of this._shells) {
-      shell.kill();
+  getMates() {
+    const mates = [];
+    for (let [key, shell] of this._shellMap) {
+      mates.push(shell.getMeta());
     }
 
-    this._shells = [];
-    this._shellMap.clear();
+    return mates;
+  }
+
+  removeAllShell(groupName: string = this._defaultGroupName): void {
+    const shells = this._groupMap.get(groupName);
+    if (shells) {
+      for (const shell of shells) {
+        shell.kill();
+        this._shellMap.delete(shell.name);
+      }
+      this._groupMap.set(groupName, []);
+    }
   }
 
   removeShell(name: string): void {
-    const shell = this._shellMap.get(name);
+    let shell = this._shellMap.get(name);
     if (shell) {
       shell.kill();
-      this._shells = this._shells.filter((s) => s !== shell);
+      const shells = this._groupMap.get(shell.groupName) || [];
+      const index = shells.indexOf(shell);
+      if (index !== -1) {
+        shells.splice(index, 1);
+      }
       this._shellMap.delete(name);
+      shell = undefined;
+    }
+  }
+
+  pauseAllShell(groupName: string = this._defaultGroupName): void {
+    for (let shell of this._groupMap.get(groupName) || []) {
+      shell.pause();
+    }
+  }
+
+  pauseShell(name: string): void {
+    let shell = this.getShell(name);
+    if (shell) {
+      shell.pause();
+    }
+  }
+
+  resumeAllShell(groupName: string = this._defaultGroupName): void {
+    for (let shell of this._groupMap.get(groupName) || []) {
+      shell.resume();
+    }
+  }
+
+  resumeShell(name: string): void {
+    let shell = this.getShell(name);
+    if (shell) {
+      shell.resume();
     }
   }
 

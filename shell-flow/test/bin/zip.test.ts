@@ -1,5 +1,5 @@
 import { ShellFlow } from '../../src';
-import {Zip} from "../../src/bin/zip";
+import {Zip} from "../../src/bin/module/zip";
 
 jest.setTimeout(1000000);
 

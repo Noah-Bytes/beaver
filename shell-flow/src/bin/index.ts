@@ -1,22 +1,29 @@
-import { IBinModuleTypes, IBinTypes } from '../types/bin-types';
-import { ShellFlow } from '../shell-flow';
 import * as fs from 'fs';
 import * as path from 'path';
+import { IKey, IShellAppRequires } from '@beaver/types';
 import * as fse from 'fs-extra';
-import { loader } from '../loader';
-import { Logger } from 'winston';
-import * as wget from 'wget-improved';
-import { createLogger } from '../logger';
 import { DownloaderHelper } from 'node-downloader-helper';
+import * as wget from 'wget-improved';
+import { Logger } from 'winston';
+import { createLogger } from '../logger';
 import { mirrorUrl } from '../mirror';
+import { ShellFlow } from '../shell-flow';
+import { IBinModuleTypes, IBinTypes } from '../types/bin-types';
+import { IShellTypes } from '../types/shell-types';
+import * as modules from './module';
 
 export class Bin implements IBinTypes {
   private readonly _dir: string;
   private readonly _ctx: ShellFlow;
   readonly logger: Logger;
-  private modules: IBinModuleTypes[] = [];
+  private moduleList: IBinModuleTypes[] = [];
   private moduleMap: Map<string, IBinModuleTypes> = new Map();
-  installed: { [p: string]: string[] } = {};
+  private _installed = {
+    conda: new Set<string>(),
+    brew: new Set<string>(),
+    pip: new Set<string>(),
+  };
+  readonly shell: IShellTypes;
 
   get dir(): string {
     return this._dir;
@@ -26,36 +33,26 @@ export class Bin implements IBinTypes {
     this._ctx = ctx;
     this._dir = ctx.absPath('bin');
     this.logger = createLogger(`bin`);
+    this.shell = ctx.shell.createShell('bin');
   }
 
   async init(): Promise<void> {
     await fs.promises.mkdir(this._dir, { recursive: true });
 
-    // General purpose package managers like conda, conda needs to come at the end
-    const modFiles = (await fs.promises.readdir(__dirname)).filter((file) => {
-      return file.endsWith('.js') && file !== 'index.js' && file !== 'cmake.js';
-    });
-
-    const mods = [];
-
-    for (let filename of modFiles) {
-      const filePath = path.resolve(__dirname, filename);
-      const mod = (await loader(filePath, this._ctx)).resolved;
-      const name = path.basename(filename, '.js');
-      mods.push({
-        name,
-        mod,
-      });
-    }
+    await this.checkInstalled();
 
     this.removeAllModule();
 
-    for (let mod of mods) {
-      if (mod.mod?.init) {
-        await mod.mod.init();
+    for (let modulesKey in modules) {
+      if (this.getModule(modulesKey.toLowerCase())) {
+      } else {
+        // @ts-ignore
+        const m = new modules[modulesKey](this._ctx);
+        if (m?.init) {
+          await m.init();
+        }
+        this.createModule(modulesKey.toLowerCase(), m);
       }
-
-      this.createModule(mod.name, mod.mod);
     }
   }
 
@@ -167,24 +164,267 @@ export class Bin implements IBinTypes {
   }
 
   getModules(): IBinModuleTypes[] {
-    return this.modules;
+    return this.moduleList;
+  }
+
+  hasModule(name: string): boolean {
+    return this.moduleMap.has(name);
   }
 
   removeAllModule(): void {
-    this.modules = [];
+    this.moduleList = [];
     this.moduleMap.clear();
   }
 
   removeModule(name: string): void {
     const mod = this.getModule(name);
     if (mod) {
-      this.modules = this.modules.filter((s) => s !== mod);
+      this.moduleList = this.moduleList.filter((s) => s !== mod);
       this.moduleMap.delete(name);
     }
   }
 
   createModule(name: string, instantiate: IBinModuleTypes): void {
+    console.log(name);
     this.moduleMap.set(name, instantiate);
-    this.modules.push(instantiate);
+    this.moduleList.push(instantiate);
+  }
+
+  async checkInstalled(): Promise<void> {
+    const existsConda = this.exists('miniconda');
+
+    // 检测 conda 已安装
+    const conda = new Set<string>();
+
+    if (existsConda) {
+      const result = await this.shell.run({
+        message: 'conda list',
+      });
+
+      const lines = result.split(/[\r\n]+/);
+      let start;
+      for (let line of lines) {
+        if (start) {
+          let chunks = line.split(/\s+/).filter((x) => x);
+          if (chunks.length > 1) {
+            conda.add(chunks[0]);
+          }
+        } else {
+          if (/name.*version.*build.*channel/i.test(line)) {
+            start = true;
+          }
+        }
+      }
+    }
+
+    this._installed.conda = conda;
+
+    // 检查pip已安装
+    const pip = new Set<string>();
+
+    if (existsConda) {
+      const result = await this.shell.run({
+        message: 'pip list',
+      });
+
+      const lines = result.split(/[\r\n]+/);
+      let start;
+      for (let line of lines) {
+        if (start) {
+          let chunks = line.split(/\s+/).filter((x) => x);
+          if (chunks.length > 1) {
+            pip.add(chunks[0]);
+          }
+        } else {
+          if (/-------.*/i.test(line)) {
+            start = true;
+          }
+        }
+      }
+    }
+
+    this._installed.pip = pip;
+
+    if (['darwin', 'linux'].includes(this._ctx.systemInfo.platform)) {
+      let brew: string[] = [];
+      if (this.exists('homebrew')) {
+        const result = await this.shell.run({
+          message: 'brew list -1',
+        });
+
+        const lines = result.split(/[\r\n]+/);
+        let start, end;
+        for (let line of lines) {
+          if (start) {
+            if (/^\s*$/.test(line)) {
+              end = true;
+            } else {
+              if (!end) {
+                let chunks = line.split(/\s+/).filter((x) => x);
+                brew = brew.concat(chunks);
+              }
+            }
+          } else {
+            if (/==>/.test(line)) {
+              start = true;
+            }
+          }
+        }
+      }
+
+      this._installed.brew = new Set(brew);
+    }
+  }
+
+  private async _isInstalled(
+    name: string,
+    type: string | undefined,
+  ): Promise<boolean> {
+    switch (type) {
+      case 'conda':
+        this.logger.info(
+          `检测 ${type}:${name} 安装状态: ${this._installed.conda.has(name)}`,
+        );
+        return this._installed.conda.has(name);
+      case 'pip':
+        this.logger.info(
+          `检测 ${type}:${name} 安装状态: ${this._installed.pip.has(name)}`,
+        );
+        return this._installed.pip.has(name);
+      case 'brew':
+        this.logger.info(
+          `检测 ${type}:${name} 安装状态: ${this._installed.brew.has(name)}`,
+        );
+        return this._installed.brew.has(name);
+      default:
+        if (this.hasModule(name)) {
+          const isInstalled = await this.getModule(name)?.installed();
+          return !!isInstalled;
+        }
+        return false;
+    }
+  }
+
+  private _isMatch(current: string, value?: string | string[]) {
+    return (
+      !value ||
+      value === current ||
+      (Array.isArray(value) && value.includes(current))
+    );
+  }
+
+  async install(list: IShellAppRequires[]): Promise<void> {
+    const { systemInfo } = this._ctx;
+    const _list = list.filter(
+      (elem) =>
+        this._isMatch(systemInfo.platform, elem.platform) &&
+        this._isMatch(systemInfo.arch, elem.arch) &&
+        this._isMatch(systemInfo.GPU!, elem.gpu),
+    );
+    for (let { name, args, type } of _list) {
+      if (await this.checkIsInstalled(name, type)) {
+        this.logger.info(`已安装 ${name}`);
+        continue;
+      }
+
+      const _name: string[] = Array.isArray(name) ? name : [name];
+
+      if (type) {
+        let cmd;
+        switch (type) {
+          case 'conda':
+            await this.getModule('conda')?.install();
+            cmd = `conda install -y ${args} ${_name.join(' ')}`;
+            break;
+          case 'pip':
+            cmd = `pip install ${args} ${_name.join(' ')}`;
+            break;
+          case 'brew':
+            await this.getModule('brew')?.install();
+            cmd = `brew install ${args} ${_name.join(' ')}`;
+            break;
+        }
+
+        if (cmd) {
+          await this.shell.run({
+            message: cmd,
+          });
+        }
+      } else {
+        for (let n of _name) {
+          if (this.hasModule(n)) {
+            await this.getModule(n)?.install();
+          }
+        }
+      }
+    }
+
+    await this.checkInstalled();
+  }
+
+  async checkIsInstalled(
+    name: string | string[],
+    type: string | undefined,
+  ): Promise<boolean> {
+    if (Array.isArray(name)) {
+      for (let n of name) {
+        let installed = await this._isInstalled(n, type);
+        if (!installed) return false;
+      }
+      return true;
+    }
+
+    return this._isInstalled(name, type);
+  }
+
+  private _mergeEnv(
+    existing: IKey<string | string[]>,
+    merge: IKey<string | string[]>,
+  ) {
+    // merge 'merge' into 'existing'
+    for (let key in merge) {
+      if (Array.isArray(merge[key])) {
+        if (typeof existing[key] === 'undefined') {
+          existing[key] = merge[key];
+        } else {
+          // if the env value is an array, it should be PREPENDED to the existing, in order to override
+          if (existing[key]) {
+            // @ts-ignore
+            existing[key] = merge[key].concat(existing[key]);
+          } else {
+            existing[key] = merge[key];
+          }
+        }
+      } else {
+        existing[key] = merge[key];
+      }
+    }
+    return existing;
+  }
+
+  envs(env?: IKey<string | string[]>): IKey<string | string[]> {
+    const envs = this.moduleList
+      .map((elem) => {
+        if (elem.env) {
+          return elem.env();
+        }
+        return undefined;
+      })
+      .filter((x) => !!x);
+
+    // 2. Merge module envs
+    let e: IKey<string | string[]> = {};
+    for (let env of envs) {
+      if (env) {
+        e = this._mergeEnv(e, env);
+      }
+    }
+
+    // 3. Merge override_envs
+    if (env) {
+      e = this._mergeEnv(e, env);
+    }
+
+    return e;
   }
 }

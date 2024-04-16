@@ -3,6 +3,7 @@ export interface IShellRunOptions {
   rows?: number;
   sudo?: boolean;
   path?: string;
+  cwd?: string;
   env?: { [key: string]: string };
 }
 
@@ -21,8 +22,23 @@ export interface IShellRunParams {
       };
 }
 
-export interface IShellTypes {
+export interface IShellMeta {
+  status: number;
   name: string;
+  groupName: string;
+  terminal: string;
+  args: string[];
+  env: {
+    [key: string]: string | undefined;
+  }
+}
+
+export interface IShellTypes {
+  status: number;
+
+  readonly groupName: string;
+
+  readonly name: string;
 
   terminal: string;
 
@@ -35,18 +51,29 @@ export interface IShellTypes {
   /**
    * 给终端发送信息
    * @param message
-   * @param isExe 是否执行
+   * @param options 配置
    */
-  send(message: string, isExe: boolean): void;
+  send(
+    message: string,
+    options: {
+      isExe: boolean;
+      isFlag: boolean;
+    },
+  ): void;
 
   /**
    * 清理终端
    */
   clear(): void;
 
+  pause(): void;
+  resume(): void;
+
   kill(): void;
 
   run(params: IShellRunParams, options?: IShellRunOptions): Promise<string>;
+
+  execute(params: IShellRunParams, options?: IShellRunOptions): Promise<void>;
 
   /**
    * 初始化
@@ -57,4 +84,6 @@ export interface IShellTypes {
 
   onShellData(func: (data: string) => void): () => void;
   onShellExit(func: (data: string) => void): () => void;
+
+  getMeta(): IShellMeta;
 }

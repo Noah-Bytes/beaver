@@ -1,8 +1,8 @@
+import {IKey, IShellAppRequires} from '@beaver/types';
 import type { IShellTypes } from './shell-types';
 
 export interface IBinTypes {
   dir: string;
-  installed: { [key: string]: string[] };
   init: () => Promise<void>;
   download: (url: string, dest: string) => Promise<void>;
   wget: (url: string, dest: string) => Promise<void>;
@@ -26,6 +26,17 @@ export interface IBinTypes {
   removeModule: (name: string) => void;
 
   createModule: (name: string, instantiate: IBinModuleTypes) => void;
+
+  checkInstalled: () => Promise<void>;
+
+  install: (list: IShellAppRequires[]) => Promise<void>;
+
+  checkIsInstalled: (
+    name: string | string[],
+    type?: string,
+  ) => Promise<boolean>;
+
+  envs(env?: IKey<string | string[]>): IKey<string | string[]>;
 }
 
 export interface IBinModuleTypes {

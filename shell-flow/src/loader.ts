@@ -2,14 +2,13 @@ import * as yaml from 'yaml';
 import * as fs from 'fs';
 import { parse } from 'csv-parse';
 import * as path from 'path';
-import * as clearModule from 'clear-module';
-import {createLogger} from "./logger";
+import { createLogger } from './logger';
+import * as vm from 'vm';
 
 const logger = createLogger(`loader`);
 
-export async function loader(filePath: string, props?: any) {
+export async function loader(filePath: string) {
   const extension = path.extname(filePath);
-  clearModule(filePath);
 
   let resolved;
   let dirname = path.dirname(filePath);
@@ -19,12 +18,12 @@ export async function loader(filePath: string, props?: any) {
       resolved = requireJSON(filePath);
       break;
     case '.js':
-      resolved = await requireJS(filePath, props);
+      resolved = await requireJS(filePath);
       break;
     default:
       const status = await fs.promises.stat(filePath);
       if (status.isDirectory()) {
-        resolved = await requireJS(filePath, props);
+        resolved = await requireJS(filePath);
         dirname = filePath;
       } else {
         resolved = null;
@@ -38,31 +37,46 @@ export async function loader(filePath: string, props?: any) {
   };
 }
 
-export function requireJSON(filePath: string) {
-  let config;
+export async function requireJSON(filePath: string) {
+  const content = await fs.promises.readFile(filePath, 'utf8');
+
   try {
-    config = require(filePath);
+    return JSON.parse(content);
   } catch (e) {
     logger.error(e);
   }
-
-  return config;
 }
 
-export function requireJS(filePath: string, props?: any) {
-  let config;
-  try {
-    config = require(filePath);
-  } catch (e) {
-    logger.error(e);
+export async function requireJS(filePath: string) {
+  if (filePath === 'path') {
+    return path;
   }
-  try {
-    // if the required module is a class, return the instantiated object
-    return new config(props);
-  } catch (e) {
-    // otherwise return normally
-    return config;
-  }
+
+  const code = fs.readFileSync(filePath, 'utf8');
+  const dirname = path.dirname(filePath);
+
+  // 创建一个模块沙箱环境
+  const sandbox = {
+    console: console,
+    exports: {},
+    require: requireJS, // 允许模块内部使用自定义的require函数
+    module: {
+      exports: {},
+    },
+    __filename: filePath,
+    __dirname: dirname,
+  };
+  sandbox.module.exports = sandbox.exports;
+
+  // 使用vm模块执行代码
+  vm.runInNewContext(code, sandbox, { filename: filePath });
+
+  return sandbox.module.exports;
+}
+
+export async function requireImage(filePath: string) {
+  const buffer = await fs.promises.readFile(filePath);
+  return buffer.toString('base64');
 }
 
 export async function requireYAML(filePath: string) {

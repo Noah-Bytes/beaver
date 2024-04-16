@@ -2,6 +2,7 @@ import { SystemInfo } from '@beaver/shell-flow';
 
 export interface IShellFlowOptionsTypes {
   isMirror?: boolean;
+  homeDir?: string;
 }
 
 export interface IShellFlowTypes {
