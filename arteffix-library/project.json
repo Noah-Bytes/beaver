@@ -1,0 +1,32 @@
+{
+  "name": "arteffix-library",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "arteffix-library/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/arteffix-library",
+        "main": "arteffix-library/src/index.ts",
+        "tsConfig": "arteffix-library/tsconfig.lib.json",
+        "assets": ["arteffix-library/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  },
+  "tags": [],
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  }
+}
