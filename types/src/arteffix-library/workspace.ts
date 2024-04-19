@@ -1,13 +1,13 @@
-export interface ILibraryResource {
+export interface IWorkspaceResource {
   folders: Folder[]
   smartFolders: any[]
   quickAccess: any[]
   tagsGroups: TagsGroup[]
 }
 
-export interface ILibraryMeta {
-  media: ILibraryResource,
-  creativity: ILibraryResource,
+export interface IWorkspaceMeta {
+  media: IWorkspaceResource,
+  creativity: IWorkspaceResource,
   modificationTime: number
   applicationVersion: string
 }
@@ -43,10 +43,15 @@ export interface TagsGroup {
   tags: string[]
 }
 
-export interface ILibrary {
-  readonly version: string;
+export interface IWorkspace {
   readonly rootDir: string;
-  meta: ILibraryMeta | undefined;
+  meta: IWorkspaceMeta | undefined;
 
   init: () => Promise<void>;
+
+  destroy: () => Promise<void>;
+
+  createMetadata: () => Promise<void>;
+
+  absPath: (...p: string[]) => string;
 }

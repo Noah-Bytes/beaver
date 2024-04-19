@@ -1,6 +1,9 @@
-export interface IFileManage<T> {
+export interface IFileManage<T, U> {
   readonly fileGroup: Map<string, T[]>;
-  readonly fileMap: Map<string, T>
+  readonly fileMap: Map<string, T>;
+  readonly rootDir: string;
+
+  init: (rootDir: string) => Promise<void>;
 
   createFile: (file: T, groupName: string) => void;
 
@@ -10,7 +13,11 @@ export interface IFileManage<T> {
 
   getFiles: (groupName: string) => T[] | undefined;
 
+  getFileMetas: (groupName: string) => U[];
+
   hasFile: (id: string) => boolean;
 
   getFile: (id: string) => T | undefined;
+
+  absPath: (...p: string[]) => string;
 }

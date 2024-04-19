@@ -128,6 +128,9 @@ export interface IFileMetaUpdate {
 export interface IFile<T, U> {
   readonly meta: T;
   readonly dir: string;
+  readonly rootDir: string;
+
+  save: (data: any) => Promise<void>;
 
   /**
    * 元信息保存
@@ -139,6 +142,8 @@ export interface IFile<T, U> {
    */
   readMetaData: () => T;
 
+  getMeta: () => T;
+
   /**
    * 修改文件名
    */
@@ -146,6 +151,8 @@ export interface IFile<T, U> {
   updateMeta: (meta: U) => Promise<void>;
 
   absPath: (...p: string[]) => string;
+
+  exists: (...p: string[]) => boolean;
 
   getFileName: () => string;
 

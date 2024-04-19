@@ -6,13 +6,19 @@ import * as path from 'path';
 export class File<T extends IFileMeta, U extends IFileMetaUpdate>
   implements IFile<T, U>
 {
+  static TYPE = {
+    workflow: 'workflow',
+    image: 'image',
+  }
   static META_NAME = 'metadata.json';
   meta: T;
   readonly dir: string;
+  readonly rootDir: string;
 
-  constructor(dir: string, meta?: T) {
-    this.dir = dir;
-    this.meta = meta || this.readMetaData();
+  constructor(rootDir: string, meta: T) {
+    this.rootDir = rootDir;
+    this.dir = path.resolve(this.rootDir, meta.id);
+    this.meta = meta;
   }
 
   async saveMetadata() {
@@ -24,7 +30,15 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
   }
 
   readMetaData() {
-    return require(this.absPath(File.META_NAME));
+    this.meta = require(this.absPath(File.META_NAME));
+    return this.meta;
+  }
+
+  getMeta(): T {
+    if (this.meta) {
+      return this.meta;
+    }
+    return this.readMetaData();
   }
 
   async rename(name: string) {
@@ -58,11 +72,30 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
     return path.resolve(this.dir, ...p);
   }
 
+  exists(...p: string[]): boolean {
+    try {
+      fs.accessSync(this.absPath(...p), fs.constants.F_OK);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   getFileName(name?: string): string {
     return `${name ? name : this.meta.name}.${this.meta.ext}`;
   }
 
   async remove(): Promise<void> {
     await rimraf(this.dir);
+  }
+
+  async save(data: any) {
+    if (this.exists()) {
+      // 更新
+    } else {
+      await fs.promises.mkdir(this.absPath(this.dir));
+      await this.saveMetadata();
+      await fs.promises.writeFile(this.absPath(this.getFileName()), data);
+    }
   }
 }
