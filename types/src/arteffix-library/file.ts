@@ -132,6 +132,8 @@ export interface IFile<T, U> {
 
   save: (data: any) => Promise<void>;
 
+  copy: (path: string) => Promise<void>;
+
   /**
    * 元信息保存
    */

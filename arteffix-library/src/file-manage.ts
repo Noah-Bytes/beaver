@@ -10,7 +10,7 @@ export type IFile = Workflow | Image;
 export type FileMeta = IImageWorkflowMeta | IImageMeta;
 
 export class FileManage implements IFileManage<IFile, FileMeta> {
-  readonly fileGroup: Map<string, IFile[]> = new Map();
+  readonly files: IFile[] = [];
   readonly fileMap: Map<string, IFile> = new Map();
   readonly rootDir: string;
 
@@ -19,16 +19,11 @@ export class FileManage implements IFileManage<IFile, FileMeta> {
   }
 
   async init(): Promise<void> {
-    const paths = await fg([`**/${File.META_NAME}`], {
+    const paths = await fg([`arteffix/*/${File.META_NAME}`], {
       cwd: this.rootDir,
     });
-    for (let path in paths) {
-      const arr = path.split('/');
-      if (arr.length !== 2) {
-        continue;
-      }
-
-      const meta: FileMeta = require(path);
+    for (let path of paths) {
+      const meta: FileMeta = require(this.absPath(path));
 
       let file: IFile | undefined;
 
@@ -46,42 +41,37 @@ export class FileManage implements IFileManage<IFile, FileMeta> {
       }
 
       if (file) {
-        this.createFile(file, meta.type);
+        this.createFile(file);
       }
     }
   }
 
-  async batchRemoveFIle(ids: string[], groupName: string): Promise<void> {
+  async batchRemoveFIle(ids: string[]): Promise<void> {
     for (let id of ids) {
       if (this.hasFile(id)) {
-        await this.removeFile(id, groupName);
+        await this.removeFile(id);
       }
     }
   }
 
-  createFile(file: IFile, groupName: string): void {
-    if (this.fileGroup.has(groupName)) {
-      this.fileGroup.get(groupName)!.push(file);
-    } else {
-      this.fileGroup.set(groupName, [file]);
-    }
-
+  createFile(file: IFile): void {
+    this.files.push(file);
     this.fileMap.set(file.meta.id, file);
   }
 
-  getFiles(groupName: string): IFile[] | undefined {
-    return this.fileGroup.get(groupName);
+  getFiles(): IFile[] | undefined {
+    return this.files;
   }
 
-  getFileMetas(groupName: string): FileMeta[] {
-    const files = this.getFiles(groupName);
+  getFileMetas(): FileMeta[] {
+    const files = this.getFiles();
     if (files) {
       return files.map((file) => file.getMeta());
     }
     return [];
   }
 
-  async removeFile(id: string, groupName: string): Promise<void> {
+  async removeFile(id: string): Promise<void> {
     if (!this.hasFile(id)) {
       return;
     }
@@ -90,16 +80,10 @@ export class FileManage implements IFileManage<IFile, FileMeta> {
     await file.remove();
     this.fileMap.delete(id);
 
-    const files = this.fileGroup.get(groupName);
-
-    if (!files) {
-      return;
-    }
-
-    const index = findIndex(files, (elem) => elem.meta.id === id);
+    const index = findIndex(this.files, (elem) => elem.meta.id === id);
 
     if (index > -1) {
-      files.slice(index, 1);
+      this.files.slice(index, 1);
     }
   }
 

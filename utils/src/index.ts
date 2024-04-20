@@ -1,4 +1,4 @@
-export * as constant from './constant';
+export * from './constant';
 export * from './event';
 export * from './generate-unique-id';
 export * as img from './image';

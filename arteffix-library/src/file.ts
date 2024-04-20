@@ -1,7 +1,7 @@
 import { IFile, IFileMeta, IFileMetaUpdate } from '@beaver/types';
-import * as fs from 'fs';
-import { rimraf } from 'rimraf';
+import * as fs from 'fs-extra';
 import * as path from 'path';
+import { rimraf } from 'rimraf';
 
 export class File<T extends IFileMeta, U extends IFileMetaUpdate>
   implements IFile<T, U>
@@ -9,7 +9,7 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
   static TYPE = {
     workflow: 'workflow',
     image: 'image',
-  }
+  };
   static META_NAME = 'metadata.json';
   meta: T;
   readonly dir: string;
@@ -22,10 +22,7 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
   }
 
   async saveMetadata() {
-    await fs.promises.writeFile(
-      this.absPath(File.META_NAME),
-      JSON.stringify(this.meta),
-    );
+    await fs.writeJson(this.absPath(File.META_NAME), this.meta);
     return true;
   }
 
@@ -73,12 +70,8 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
   }
 
   exists(...p: string[]): boolean {
-    try {
-      fs.accessSync(this.absPath(...p), fs.constants.F_OK);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    const path = this.absPath(...p);
+    return fs.pathExistsSync(path);
   }
 
   getFileName(name?: string): string {
@@ -90,12 +83,30 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
   }
 
   async save(data: any) {
-    if (this.exists()) {
-      // 更新
-    } else {
-      await fs.promises.mkdir(this.absPath(this.dir));
+    await fs.ensureDir(this.absPath(), 0o755);
+
+    if (!this.exists(File.META_NAME)) {
       await this.saveMetadata();
-      await fs.promises.writeFile(this.absPath(this.getFileName()), data);
+    }
+
+    const filePath = this.absPath(this.getFileName());
+
+    if (!this.exists(filePath)) {
+      await fs.promises.writeFile(filePath, data);
+    }
+  }
+
+  async copy(path: string) {
+    await fs.ensureDir(this.absPath(), 0o755);
+
+    if (!this.exists(File.META_NAME)) {
+      await this.saveMetadata();
+    }
+
+    const filePath = this.absPath(this.getFileName());
+
+    if (!this.exists(filePath)) {
+      await fs.copyFile(path, filePath);
     }
   }
 }
