@@ -1,7 +1,7 @@
 export interface IFileManage<T, U> {
   readonly files: T[];
   readonly fileMap: Map<string, T>;
-  readonly rootDir: string;
+  readonly dir: string;
 
   init: (rootDir: string) => Promise<void>;
 

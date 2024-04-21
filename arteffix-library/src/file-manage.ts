@@ -1,4 +1,10 @@
-import { IFileManage, IImageMeta, IImageWorkflowMeta } from '@beaver/types';
+import {
+  IFileManage,
+  IFileMeta,
+  IFileMetaUpdate,
+  IImageMeta,
+  IImageWorkflowMeta,
+} from '@beaver/types';
 import { findIndex } from '@technically/lodash';
 import * as fg from 'fast-glob';
 import * as path from 'path';
@@ -6,21 +12,21 @@ import { Workflow } from './creativity';
 import { File } from './file';
 import { Image } from './media';
 
-export type IFile = Workflow | Image;
-export type FileMeta = IImageWorkflowMeta | IImageMeta;
+export type IFile = Workflow | Image | File<IFileMeta, IFileMetaUpdate>;
+export type FileMeta = IImageWorkflowMeta | IImageMeta | IFileMeta;
 
 export class FileManage implements IFileManage<IFile, FileMeta> {
   readonly files: IFile[] = [];
   readonly fileMap: Map<string, IFile> = new Map();
-  readonly rootDir: string;
+  readonly dir: string;
 
   constructor(rootDir: string) {
-    this.rootDir = rootDir;
+    this.dir = path.resolve(rootDir, 'arteffix');
   }
 
   async init(): Promise<void> {
-    const paths = await fg([`arteffix/*/${File.META_NAME}`], {
-      cwd: this.rootDir,
+    const paths = await fg([`*/${File.META_NAME}`], {
+      cwd: this.dir,
     });
     for (let path of paths) {
       const meta: FileMeta = require(this.absPath(path));
@@ -30,13 +36,13 @@ export class FileManage implements IFileManage<IFile, FileMeta> {
       // 后续扩展后缀
       switch (meta.type) {
         case File.TYPE.workflow:
-          file = new Workflow(
-            this.absPath(meta.type),
-            meta as IImageWorkflowMeta,
-          );
+          file = new Workflow(this.absPath(), meta as IImageWorkflowMeta);
           break;
         case File.TYPE.image:
-          file = new Image(this.absPath(meta.type), meta as IImageMeta);
+          file = new Image(this.absPath(), meta as IImageMeta);
+          break;
+        default:
+          file = new File(this.absPath(), meta);
           break;
       }
 
@@ -96,6 +102,6 @@ export class FileManage implements IFileManage<IFile, FileMeta> {
   }
 
   absPath(...p: string[]): string {
-    return path.resolve(this.rootDir, ...p);
+    return path.resolve(this.dir, ...p);
   }
 }

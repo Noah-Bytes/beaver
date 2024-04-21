@@ -61,6 +61,7 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
     this.meta = {
       ...this.meta,
       ...meta,
+      lastModified: Date.now(),
     };
     await this.saveMetadata();
   }

@@ -7,6 +7,6 @@ describe('空间测试', () => {
   });
 
   it('获取图片列表', () => {
-    console.log(wk.file.getFileMetas(File.TYPE.image));
+    console.log(wk.file.getFileMetas());
   });
 });

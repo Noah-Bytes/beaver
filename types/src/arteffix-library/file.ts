@@ -70,16 +70,6 @@ export interface IFileMeta {
   modificationTime: number;
 
   /**
-   * 尺寸：高
-   */
-  height: number;
-
-  /**
-   * 尺寸：宽
-   */
-  width: number;
-
-  /**
    * 最后一次修改时间
    */
   lastModified?: number;
@@ -123,6 +113,8 @@ export interface IFileMetaUpdate {
    * 评分
    */
   star?: number;
+
+  isDeleted?: boolean;
 }
 
 export interface IFile<T, U> {
