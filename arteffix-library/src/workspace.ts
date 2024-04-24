@@ -1,5 +1,10 @@
-import { IWorkspace, IWorkspaceMeta } from '@beaver/types';
-import * as fs from 'fs';
+import {
+  IFileBaseMeta,
+  IFileBaseMetaUpdate,
+  IWorkspace,
+  IWorkspaceMeta,
+} from '@beaver/types';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import { FileManage } from './file-manage';
 
@@ -7,8 +12,15 @@ export class Workspace implements IWorkspace {
   static version: string = '0.0.1';
   readonly rootDir: string;
   static META_NAME = 'metadata.json';
-  meta: IWorkspaceMeta | undefined;
-  readonly file: FileManage;
+  meta: IWorkspaceMeta = {
+    folders: [],
+    smartFolders: [],
+    quickAccess: [],
+    tagsGroups: [],
+    applicationVersion: Workspace.version,
+    modificationTime: Date.now(),
+  };
+  readonly file: FileManage<IFileBaseMeta, IFileBaseMetaUpdate>;
 
   constructor(rootDir: string) {
     this.rootDir = rootDir;
@@ -21,7 +33,9 @@ export class Workspace implements IWorkspace {
     }
 
     if (!fs.existsSync(this.absPath(Workspace.META_NAME))) {
-      await this.createMetadata();
+      await this.saveMetadata();
+    } else {
+      this.readMetaData();
     }
 
     await this.file.init();
@@ -29,32 +43,21 @@ export class Workspace implements IWorkspace {
 
   async destroy() {}
 
-  async createMetadata() {
+  public async updateMeta(meta: IWorkspaceMeta) {
     this.meta = {
-      media: {
-        folders: [],
-        smartFolders: [],
-        quickAccess: [],
-        tagsGroups: [],
-      },
-      creativity: {
-        folders: [],
-        smartFolders: [],
-        quickAccess: [],
-        tagsGroups: [],
-      },
-      applicationVersion: Workspace.version,
-      modificationTime: Date.now(),
+      ...this.meta,
+      ...meta,
     };
+    await this.saveMetadata();
+  }
 
-    await fs.promises.writeFile(
-      this.absPath(Workspace.META_NAME),
-      JSON.stringify(this.meta),
-    );
+  async saveMetadata() {
+    await fs.writeJson(this.absPath(Workspace.META_NAME), this.meta);
   }
 
   readMetaData() {
-    return require(this.absPath(Workspace.META_NAME));
+    this.meta = require(this.absPath(Workspace.META_NAME));
+    return this.meta;
   }
 
   absPath(...p: string[]): string {

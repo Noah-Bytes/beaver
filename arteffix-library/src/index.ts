@@ -1,5 +1,4 @@
-export * from './creativity';
-export * from './media';
-export * from './file';
+export * from './file-base';
+export * from './file-default';
 export * from './file-manage';
 export * from './workspace';

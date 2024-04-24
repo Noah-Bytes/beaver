@@ -1,41 +1,52 @@
-import { IFile, IFileMeta, IFileMetaUpdate } from '@beaver/types';
+import { IFileBaseMeta, IFileBaseMetaUpdate, IFileExtend } from '@beaver/types';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { rimraf } from 'rimraf';
 
-export class File<T extends IFileMeta, U extends IFileMetaUpdate>
-  implements IFile<T, U>
+export class FileBase<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
+  implements IFileExtend<M, U>
 {
-  static TYPE = {
-    workflow: 'workflow',
-    image: 'image',
-  };
   static META_NAME = 'metadata.json';
-  meta: T;
+  static createId(): string {
+    const timestamp = new Date().getTime(); // 获取当前时间的时间戳
+    const randomPart = Math.random().toString(36).substring(2, 15); // 生成一个随机字符串
+    return `${timestamp}_${randomPart.toUpperCase()}`; // 组合成一个唯一ID
+  }
+
+  meta: M;
   readonly dir: string;
   readonly rootDir: string;
 
-  constructor(rootDir: string, meta: T) {
+  constructor(rootDir: string, meta: M) {
     this.rootDir = rootDir;
-    this.dir = path.resolve(this.rootDir, meta.id);
     this.meta = meta;
+    this.dir = path.resolve(this.rootDir, meta.id);
+  }
+
+  createInit(): Promise<void> {
+    return Promise.resolve(undefined);
   }
 
   async saveMetadata() {
-    await fs.writeJson(this.absPath(File.META_NAME), this.meta);
+    await fs.writeJson(this.absPath(FileBase.META_NAME), this.meta);
     return true;
   }
 
   readMetaData() {
-    this.meta = require(this.absPath(File.META_NAME));
+    this.meta = require(this.absPath(FileBase.META_NAME));
     return this.meta;
   }
 
-  getMeta(): T {
-    if (this.meta) {
-      return this.meta;
+  public getMeta(): M {
+    let m = this.meta;
+    if (!m) {
+      m = this.readMetaData();
     }
-    return this.readMetaData();
+
+    return {
+      ...m,
+      dir: this.dir,
+    };
   }
 
   async rename(name: string) {
@@ -50,7 +61,7 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
     await this.saveMetadata();
   }
 
-  async updateMeta(meta: U) {
+  public async updateMeta(meta: U) {
     if (meta.name) {
       await fs.promises.rename(
         this.absPath(this.getFileName()),
@@ -66,7 +77,7 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
     await this.saveMetadata();
   }
 
-  absPath(...p: string[]): string {
+  public absPath(...p: string[]): string {
     return path.resolve(this.dir, ...p);
   }
 
@@ -75,7 +86,7 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
     return fs.pathExistsSync(path);
   }
 
-  getFileName(name?: string): string {
+  public getFileName(name?: string): string {
     return `${name ? name : this.meta.name}.${this.meta.ext}`;
   }
 
@@ -86,7 +97,7 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
   async save(data: any) {
     await fs.ensureDir(this.absPath(), 0o755);
 
-    if (!this.exists(File.META_NAME)) {
+    if (!this.exists(FileBase.META_NAME)) {
       await this.saveMetadata();
     }
 
@@ -97,17 +108,17 @@ export class File<T extends IFileMeta, U extends IFileMetaUpdate>
     }
   }
 
-  async copy(path: string) {
+  async copy() {
     await fs.ensureDir(this.absPath(), 0o755);
 
-    if (!this.exists(File.META_NAME)) {
+    if (!this.exists(FileBase.META_NAME)) {
       await this.saveMetadata();
     }
 
     const filePath = this.absPath(this.getFileName());
 
     if (!this.exists(filePath)) {
-      await fs.copyFile(path, filePath);
+      await fs.copyFile(this.meta.url!, filePath);
     }
   }
 }

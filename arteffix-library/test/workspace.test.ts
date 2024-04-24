@@ -1,4 +1,4 @@
-import { File, Workspace } from '../src';
+import { FileDefault, Workspace } from '../src';
 
 describe('空间测试', () => {
   const wk = new Workspace('/Users/taibai/Documents/我的空间.arteffix');

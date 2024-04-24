@@ -1,4 +1,6 @@
-export interface IFileMeta {
+import { Folder } from './workspace';
+
+export interface IFileBaseMeta {
   /**
    * uuid
    */
@@ -42,12 +44,12 @@ export interface IFileMeta {
   /**
    * tag
    */
-  tags: any[];
+  tags: string[];
 
   /**
    * 在哪些文件夹
    */
-  folders: string[];
+  folders: Pick<Folder, 'id' | 'name'>[];
 
   /**
    * 是否删除
@@ -79,10 +81,11 @@ export interface IFileMeta {
    */
   star?: number;
 
-  type: string;
+  // 路径动态填入，不会写入文件
+  dir?: string;
 }
 
-export interface IFileMetaUpdate {
+export interface IFileBaseMetaUpdate {
   /**
    * stat.name
    * 文件名
@@ -97,7 +100,7 @@ export interface IFileMetaUpdate {
   /**
    * 在哪些文件夹
    */
-  folders: string[];
+  folders?: Pick<Folder, 'id' | 'name'>[];
 
   /**
    * 来源地址
@@ -114,41 +117,13 @@ export interface IFileMetaUpdate {
    */
   star?: number;
 
+  /**
+   * 删除标记
+   */
   isDeleted?: boolean;
 }
 
-export interface IFile<T, U> {
-  readonly meta: T;
-  readonly dir: string;
-  readonly rootDir: string;
-
-  save: (data: any) => Promise<void>;
-
-  copy: (path: string) => Promise<void>;
-
-  /**
-   * 元信息保存
-   */
-  saveMetadata: () => Promise<boolean>;
-
-  /**
-   * 读取元信息
-   */
-  readMetaData: () => T;
-
-  getMeta: () => T;
-
-  /**
-   * 修改文件名
-   */
-  rename: (name: string) => Promise<void>;
-  updateMeta: (meta: U) => Promise<void>;
-
-  absPath: (...p: string[]) => string;
-
-  exists: (...p: string[]) => boolean;
-
-  getFileName: () => string;
-
-  remove: () => Promise<void>;
-}
+export type IFileOptions<T> = {
+  filePath?: string;
+  meta?: T;
+};
