@@ -1,6 +1,6 @@
 'use server';
 
-import { fail, success } from '@beaver/utils';
+import { fail, success } from '@beaver/arteffix-utils';
 import {shellFlow} from "../../../beaver";
 
 export async function explore() {
@@ -12,7 +12,7 @@ export async function explore() {
 export async function gitClone(remoteUrl: string) {
   try {
     await shellFlow!.app.clone(remoteUrl);
-    return success();
+    return success(undefined);
   } catch (e: any) {
     return fail(e.message);
   }

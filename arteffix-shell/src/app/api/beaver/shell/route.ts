@@ -1,4 +1,4 @@
-import { fail, success } from '@beaver/utils';
+import { fail, success } from '@beaver/arteffix-utils';
 import { NextResponse } from 'next/server';
 import { shellFlow } from '../../../../beaver';
 

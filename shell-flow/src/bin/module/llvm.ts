@@ -1,9 +1,5 @@
-import { IBinModuleTypes } from '../../types/bin-types';
-import { ShellFlow } from '@beaver/shell-flow';
-import { IShellTypes } from '../../types/shell-types';
-import * as decompress from 'decompress';
-import * as path from 'path';
-import { isDarwin } from '@beaver/utils';
+import { isDarwin } from '@beaver/arteffix-utils';
+import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 
 export class LLVM implements IBinModuleTypes {
   private readonly _ctx: ShellFlow;

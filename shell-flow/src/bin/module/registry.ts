@@ -1,7 +1,6 @@
-import { IBinModuleTypes } from '../../types/bin-types';
-import { isWin32 } from '@beaver/utils';
-import { ShellFlow } from '@beaver/shell-flow';
-import type { IShellTypes } from '../../types/shell-types';
+import { isWin32 } from '@beaver/arteffix-utils';
+import type { IShellTypes } from '@beaver/shell-flow';
+import { IBinModuleTypes, ShellFlow } from '@beaver/shell-flow';
 
 export class Registry implements IBinModuleTypes {
   readonly description =

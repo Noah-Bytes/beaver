@@ -1,4 +1,4 @@
-import { fail, isWin32, success } from '@beaver/utils';
+import { fail, isWin32, success } from '@beaver/arteffix-utils';
 import { NextResponse } from 'next/server';
 import { shellFlow } from '../../../../beaver';
 import { IRequirement } from '../../../guide/actions';
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     }));
   try {
     await shellFlow!.bin.install(rs);
-    return NextResponse.json(success());
+    return NextResponse.json(success(undefined));
   } catch (e: any) {
     return NextResponse.json(fail(e.message));
   }

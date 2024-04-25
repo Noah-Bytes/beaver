@@ -1,4 +1,4 @@
-import { fail, success } from '@beaver/utils';
+import { fail, success } from '@beaver/arteffix-utils';
 import { NextResponse } from 'next/server';
 import { shellFlow } from '../../../../../beaver';
 
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
   try {
     await shellFlow?.app.start(name);
-    return NextResponse.json(success());
+    return NextResponse.json(success(undefined));
   } catch (e: any) {
     return NextResponse.json(fail(e.message));
   }

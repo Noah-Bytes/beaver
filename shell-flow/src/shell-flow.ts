@@ -10,7 +10,7 @@ import { SystemInfo } from './system-info';
 import {
   IShellFlowOptionsTypes,
   IShellFlowTypes,
-} from './types/shell-flow-types';
+} from './types';
 
 export class ShellFlow implements IShellFlowTypes {
   static CACHE_FOLDERS = [

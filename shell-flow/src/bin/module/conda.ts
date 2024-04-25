@@ -1,6 +1,6 @@
 import { IBinModuleTypes } from '../../types/bin-types';
 import { ShellFlow } from '../../shell-flow';
-import { isDarwin, isWin32 } from '@beaver/utils';
+import { isDarwin, isWin32 } from '@beaver/arteffix-utils';
 import * as path from 'path';
 import type { IShellTypes } from '../../types/shell-types';
 import * as fs from 'fs';

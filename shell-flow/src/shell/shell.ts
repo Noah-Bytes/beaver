@@ -1,23 +1,27 @@
+import {
+  createModuleEventBus,
+  IEventBus,
+  isWin32,
+} from '@beaver/arteffix-utils';
 import { createLogger, ShellFlow } from '@beaver/shell-flow';
 import { IKey } from '@beaver/types';
-import { createModuleEventBus, IEventBus, isWin32 } from '@beaver/utils';
 import * as fs from 'fs';
 import type { IPty } from 'node-pty';
 import * as pty from 'node-pty';
 import * as os from 'os';
 import * as path from 'path';
 import * as process from 'process';
-// @ts-ignore
-import { shellPathSync } from 'shell-path';
-import * as sudoPrompt from 'sudo-prompt';
-import { Logger } from 'winston';
-import { mirrorUrl } from '../mirror';
 import {
   IShellMeta,
   IShellRunOptions,
   IShellRunParams,
   IShellTypes,
-} from '../types/shell-types';
+} from '@beaver/shell-flow';
+// @ts-ignore
+import { shellPathSync } from 'shell-path';
+import * as sudoPrompt from 'sudo-prompt';
+import { Logger } from 'winston';
+import { mirrorUrl } from '../mirror';
 
 export class Shell implements IShellTypes {
   static STATUS = {

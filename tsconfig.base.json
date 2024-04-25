@@ -20,8 +20,7 @@
       "@beaver/core": ["core/src/index.ts"],
       "@beaver/interceptor": ["interceptor/src/index.ts"],
       "@beaver/shell-flow": ["shell-flow/src/index.ts"],
-      "@beaver/types": ["types/src/index.ts"],
-      "@beaver/utils": ["utils/src/index.ts"]
+      "@beaver/types": ["types/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

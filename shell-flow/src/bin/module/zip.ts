@@ -1,7 +1,5 @@
-import { ShellFlow } from '@beaver/shell-flow';
-import { isWin32 } from '@beaver/utils';
-import { IBinModuleTypes } from '../../types/bin-types';
-import { IShellTypes } from '../../types/shell-types';
+import { isWin32 } from '@beaver/arteffix-utils';
+import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 
 export class Zip implements IBinModuleTypes {
   readonly shell: IShellTypes;

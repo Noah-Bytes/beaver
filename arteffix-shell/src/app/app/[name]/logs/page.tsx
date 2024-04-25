@@ -1,5 +1,5 @@
 'use client';
-import { constant } from '@beaver/utils';
+import { YYYYMMDDhhmmss } from '@beaver/arteffix-utils';
 import { useAsyncEffect } from 'ahooks';
 import dayjs from 'dayjs';
 import { ReadCommitResult } from 'isomorphic-git';
@@ -92,7 +92,7 @@ export default async function AppLogsPage({ params: { name } }: AppPageProps) {
                     className="font-normal"
                   >
                     {dayjs(commit.committer.timestamp * 1000).format(
-                      constant.YYYYMMDDhhmmss,
+                      YYYYMMDDhhmmss,
                     )}
                   </Typography>
                 </td>

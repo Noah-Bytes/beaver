@@ -1,6 +1,6 @@
 import path from 'path';
 import { ShellFlowClass } from '@beaver/types';
-import { fail, success } from '@beaver/utils';
+import { fail, success } from '@beaver/arteffix-utils';
 import { NextResponse } from 'next/server';
 import { initShellFlow } from '../../../../beaver';
 
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
   try {
     await initShellFlow(homeDir);
-    return NextResponse.json(success());
+    return NextResponse.json(success(undefined));
   } catch (e: any) {
     return NextResponse.json(fail(e.message));
   }

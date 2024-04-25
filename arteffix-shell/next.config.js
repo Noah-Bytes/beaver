@@ -44,7 +44,7 @@ const withNextJsObfuscator = require('nextjs-obfuscator')(
       webpack: true,
       additionalModules: [
         '@beaver/shell-flow',
-        '@beaver/utils',
+        '@beaver/arteffix-utils',
         '@beaver/types',
       ]
     },

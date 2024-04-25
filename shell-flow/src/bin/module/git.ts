@@ -1,9 +1,7 @@
+import { isWin32 } from '@beaver/arteffix-utils';
+import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ShellFlow } from '@beaver/shell-flow';
-import { isWin32 } from '@beaver/utils';
-import { IBinModuleTypes } from '../../types/bin-types';
-import { IShellTypes } from '../../types/shell-types';
 
 export class Git implements IBinModuleTypes {
   static GIT_CONFIG = '.gitconfig';

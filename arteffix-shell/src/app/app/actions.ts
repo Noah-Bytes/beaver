@@ -1,6 +1,6 @@
 'use server';
 import { IAppMeta } from '@beaver/shell-flow';
-import { fail, success } from '@beaver/utils';
+import { fail, success } from '@beaver/arteffix-utils';
 import { ReadCommitResult } from 'isomorphic-git';
 import { shellFlow } from '../../beaver';
 

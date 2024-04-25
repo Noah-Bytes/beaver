@@ -1,10 +1,10 @@
 'use server';
 
+import { fail, isWin32, success } from '@beaver/arteffix-utils';
+import { IShellAppRequires } from '@beaver/types';
 import * as os from 'os';
 import path from 'path';
-import { fail, isWin32, success } from '@beaver/utils';
 import { initShellFlow, shellFlow } from '../../beaver';
-import {IShellAppRequires} from "@beaver/types";
 
 export async function getPlatform() {
   return success(os.platform());
@@ -14,7 +14,7 @@ export async function init(homeDir: string) {
   if (path.isAbsolute(homeDir)) {
     try {
       await initShellFlow(homeDir);
-      return success();
+      return success(undefined);
     } catch (e: any) {
       return fail(e.message);
     }
@@ -85,7 +85,7 @@ export async function installByRequirements(requirements: IRequirement[]) {
     }));
   try {
     await shellFlow!.bin.install(rs);
-    return success();
+    return success(undefined);
   } catch (e: any) {
     return fail(e.message);
   }
