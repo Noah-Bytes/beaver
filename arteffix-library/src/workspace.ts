@@ -13,8 +13,36 @@ export class Workspace implements IWorkspace {
   readonly rootDir: string;
   static META_NAME = 'metadata.json';
   meta: IWorkspaceMeta = {
-    folders: [],
-    smartFolders: [],
+    folders: {
+      root: {
+        children: [],
+        isFolder: true,
+        canMove: true,
+        canRename: true,
+        index: 'root',
+        data: {
+          id: 'root',
+          name: '根',
+          modificationTime: Date.now(),
+        },
+      },
+    },
+    smartFolders: {
+      root: {
+        children: [],
+        isFolder: true,
+        canMove: true,
+        canRename: true,
+        index: 'root',
+        data: {
+          id: 'root',
+          name: '根',
+          modificationTime: Date.now(),
+          children: [],
+          conditions: [],
+        },
+      },
+    },
     quickAccess: [],
     tagsGroups: [],
     applicationVersion: Workspace.version,

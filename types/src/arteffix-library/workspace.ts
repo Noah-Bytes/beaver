@@ -1,10 +1,20 @@
 export interface IWorkspaceMeta {
-  folders: Folder[];
-  smartFolders: SmartFolder[];
+  folders: { [key: string]: TreeItem<Folder> };
+  smartFolders: { [key: string]: TreeItem<SmartFolder> };
   quickAccess: QuickAccess[];
   tagsGroups: TagsGroup[];
   modificationTime: number;
   applicationVersion: string;
+}
+
+export interface TreeItem<T = any> {
+  index: string;
+  children: Array<string>;
+  isFolder?: boolean;
+  // isChildrenLoading?: boolean;
+  canMove?: boolean;
+  canRename?: boolean;
+  data: T;
 }
 
 export interface QuickAccess {
@@ -29,7 +39,8 @@ export interface SmartFolder {
   name: string;
   description?: string;
   modificationTime: number;
-  children: SmartFolder[];
+  count?: number;
+  children: string[];
   conditions: Conditions[];
 }
 
@@ -37,8 +48,9 @@ export interface Folder {
   id: string;
   name: string;
   description?: string;
-  children?: Folder[];
+  children?: string[];
   modificationTime: number;
+  count?: number;
   tags?: any[];
   password?: string;
   passwordTips?: string;
@@ -61,9 +73,9 @@ export interface IWorkspace {
 
   absPath: (...p: string[]) => string;
 
-  updateMeta: (params: IWorkspaceMeta) => Promise<void>
+  updateMeta: (params: IWorkspaceMeta) => Promise<void>;
 
-  saveMetadata: () => Promise<void>
+  saveMetadata: () => Promise<void>;
 
-  readMetaData: () => IWorkspaceMeta | undefined
+  readMetaData: () => IWorkspaceMeta | undefined;
 }

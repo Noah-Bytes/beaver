@@ -1,8 +1,6 @@
-import { ShellFlow } from '@beaver/shell-flow';
+import { uuid } from '@beaver/arteffix-utils';
+import { IAppTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 import { IShellAppRunParams } from '@beaver/types';
-import { uuid } from '@beaver/utils';
-import { IAppTypes } from '../../types/app-types';
-import { IShellTypes } from '../../types/shell-types';
 
 export class Shell {
   private readonly shell: IShellTypes;

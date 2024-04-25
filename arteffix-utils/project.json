@@ -1,21 +1,17 @@
 {
-  "name": "utils",
+  "name": "arteffix-utils",
   "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "utils/src",
+  "sourceRoot": "arteffix-utils/src",
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/utils",
-        "main": "utils/src/index.ts",
-        "tsConfig": "utils/tsconfig.lib.json",
-        "assets": [
-          "utils/*.md"
-        ]
+        "outputPath": "dist/arteffix-utils",
+        "main": "arteffix-utils/src/index.ts",
+        "tsConfig": "arteffix-utils/tsconfig.lib.json",
+        "assets": []
       }
     },
     "nx-release-publish": {
