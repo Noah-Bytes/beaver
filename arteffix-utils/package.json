@@ -2,7 +2,8 @@
   "name": "@beaver/arteffix-utils",
   "version": "0.0.1",
   "dependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "exifreader": "^4.22.1"
   },
   "type": "commonjs",
   "main": "./src/index.js",
