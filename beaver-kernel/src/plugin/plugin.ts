@@ -1,7 +1,7 @@
-import type { IPluginRuntime } from '../types/plugin-types';
 import type { IPublicPluginConfig, IPublicPluginMeta } from '@beaver/types';
 import { consola } from 'consola';
 import type { ConsolaInstance } from 'consola/dist/core';
+import type { IPluginRuntime } from '../types';
 
 export class PluginRuntime implements IPluginRuntime {
   private _initHad: boolean = false;

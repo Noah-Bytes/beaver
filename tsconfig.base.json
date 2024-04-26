@@ -17,8 +17,8 @@
     "paths": {
       "@beaver/arteffix-library": ["arteffix-library/src/index.ts"],
       "@beaver/arteffix-utils": ["arteffix-utils/src/index.ts"],
-      "@beaver/core": ["core/src/index.ts"],
       "@beaver/interceptor": ["interceptor/src/index.ts"],
+      "@beaver/kernel": ["beaver-kernel/src/index.ts"],
       "@beaver/shell-flow": ["shell-flow/src/index.ts"],
       "@beaver/types": ["types/src/index.ts"]
     }

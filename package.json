@@ -16,7 +16,7 @@
     "@nx/next": "18.1.2",
     "@nx/node": "18.1.2",
     "@nx/react": "18.1.2",
-    "@nx/rollup": "18.1.2",
+    "@nx/rollup": "18.2.1",
     "@nx/workspace": "18.1.2",
     "@rollup/plugin-url": "^7.0.0",
     "@svgr/rollup": "^8.0.1",

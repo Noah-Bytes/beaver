@@ -5,13 +5,15 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/arteffix-utils",
         "main": "arteffix-utils/src/index.ts",
         "tsConfig": "arteffix-utils/tsconfig.lib.json",
-        "assets": []
+        "assets": [],
+        "project": "arteffix-utils/package.json",
+        "format": ["esm", "cjs"]
       }
     },
     "nx-release-publish": {

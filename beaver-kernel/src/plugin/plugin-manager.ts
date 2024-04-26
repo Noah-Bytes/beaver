@@ -1,11 +1,11 @@
+import { IPublicPlugin, IPublicPluginMeta } from '@beaver/types';
+import { consola } from 'consola';
 import {
   IPluginManager,
   IPluginRegisterOptions,
   IPluginRuntime,
-} from '../types/plugin-types';
-import { IPublicPlugin, IPublicPluginMeta } from '@beaver/types';
+} from '../types';
 import { PluginRuntime } from './plugin';
-import { consola } from 'consola';
 
 const logger = consola.withTag('preset:plugin-manager');
 

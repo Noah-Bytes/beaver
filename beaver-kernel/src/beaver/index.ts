@@ -1,5 +1,5 @@
-import { PluginManager } from '../plugin/plugin-manager';
-import type { IPluginManager } from '../types/plugin-types';
+import { PluginManager } from '../plugin';
+import type { IPluginManager } from '../types';
 
 export class Beaver {
   pluginManager: IPluginManager;
