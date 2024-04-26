@@ -1,20 +1,20 @@
 {
-  "name": "arteffix-library",
+  "name": "beaver-kernel",
   "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "arteffix-library/src",
+  "sourceRoot": "beaver-kernel/src",
   "projectType": "library",
   "targets": {
     "build": {
       "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/arteffix-library",
-        "main": "arteffix-library/src/index.ts",
-        "tsConfig": "arteffix-library/tsconfig.lib.json",
-//        "assets": ["arteffix-library/*.md"],
-        "project": "arteffix-library/package.json",
-        "format": ["esm", "cjs"],
-        "generateExportsField": true
+        "outputPath": "dist/beaver-kernel",
+        "main": "beaver-kernel/src/index.ts",
+        "tsConfig": "beaver-kernel/tsconfig.lib.json",
+        "assets": [],
+        "project": "beaver-kernel/package.json",
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
       }
     },
     "nx-release-publish": {

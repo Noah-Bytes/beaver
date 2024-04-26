@@ -1,6 +1,9 @@
-import { ShellFlow } from '@beaver/shell-flow';
-import { IShellManagerTypes } from '../types/shell-manager-types';
-import { IShellRunParams, IShellTypes } from '../types/shell-types';
+import {
+  IShellManagerTypes,
+  IShellRunParams,
+  IShellTypes,
+  ShellFlow,
+} from '@beaver/shell-flow';
 import { Shell } from './shell';
 
 export class ShellManager implements IShellManagerTypes {

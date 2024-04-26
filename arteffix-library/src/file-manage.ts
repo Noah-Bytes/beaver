@@ -6,8 +6,8 @@ import {
   IFileOptions,
 } from '@beaver/types';
 import { findIndex } from '@technically/lodash';
-import * as fg from 'fast-glob';
-import * as path from 'path';
+import fg from 'fast-glob';
+import path from 'path';
 import { FileBase } from './file-base';
 import { FileDefault } from './file-default';
 

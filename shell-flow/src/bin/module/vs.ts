@@ -1,7 +1,7 @@
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 import { isWin32 } from '@beaver/arteffix-utils';
+import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 import { glob } from 'glob';
-import * as path from 'path';
+import path from 'path';
 
 export class Vs implements IBinModuleTypes {
   static DOWNLOAD_URL =

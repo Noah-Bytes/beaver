@@ -3,8 +3,8 @@ import {
   IFileBaseMetaUpdate,
   IFileOptions,
 } from '@beaver/types';
-import * as fs from 'fs-extra';
-import * as path from 'path';
+import fs from 'fs-extra';
+import path from 'path';
 import { FileBase } from './file-base';
 
 export interface IFileDefaultMeta extends IFileBaseMeta {}

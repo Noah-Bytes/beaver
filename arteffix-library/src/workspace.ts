@@ -4,8 +4,8 @@ import {
   IWorkspace,
   IWorkspaceMeta,
 } from '@beaver/types';
-import * as fs from 'fs-extra';
-import * as path from 'path';
+import fs from 'fs-extra';
+import path from 'path';
 import { FileManage } from './file-manage';
 
 export class Workspace implements IWorkspace {

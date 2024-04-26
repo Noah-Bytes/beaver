@@ -3,23 +3,24 @@ import {
   IEventBus,
   isWin32,
 } from '@beaver/arteffix-utils';
-import { createLogger, ShellFlow } from '@beaver/shell-flow';
-import { IKey } from '@beaver/types';
-import * as fs from 'fs';
-import type { IPty } from 'node-pty';
-import * as pty from 'node-pty';
-import * as os from 'os';
-import * as path from 'path';
-import * as process from 'process';
 import {
+  createLogger,
   IShellMeta,
   IShellRunOptions,
   IShellRunParams,
   IShellTypes,
+  ShellFlow,
 } from '@beaver/shell-flow';
+import { IKey } from '@beaver/types';
+import fs from 'fs';
+import type { IPty } from 'node-pty';
+import pty from 'node-pty';
+import os from 'os';
+import path from 'path';
+import process from 'process';
 // @ts-ignore
 import { shellPathSync } from 'shell-path';
-import * as sudoPrompt from 'sudo-prompt';
+import sudoPrompt from 'sudo-prompt';
 import { Logger } from 'winston';
 import { mirrorUrl } from '../mirror';
 

@@ -1,7 +1,5 @@
-import { ShellFlow } from '@beaver/shell-flow';
 import { isWin32 } from '@beaver/arteffix-utils';
-import { IBinModuleTypes } from '../../types/bin-types';
-import { IShellTypes } from '../../types/shell-types';
+import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 
 export class Aria2 implements IBinModuleTypes {
   static DOWNLOAD_URL =

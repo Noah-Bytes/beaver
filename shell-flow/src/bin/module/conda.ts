@@ -1,10 +1,10 @@
-import { IBinModuleTypes } from '../../types/bin-types';
-import { ShellFlow } from '../../shell-flow';
 import { isDarwin, isWin32 } from '@beaver/arteffix-utils';
-import * as path from 'path';
-import type { IShellTypes } from '../../types/shell-types';
-import * as fs from 'fs';
+import type { IShellTypes } from '@beaver/shell-flow';
+import { IBinModuleTypes } from '@beaver/shell-flow';
+import fs from 'fs';
 import { glob } from 'glob';
+import path from 'path';
+import { ShellFlow } from '../../shell-flow';
 
 interface PlatformUrls {
   [key: string]: {

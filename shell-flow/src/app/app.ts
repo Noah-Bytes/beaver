@@ -5,9 +5,9 @@ import {
   ShellFlow,
 } from '@beaver/shell-flow';
 import { IShellApp, IShellAppMeta, IShellAppRun } from '@beaver/types';
-import * as fs from 'fs';
+import fs from 'fs';
 import git, { ReadCommitResult } from 'isomorphic-git';
-import * as path from 'path';
+import path from 'path';
 import { Logger } from 'winston';
 import { IAppMeta, IAppTypes } from '../types/app-types';
 

@@ -1,15 +1,15 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import { IShellTypes } from '@beaver/shell-flow';
 import { IKey, IShellAppRequires } from '@beaver/types';
-import * as fse from 'fs-extra';
+import fs from 'fs';
+import fse from 'fs-extra';
 import { DownloaderHelper } from 'node-downloader-helper';
-import * as wget from 'wget-improved';
+import path from 'path';
+import wget from 'wget-improved';
 import { Logger } from 'winston';
 import { createLogger } from '../logger';
 import { mirrorUrl } from '../mirror';
 import { ShellFlow } from '../shell-flow';
 import { IBinModuleTypes, IBinTypes } from '../types/bin-types';
-import { IShellTypes } from '../types/shell-types';
 import * as modules from './module';
 
 export class Bin implements IBinTypes {

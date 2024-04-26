@@ -1,7 +1,7 @@
 import { createLogger, ShellFlow } from '@beaver/shell-flow';
 import { IShellAppRunParams } from '@beaver/types';
 import { DownloaderHelper } from 'node-downloader-helper';
-import * as path from 'path';
+import path from 'path';
 // @ts-ignore
 import Pdrive from 'pdrive';
 import { rimraf } from 'rimraf';

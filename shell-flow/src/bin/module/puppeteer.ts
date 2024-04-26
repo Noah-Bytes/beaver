@@ -1,7 +1,5 @@
-import { IBinModuleTypes } from '../../types/bin-types';
-import { ShellFlow } from '@beaver/shell-flow';
-import { IShellTypes } from '../../types/shell-types';
-import * as fs from 'fs';
+import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import fs from 'fs';
 
 export class Puppeteer implements IBinModuleTypes {
   private readonly _ctx: ShellFlow;

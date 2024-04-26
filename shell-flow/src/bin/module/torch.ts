@@ -1,6 +1,5 @@
-import { ShellFlow } from '@beaver/shell-flow';
-import { IBinModuleTypes } from '../../types/bin-types';
-import type { IShellTypes } from '../../types/shell-types';
+import type { IShellTypes } from '@beaver/shell-flow';
+import { IBinModuleTypes, ShellFlow } from '@beaver/shell-flow';
 
 export class Torch implements IBinModuleTypes {
   readonly dependencies: string[] = ['conda'];

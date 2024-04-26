@@ -1,9 +1,9 @@
-import type { IBinModuleTypes } from '../../types/bin-types';
-import { IShellTypes } from '../../types/shell-types';
+import type { IBinModuleTypes } from '@beaver/shell-flow';
+import { IShellTypes } from '@beaver/shell-flow';
 import { ShellFlow } from '@beaver/shell-flow';
-import * as path from 'path';
-import * as decompress from 'decompress';
-import * as fs from 'fs';
+import path from 'path';
+import decompress from 'decompress';
+import fs from 'fs';
 
 // @ts-ignore
 const _decompress = decompress as unknown as typeof decompress.default;

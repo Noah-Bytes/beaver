@@ -1,6 +1,4 @@
-import { ShellFlow } from '@beaver/shell-flow';
-import { IBinModuleTypes } from '../../types/bin-types';
-import { IShellTypes } from '../../types/shell-types';
+import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 
 export class Py implements IBinModuleTypes {
   private readonly _ctx: ShellFlow;

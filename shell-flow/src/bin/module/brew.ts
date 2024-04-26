@@ -1,5 +1,5 @@
-import * as decompress from 'decompress';
-import { IBinModuleTypes } from '../../types/bin-types';
+import decompress from 'decompress';
+import { IBinModuleTypes } from '@beaver/shell-flow';
 
 // @ts-ignore
 const _decompress = decompress as unknown as typeof decompress.default;

@@ -1,4 +1,4 @@
-import * as ExifReader from 'exifreader';
+import ExifReader from 'exifreader';
 
 function getStringWithUTF8(numbers: Uint8Array | number[]): string {
   let str = '';

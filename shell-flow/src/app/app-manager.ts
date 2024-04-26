@@ -1,7 +1,7 @@
 import { IShellTypes, ShellFlow } from '@beaver/shell-flow';
-import * as fs from 'fs';
+import fs from 'fs';
 import git from 'isomorphic-git';
-import * as path from 'path';
+import path from 'path';
 import { App } from './app';
 import * as modules from './module';
 

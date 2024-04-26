@@ -1,6 +1,6 @@
 import { IFileBaseMeta, IFileBaseMetaUpdate, IFileExtend } from '@beaver/types';
-import * as fs from 'fs-extra';
-import * as path from 'path';
+import fs from 'fs-extra';
+import path from 'path';
 import { rimraf } from 'rimraf';
 
 export class FileBase<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
