@@ -27,9 +27,9 @@ export interface IFileExtend<
   /**
    * 读取元信息
    */
-  readMetaData: () => M;
+  readMetaData: () => Promise<M>;
 
-  getMeta: () => M;
+  getMeta: () => Promise<M>;
   /**
    * 修改文件名
    */

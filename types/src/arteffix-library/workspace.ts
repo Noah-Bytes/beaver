@@ -7,6 +7,13 @@ export interface IWorkspaceMeta {
   applicationVersion: string;
 }
 
+export interface IWorkspaceMetaUpdate {
+  folders?: { [key: string]: TreeItem<Folder> };
+  smartFolders?: { [key: string]: TreeItem<SmartFolder> };
+  quickAccess?: QuickAccess[];
+  tagsGroups?: TagsGroup[];
+}
+
 export interface TreeItem<T = any> {
   index: string;
   children: Array<string>;
@@ -77,5 +84,5 @@ export interface IWorkspace {
 
   saveMetadata: () => Promise<void>;
 
-  readMetaData: () => IWorkspaceMeta | undefined;
+  readMetaData: () => Promise<IWorkspaceMeta | undefined>;
 }

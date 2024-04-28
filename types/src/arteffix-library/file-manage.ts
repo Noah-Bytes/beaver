@@ -31,7 +31,7 @@ export interface IFileManage<
 
   getFiles: () => IFileExtend<M, U>[] | undefined;
 
-  getFileMetas: () => M[];
+  getFileMetas: () => Promise<M[]>;
 
   hasFile: (id: string) => boolean;
 
@@ -39,5 +39,5 @@ export interface IFileManage<
 
   absPath: (...p: string[]) => string;
 
-  pushRecycleBin: (id: string) => Promise<M>
+  pushRecycleBin: (id: string) => Promise<M>;
 }

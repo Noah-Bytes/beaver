@@ -108,10 +108,15 @@ export class FileManage<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
     return this.files;
   }
 
-  getFileMetas(): M[] {
+  async getFileMetas(): Promise<M[]> {
     const files = this.getFiles();
     if (files) {
-      return files.map((file) => file.getMeta());
+      const result = [];
+      for (let i = 0; i < files.length; i++) {
+        const meta = await files[i].getMeta();
+        result.push(meta);
+      }
+      return result;
     }
     return [];
   }

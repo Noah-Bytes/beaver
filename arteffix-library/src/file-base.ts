@@ -1,3 +1,4 @@
+import { safeAccessSync } from '@beaver/arteffix-utils';
 import { IFileBaseMeta, IFileBaseMetaUpdate, IFileExtend } from '@beaver/types';
 import fs from 'fs-extra';
 import path from 'path';
@@ -28,19 +29,22 @@ export class FileBase<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
   }
 
   async saveMetadata() {
-    await fs.writeJson(this.absPath(FileBase.META_NAME), this.meta);
+    await fs.writeJson(this.absPath(FileBase.META_NAME), this.meta, {
+      mode: '0755',
+    });
     return true;
   }
 
-  readMetaData() {
-    this.meta = require(this.absPath(FileBase.META_NAME));
+  async readMetaData() {
+    safeAccessSync(this.absPath());
+    this.meta = await fs.readJson(this.absPath(FileBase.META_NAME));
     return this.meta;
   }
 
-  public getMeta(): M {
+  async getMeta(): Promise<M> {
     let m = this.meta;
     if (!m) {
-      m = this.readMetaData();
+      m = await this.readMetaData();
     }
 
     return {
@@ -104,12 +108,16 @@ export class FileBase<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
     const filePath = this.absPath(this.getFileName());
 
     if (!this.exists(filePath)) {
-      await fs.promises.writeFile(filePath, data);
+      await fs.promises.writeFile(filePath, data, {
+        mode: '0755',
+      });
     }
   }
 
   async copy() {
-    await fs.ensureDir(this.absPath(), 0o755);
+    await fs.ensureDir(this.absPath(), {
+      mode: 0o2775,
+    });
 
     if (!this.exists(FileBase.META_NAME)) {
       await this.saveMetadata();

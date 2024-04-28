@@ -1,8 +1,10 @@
+import { safeAccessSync } from '@beaver/arteffix-utils';
 import {
   IFileBaseMeta,
   IFileBaseMetaUpdate,
   IWorkspace,
   IWorkspaceMeta,
+  IWorkspaceMetaUpdate,
 } from '@beaver/types';
 import fs from 'fs-extra';
 import path from 'path';
@@ -57,13 +59,15 @@ export class Workspace implements IWorkspace {
 
   async init() {
     if (!fs.existsSync(this.rootDir)) {
-      await fs.promises.mkdir(this.rootDir);
+      await fs.promises.mkdir(this.rootDir, {
+        mode: '0755',
+      });
     }
 
     if (!fs.existsSync(this.absPath(Workspace.META_NAME))) {
       await this.saveMetadata();
     } else {
-      this.readMetaData();
+      await this.readMetaData();
     }
 
     await this.file.init();
@@ -71,7 +75,7 @@ export class Workspace implements IWorkspace {
 
   async destroy() {}
 
-  public async updateMeta(meta: IWorkspaceMeta) {
+  public async updateMeta(meta: IWorkspaceMetaUpdate) {
     this.meta = {
       ...this.meta,
       ...meta,
@@ -80,11 +84,14 @@ export class Workspace implements IWorkspace {
   }
 
   async saveMetadata() {
-    await fs.writeJson(this.absPath(Workspace.META_NAME), this.meta);
+    await fs.writeJson(this.absPath(Workspace.META_NAME), this.meta, {
+      mode: '0755',
+    });
   }
 
-  readMetaData() {
-    this.meta = require(this.absPath(Workspace.META_NAME));
+  async readMetaData() {
+    safeAccessSync(this.absPath());
+    this.meta = await fs.readJson(this.absPath(Workspace.META_NAME));
     return this.meta;
   }
 

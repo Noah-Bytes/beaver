@@ -20,14 +20,12 @@ interface FailureResponse {
 }
 
 // 使用条件类型根据 success 的值来决定具体的类型
-export type IResponse<T> =
-  BaseResponse<T> extends { success: infer S }
-    ? S extends true
-      ? SuccessResponse<T>
-      : S extends false
-        ? FailureResponse
-        : never
-    : never;
+export type IResponse<T> = SuccessResponse<T> | FailureResponse;
+
+// 判断响应是否成功的类型保护函数
+export function isSuccess<T>(response: IResponse<T>): response is SuccessResponse<T> {
+  return response.success;
+}
 
 export function success<T>(data: T): IResponse<T> {
   return {
