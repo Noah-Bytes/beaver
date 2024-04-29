@@ -1,4 +1,4 @@
-import ExifReader from 'exifreader';
+const ExifReader = typeof window === 'undefined' ? require('exifreader') : {};
 
 function getStringWithUTF8(numbers: Uint8Array | number[]): string {
   let str = '';
@@ -27,7 +27,7 @@ function getStringWithUTF16(numbers: Uint8Array | number[]): string {
  * @param tags
  * @returns
  */
-export function extract(tags: ExifReader.Tags): [string, boolean] {
+export function extract(tags: typeof ExifReader.Tags): [string, boolean] {
   let parameters = '';
   try {
     const raw = tags.UserComment?.value as number[];
@@ -59,8 +59,8 @@ type ImageMeta = {
   width?: number;
   height?: number;
   resources?: Resource[];
-  Size?: string
-  size?: string
+  Size?: string;
+  size?: string;
 } & Record<string, any>;
 
 type Resource = {

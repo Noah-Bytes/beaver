@@ -7,6 +7,7 @@ import {
 } from '@beaver/types';
 import { findIndex } from '@technically/lodash';
 import fg from 'fast-glob';
+import fs from 'fs-extra';
 import path from 'path';
 import { FileBase } from './file-base';
 import { FileDefault } from './file-default';
@@ -54,7 +55,7 @@ export class FileManage<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
     });
     for (let filePath of paths) {
       try {
-        const meta: M = require(this.absPath(filePath));
+        const meta: M = await fs.readJson(this.absPath(filePath));
 
         const ext = meta.ext;
 

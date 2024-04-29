@@ -29,9 +29,7 @@ export class FileBase<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
   }
 
   async saveMetadata() {
-    await fs.writeJson(this.absPath(FileBase.META_NAME), this.meta, {
-      mode: '0755',
-    });
+    await fs.writeJson(this.absPath(FileBase.META_NAME), this.meta);
     return true;
   }
 

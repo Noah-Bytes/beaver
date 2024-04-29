@@ -84,9 +84,7 @@ export class Workspace implements IWorkspace {
   }
 
   async saveMetadata() {
-    await fs.writeJson(this.absPath(Workspace.META_NAME), this.meta, {
-      mode: '0755',
-    });
+    await fs.writeJson(this.absPath(Workspace.META_NAME), this.meta);
   }
 
   async readMetaData() {

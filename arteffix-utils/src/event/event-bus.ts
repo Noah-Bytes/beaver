@@ -1,7 +1,11 @@
-import { EventEmitter } from 'events';
 import { IPublicEvent } from '@beaver/types';
 import { consola } from 'consola';
 import type { ConsolaInstance } from 'consola/dist/core';
+
+const EventEmitter =
+  typeof window === 'undefined'
+    ? require('events').EventEmitter
+    : window.CustomEvent;
 
 export interface IEventBus extends IPublicEvent {
   removeListener(
@@ -14,7 +18,7 @@ export interface IEventBus extends IPublicEvent {
 }
 
 export class EventBus implements IEventBus {
-  private readonly eventEmitter: EventEmitter;
+  private readonly eventEmitter: typeof EventEmitter;
   private readonly name?: string;
   logger: ConsolaInstance;
 
@@ -23,7 +27,7 @@ export class EventBus implements IEventBus {
    */
   readonly names = [];
 
-  constructor(emitter: EventEmitter, name?: string) {
+  constructor(emitter: typeof EventEmitter, name?: string) {
     this.eventEmitter = emitter;
     this.name = name;
     this.logger = consola.withTag(`event-bus:${name}`);
