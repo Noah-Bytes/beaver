@@ -1,0 +1,11 @@
+{
+  "name": "@beaver/arteffix-extension",
+  "version": "0.0.1",
+  "dependencies": {},
+  "peerDependencies": {
+    "jquery": "^3.7.1"
+  },
+  "type": "commonjs",
+  "main": "./index.cjs",
+  "module": "./index.js"
+}

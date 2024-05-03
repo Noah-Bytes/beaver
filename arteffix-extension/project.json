@@ -1,0 +1,35 @@
+{
+  "name": "arteffix-extension",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "arteffix-extension/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/arteffix-extension",
+        "main": "arteffix-extension/src/index.ts",
+        "tsConfig": "arteffix-extension/tsconfig.lib.json",
+        "assets": [],
+        "project": "arteffix-extension/package.json",
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  },
+  "tags": [],
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  }
+}
