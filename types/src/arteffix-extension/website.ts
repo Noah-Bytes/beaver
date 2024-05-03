@@ -23,8 +23,9 @@ export interface IWebsite {
   image?: IWebsiteImage;
   svg?: IWebsiteSvg;
   link?: IWebsiteLink;
-  readonly meta: IWebsiteMeta;
   options?: IDragOptions;
+
+  getMeta: () => IWebsiteMeta;
 
   init: () => void;
   initImage: () => void;

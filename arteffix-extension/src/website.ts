@@ -20,17 +20,9 @@ export class Website implements IWebsite {
   image?: Image;
   svg?: Svg;
   link?: Link;
-  readonly meta: IWebsiteMeta;
   options?: IDragOptions;
 
-  constructor() {
-    const selectorMeta = this._getSelectorMeta();
-    this.meta = {
-      url: location.href,
-      title: document.title,
-      ...selectorMeta,
-    };
-  }
+  constructor() {}
 
   init(options?: IDragOptions) {
     this.options = options;
@@ -49,6 +41,15 @@ export class Website implements IWebsite {
 
   initLink() {
     this.link = new Link(this.options);
+  }
+
+  getMeta(): IWebsiteMeta {
+    const selectorMeta = this._getSelectorMeta();
+    return {
+      url: location.href,
+      title: document.title,
+      ...selectorMeta,
+    };
   }
 
   private _getSelectorMeta() {
@@ -111,14 +112,21 @@ export class Website implements IWebsite {
   }
 
   getSvgMetas(): IWebsiteSVGMeta[] {
-    const elementsByTagName = document.getElementsByTagName('svg');
+    const elementsByTagName = Website.getAllTagName<SVGSVGElement>('svg');
 
     const result: IWebsiteSVGMeta[] = [];
+
+    // 去重
+    const has: { [key: string]: boolean } = {};
 
     for (let i = 0; i < elementsByTagName.length; i++) {
       const e = elementsByTagName[i];
       if (e.width.baseVal.value > 5 && e.height.baseVal.value > 5) {
-        this.svg && result.push(Svg.getMeta(e));
+        const info = Svg.getMeta(e);
+        if (!has[info.svg]) {
+          has[info.svg] = true;
+          result.push(info);
+        }
       }
     }
 
@@ -127,13 +135,59 @@ export class Website implements IWebsite {
 
   getImageMetas(): IWebsiteImageMeta[] {
     const result: IWebsiteImageMeta[] = [];
-    const elements = document.getElementsByTagName('img');
+    const elements = Website.getAllTagName<HTMLImageElement>('img');
+    // 去重
+    const has: { [key: string]: boolean } = {};
+
     for (let i = 0; i < elements.length; i++) {
       const e = elements[i];
-      if (e.width > 5 && e.height > 5) {
-        this.image && result.push(Image.getMeta(e));
+      if (e.width > 5 && e.height > 5 && !!e.src) {
+        const info = Image.getMeta(e);
+        // @ts-ignore
+        if (!has[info.src || info.base64]) {
+          result.push(info);
+        }
       }
     }
     return result;
+  }
+
+  /**
+   * 获取页面所有指定标签的元素
+   * @param tagName 标签名，支持大小写
+   * @param root
+   */
+  static getAllTagName<T>(
+    tagName: string,
+    root: HTMLElement | ShadowRoot = document.body,
+  ) {
+    const images: T[] = [];
+    function traverse(node: HTMLElement) {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        // 检查当前节点是否为图片
+        if (node.tagName === tagName.toUpperCase()) {
+          images.push(node as T);
+        }
+
+        // 检查当前节点是否有 Shadow DOM
+        if (node.shadowRoot) {
+          // 从 Shadow DOM 中获取图片
+          const imagesInShadow: T[] = Website.getAllTagName<T>(
+            tagName,
+            node.shadowRoot,
+          );
+          images.push(...imagesInShadow);
+        }
+
+        // 遍历当前节点的子节点
+        node.childNodes.forEach((child) => {
+          traverse(child as HTMLElement);
+        });
+      }
+    }
+
+    // @ts-ignore
+    traverse(root);
+    return images;
   }
 }

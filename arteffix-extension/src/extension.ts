@@ -28,7 +28,7 @@ export class Extension implements IExtension {
     if (!this.website) {
       throw new Error('extension Uninitialized');
     }
-    return this.website?.meta;
+    return this.website?.getMeta();
   }
 
   collectAll() {

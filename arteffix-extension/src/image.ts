@@ -65,8 +65,8 @@ export class Image extends Drag implements IWebsiteImage {
     }
 
     return {
-      width: element.width,
-      height: element.height,
+      width: element.naturalWidth,
+      height: element.naturalHeight,
       title: element.getAttribute('alt'),
       src,
       base64,
