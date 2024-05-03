@@ -7,8 +7,8 @@ import {
   IWebsiteSVGMeta,
 } from '@beaver/types';
 import { Image } from './image';
+import { Link } from './link';
 import { Svg } from './svg';
-import {Link} from "./link";
 
 export class Website implements IWebsite {
   readonly metaSelector = {
@@ -17,21 +17,38 @@ export class Website implements IWebsite {
     picture: 'meta[property="og:image"]',
     favicon: 'link[rel="icon"]',
   };
-  readonly image: Image;
-  readonly svg: Svg;
-  readonly link: Link;
+  image?: Image;
+  svg?: Svg;
+  link?: Link;
   readonly meta: IWebsiteMeta;
+  options?: IDragOptions;
 
-  constructor(options?: IDragOptions) {
+  constructor() {
     const selectorMeta = this._getSelectorMeta();
     this.meta = {
       url: location.href,
       title: document.title,
       ...selectorMeta,
     };
-    this.image = new Image(options);
-    this.svg = new Svg(options);
-    this.link = new Link(options);
+  }
+
+  init(options?: IDragOptions) {
+    this.options = options;
+    this.initImage();
+    this.initSvg();
+    this.initLink();
+  }
+
+  initImage() {
+    this.image = new Image(this.options);
+  }
+
+  initSvg() {
+    this.svg = new Svg(this.options);
+  }
+
+  initLink() {
+    this.link = new Link(this.options);
   }
 
   private _getSelectorMeta() {
@@ -101,7 +118,7 @@ export class Website implements IWebsite {
     for (let i = 0; i < elementsByTagName.length; i++) {
       const e = elementsByTagName[i];
       if (e.width.baseVal.value > 5 && e.height.baseVal.value > 5) {
-        result.push(this.svg.getMeta(e));
+        this.svg && result.push(Svg.getMeta(e));
       }
     }
 
@@ -114,7 +131,7 @@ export class Website implements IWebsite {
     for (let i = 0; i < elements.length; i++) {
       const e = elements[i];
       if (e.width > 5 && e.height > 5) {
-        result.push(this.image.getMeta(e));
+        this.image && result.push(Image.getMeta(e));
       }
     }
     return result;

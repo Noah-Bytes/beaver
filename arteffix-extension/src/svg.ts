@@ -1,11 +1,11 @@
-import { IDragOptions, IWebsiteSvg } from '@beaver/types';
+import { IDragOptions, IWebsiteSvg, IWebsiteSVGMeta } from '@beaver/types';
 import { Drag } from './drag';
 
 export class Svg extends Drag implements IWebsiteSvg {
   constructor(options?: IDragOptions) {
     super('svg', options);
   }
-  getMeta(element: SVGSVGElement) {
+  static getMeta(element: SVGSVGElement): IWebsiteSVGMeta {
     return {
       title: '',
       ext: 'SVG',

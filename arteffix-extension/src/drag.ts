@@ -35,6 +35,8 @@ export class Drag implements IDrag {
           .off('dragend')
           .on('dragend', () => {
             this.options?.onDragEnd?.();
+            $(document)
+              .off('dragover, dragleave')
           });
 
         this.initDocumentEvent();
@@ -62,6 +64,8 @@ export class Drag implements IDrag {
         }
         leaveAutoClose = setTimeout(() => {
           this.options?.onDragEnd?.();
+          $(document)
+            .off('dragover, dragleave')
         }, 2000);
       });
   }

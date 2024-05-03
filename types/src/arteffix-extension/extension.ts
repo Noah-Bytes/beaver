@@ -18,7 +18,6 @@ export interface IExtensionProps {
 export interface IExtension {
   registerWebsite?: IWebsiteInstance;
   website?: IWebsite;
-  options?: IDragOptions
 
   override(website: IWebsiteInstance): void;
 

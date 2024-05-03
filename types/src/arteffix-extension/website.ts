@@ -1,6 +1,6 @@
-import { IWebsiteLink } from './link';
 import { IDragOptions } from './drag';
 import { IWebsiteImage, IWebsiteImageMeta } from './image';
+import { IWebsiteLink } from './link';
 import { IWebsiteSVGMeta, IWebsiteSvg } from './svg';
 
 export interface IWebsiteMeta {
@@ -20,10 +20,16 @@ export type IWebsiteSelectorMeta = Omit<
 
 export interface IWebsite {
   readonly metaSelector: IWebsiteSelectorMeta;
-  readonly image: IWebsiteImage;
-  readonly svg: IWebsiteSvg;
-  readonly link: IWebsiteLink;
+  image?: IWebsiteImage;
+  svg?: IWebsiteSvg;
+  link?: IWebsiteLink;
   readonly meta: IWebsiteMeta;
+  options?: IDragOptions;
+
+  init: () => void;
+  initImage: () => void;
+  initSvg: () => void;
+  initLink: () => void;
 
   getBgImageMetas: () => IWebsiteImageMeta[];
   getImageMetas: () => IWebsiteImageMeta[];

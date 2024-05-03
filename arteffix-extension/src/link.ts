@@ -6,7 +6,7 @@ export class Link extends Drag implements IWebsiteLink {
     super('a', options);
   }
 
-  private _hasBgImage(element: HTMLElement) {
+  hasBgImage(element: HTMLElement) {
     // 检查当前元素的背景图片
     const computedStyle = window.getComputedStyle(element);
     const backgroundImage = computedStyle.getPropertyValue('background-image');
@@ -22,7 +22,7 @@ export class Link extends Drag implements IWebsiteLink {
     // 递归遍历子元素
     const children = element.children;
     for (let i = 0; i < children.length; i++) {
-      if (this._hasBgImage(children[i] as HTMLElement)) {
+      if (this.hasBgImage(children[i] as HTMLElement)) {
         return true;
       }
     }
@@ -37,6 +37,6 @@ export class Link extends Drag implements IWebsiteLink {
       this.currentDragElement = target as HTMLElement;
       return true;
     }
-    return this._hasBgImage(element);
+    return this.hasBgImage(element);
   }
 }

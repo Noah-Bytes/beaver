@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@arteffix/extension": ["arteffix-extension/src/index.ts"],
+      "@beaver/arteffix-extension": ["arteffix-extension/src/index.ts"],
       "@beaver/arteffix-library": ["arteffix-library/src/index.ts"],
       "@beaver/arteffix-utils": ["arteffix-utils/src/index.ts"],
       "@beaver/interceptor": ["interceptor/src/index.ts"],

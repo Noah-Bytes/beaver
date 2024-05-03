@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "dependencies": {},
   "peerDependencies": {
-    "jquery": "^3.7.1"
+    "jquery": "^3.7.1",
+    "is-base64": "^1.1.0"
   },
-  "type": "commonjs",
   "main": "./index.cjs",
   "module": "./index.js"
 }

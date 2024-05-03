@@ -10,7 +10,4 @@ export interface IWebsiteImageMeta {
 }
 
 export interface IWebsiteImage extends IDrag {
-  getMeta: (element: HTMLImageElement) => IWebsiteImageMeta;
-  getTitle: (element: HTMLImageElement) => string | null;
-  toBase64: (element: HTMLImageElement) => string;
 }

@@ -1,5 +1,4 @@
 import {
-  IDragOptions,
   IExtension,
   IWebsite,
   IWebsiteInstance,
@@ -10,21 +9,19 @@ import { Website } from './website';
 export class Extension implements IExtension {
   registerWebsite?: IWebsiteInstance;
   website?: IWebsite;
-  options?: IDragOptions;
 
-  constructor(options?: IDragOptions) {
-    this.options = options;
+  constructor() {
     this.init();
   }
 
   init(): void {
     const Clazz = this.registerWebsite || Website;
-    this.website = new Clazz(this.options);
+    this.website = new Clazz();
   }
 
   override(website: IWebsiteInstance): void {
     this.registerWebsite = website;
-    this.website = new website(this.options);
+    this.website = new website();
   }
 
   collectWebsite(): IWebsiteMeta {
