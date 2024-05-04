@@ -1,7 +1,7 @@
-import { Website } from '@beaver/arteffix-extension';
 import { IDragOptions } from '@beaver/types';
 import * as $ from 'jquery';
 import { Link } from '../link';
+import { Website } from '../website';
 
 export class DribbbleLink extends Link {
   constructor(options?: IDragOptions) {
