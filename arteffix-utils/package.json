@@ -1,9 +1,7 @@
 {
   "name": "@beaver/arteffix-utils",
   "version": "0.0.1",
-  "dependencies": {
-    "tslib": "^2.3.0"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "exifreader": "^4.22.1"
   },

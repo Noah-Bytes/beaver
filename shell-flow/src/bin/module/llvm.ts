@@ -11,7 +11,7 @@ export class LLVM implements IBinModuleTypes {
   }
 
   async install(): Promise<void> {
-    if (isDarwin()) {
+    if (isDarwin) {
       await this.shell.run({
         message: 'brew install llvm',
       });
@@ -27,7 +27,7 @@ export class LLVM implements IBinModuleTypes {
 
     let groupName;
 
-    if (isDarwin()) {
+    if (isDarwin) {
       groupName = 'brew';
     } else {
       groupName = 'conda';

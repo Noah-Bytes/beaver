@@ -11,10 +11,8 @@
         "outputPath": "dist/arteffix-library",
         "main": "arteffix-library/src/index.ts",
         "tsConfig": "arteffix-library/tsconfig.lib.json",
-//        "assets": ["arteffix-library/*.md"],
         "project": "arteffix-library/package.json",
-        "format": ["esm", "cjs"],
-        "generateExportsField": true
+        "format": ["esm", "cjs"]
       }
     },
     "nx-release-publish": {

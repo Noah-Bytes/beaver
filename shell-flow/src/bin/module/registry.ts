@@ -14,7 +14,7 @@ export class Registry implements IBinModuleTypes {
   }
 
   async installed() {
-    if (!isWin32()) {
+    if (!isWin32) {
       return false;
     }
 

@@ -67,7 +67,7 @@ export class Shell implements IShellTypes {
     this._ctx = ctx;
     this.groupName = groupName;
 
-    if (isWin32()) {
+    if (isWin32) {
       this._terminal = 'powershell.exe';
       /**
        * 参数解释
@@ -461,7 +461,7 @@ export class Shell implements IShellTypes {
 
       if (envExists) {
         condaActivation = [
-          isWin32() ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
+          isWin32 ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
           `conda deactivate`,
           `conda deactivate`,
           `conda deactivate`,
@@ -469,7 +469,7 @@ export class Shell implements IShellTypes {
         ];
       } else {
         condaActivation = [
-          isWin32() ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
+          isWin32 ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
           `conda create -y -p ${envPath} ${condaPython} ${condaArgs ? condaArgs : ''}`,
           `conda deactivate`,
           `conda deactivate`,
@@ -480,7 +480,7 @@ export class Shell implements IShellTypes {
     } else if (condaName) {
       if (condaName === 'base') {
         condaActivation = [
-          isWin32() ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
+          isWin32 ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
           `conda deactivate`,
           `conda deactivate`,
           `conda deactivate`,
@@ -496,7 +496,7 @@ export class Shell implements IShellTypes {
         let env_exists = Shell.exists(env_path);
         if (env_exists) {
           condaActivation = [
-            isWin32() ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
+            isWin32 ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
             `conda deactivate`,
             `conda deactivate`,
             `conda deactivate`,
@@ -504,7 +504,7 @@ export class Shell implements IShellTypes {
           ];
         } else {
           condaActivation = [
-            isWin32() ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
+            isWin32 ? 'conda_hook' : `eval "$(conda shell.bash hook)"`,
             `conda create -y -n ${condaName} ${condaPython} ${condaArgs ? condaArgs : ''}`,
             `conda deactivate`,
             `conda deactivate`,
@@ -525,20 +525,20 @@ export class Shell implements IShellTypes {
     let venvActivation: string[] = [];
     if (params.venv && params.path) {
       let env_path = path.resolve(params.path, params.venv);
-      let activate_path = isWin32()
+      let activate_path = isWin32
         ? path.resolve(env_path, 'Scripts', 'activate')
         : path.resolve(env_path, 'bin', 'activate');
       let env_exists = Shell.exists(env_path);
       if (env_exists) {
         venvActivation = [
-          isWin32()
+          isWin32
             ? `${activate_path} ${env_path}`
             : `source ${activate_path} ${env_path}`,
         ];
       } else {
         venvActivation = [
           `python -m venv ${env_path}`,
-          isWin32()
+          isWin32
             ? `${activate_path} ${env_path}`
             : `source ${activate_path} ${env_path}`,
         ];
@@ -568,7 +568,7 @@ export class Shell implements IShellTypes {
 
     const result: { [key: string]: string } = {};
 
-    if (isWin32()) {
+    if (isWin32) {
       // ignore
     } else if (PATH_KEY) {
       result[PATH_KEY] =

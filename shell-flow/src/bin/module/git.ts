@@ -15,7 +15,7 @@ export class Git implements IBinModuleTypes {
   }
 
   env() {
-    if (isWin32()) {
+    if (isWin32) {
       const { homeDir } = this._ctx;
       return {
         GIT_CONFIG_GLOBAL: path.resolve(homeDir, Git.GIT_CONFIG),
@@ -30,7 +30,7 @@ export class Git implements IBinModuleTypes {
       message: 'conda install -y -c conda-forge git git-lfs',
     });
 
-    if (isWin32()) {
+    if (isWin32) {
       const { homeDir, app, absPath } = this._ctx;
       const gitConfigPath = absPath(Git.GIT_CONFIG);
       if (!app.exists(gitConfigPath)) {

@@ -11,7 +11,7 @@ export class Cuda implements IBinModuleTypes {
   }
 
   async install(): Promise<void> {
-    if (isWin32()) {
+    if (isWin32) {
       await this.shell.run({
         message: 'conda install -y cudnn libzlib-wapi -c conda-forge',
       });
@@ -35,7 +35,7 @@ export class Cuda implements IBinModuleTypes {
     const cudnn = await bin.checkIsInstalled('cudnn', 'conda');
     const cuda = await bin.checkIsInstalled('cuda', 'conda');
 
-    if (isWin32()) {
+    if (isWin32) {
       const libzlib = await bin.checkIsInstalled('libzlib-wapi', 'conda');
       return cudnn && cuda && libzlib;
     }

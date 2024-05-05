@@ -10,7 +10,7 @@ export class Zip implements IBinModuleTypes {
   constructor(ctx: ShellFlow) {
     this._ctx = ctx;
     this.shell = ctx.shell.createShell('zip');
-    this.packageName = isWin32() ? '7zip' : 'p7zip';
+    this.packageName = isWin32 ? '7zip' : 'p7zip';
   }
 
   async install(): Promise<void> {

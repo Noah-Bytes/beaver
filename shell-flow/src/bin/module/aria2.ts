@@ -14,7 +14,7 @@ export class Aria2 implements IBinModuleTypes {
   }
 
   async install(): Promise<void> {
-    if (isWin32()) {
+    if (isWin32) {
       const { bin } = this._ctx;
       const dest = 'aria2-1.36.0-win-64bit-build1.zip';
       await bin.download(Aria2.DOWNLOAD_URL, dest);
@@ -30,7 +30,7 @@ export class Aria2 implements IBinModuleTypes {
 
   async installed(): Promise<boolean> {
     const { bin } = this._ctx;
-    if (isWin32()) {
+    if (isWin32) {
       return bin.exists('aria2');
     }
 
@@ -38,7 +38,7 @@ export class Aria2 implements IBinModuleTypes {
   }
 
   async uninstall(): Promise<void> {
-    if (isWin32()) {
+    if (isWin32) {
       const { bin } = this._ctx;
       await bin.rm('aria2');
     }
@@ -48,7 +48,7 @@ export class Aria2 implements IBinModuleTypes {
   }
 
   env(): { [p: string]: any } | undefined {
-    if (isWin32()) {
+    if (isWin32) {
       return {
         PATH: [this._ctx.bin.absPath('aria2')],
       };

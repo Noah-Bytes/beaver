@@ -91,7 +91,7 @@ export class Conda implements IBinModuleTypes {
       ),
     };
 
-    if (isWin32()) {
+    if (isWin32) {
       Object.assign(base, {
         CONDA_BAT: path.join(baseDir, 'condabin/conda.bat'),
         CONDA_EXE: path.join(baseDir, 'Scripts/conda.exe'),
@@ -99,7 +99,7 @@ export class Conda implements IBinModuleTypes {
       });
     }
 
-    if (isDarwin()) {
+    if (isDarwin) {
       Object.assign(base, {
         TCL_LIBRARY: path.join(baseDir, 'lib/tcl8.6'),
         TK_LIBRARY: path.join(baseDir, 'lib/tk8.6'),
@@ -156,7 +156,7 @@ export class Conda implements IBinModuleTypes {
 
     // 2. run the script
     const installPath = path.resolve(bin.dir, 'miniconda');
-    const cmd = isWin32()
+    const cmd = isWin32
       ? `start /wait ${installer} /InstallationType=JustMe /RegisterPython=0 /S /D=${installPath}`
       : `bash ${installer} -b -p ${installPath}`;
 
@@ -197,7 +197,7 @@ export class Conda implements IBinModuleTypes {
       ],
     });
 
-    if (isWin32()) {
+    if (isWin32) {
       await fs.promises.copyFile(
         path.resolve(bin.dir, 'miniconda', 'python.exe'),
         path.resolve(bin.dir, 'miniconda', 'python3.exe'),
@@ -220,7 +220,7 @@ export class Conda implements IBinModuleTypes {
   }
 
   onstart(): string[] {
-    if (isWin32()) {
+    if (isWin32) {
       return ['conda_hook'];
     }
 

@@ -132,7 +132,7 @@ export class Vs implements IBinModuleTypes {
   }
 
   async init(): Promise<void> {
-    if (isWin32()) {
+    if (isWin32) {
       const paths = this.getPaths();
       const env = {
         PATH: ['C:\\Windows\\System32\\WindowsPowerShell\\v1.0'],
@@ -160,7 +160,7 @@ export class Vs implements IBinModuleTypes {
   }
 
   installed(): boolean {
-    if (isWin32()) {
+    if (isWin32) {
       const paths = this.getPaths();
       return !!(paths.MSVC_PATH && paths.BUILD_PATH && paths.CMAKE_PATH);
     }
@@ -169,7 +169,7 @@ export class Vs implements IBinModuleTypes {
 
   async uninstall(): Promise<void> {
     const { bin } = this._ctx;
-    if (isWin32()) {
+    if (isWin32) {
       const resp = await this.shell.run(
         {
           message: this.cmd('uninstall'),
@@ -183,7 +183,7 @@ export class Vs implements IBinModuleTypes {
   }
 
   env() {
-    if (isWin32()) {
+    if (isWin32) {
       return this._env;
     }
 

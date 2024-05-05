@@ -47,7 +47,7 @@ export async function getRequirements() {
       name: 'py',
     },
   ];
-  if (isWin32()) {
+  if (isWin32) {
     requirements.push({
       name: 'registry',
     });
