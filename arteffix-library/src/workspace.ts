@@ -8,6 +8,7 @@ import {
 } from '@beaver/types';
 import fs from 'fs-extra';
 import path from 'path';
+import { FileBase } from './file-base';
 import { FileManage } from './file-manage';
 
 export class Workspace implements IWorkspace {
@@ -50,7 +51,11 @@ export class Workspace implements IWorkspace {
     applicationVersion: Workspace.version,
     modificationTime: Date.now(),
   };
-  readonly file: FileManage<IFileBaseMeta, IFileBaseMetaUpdate>;
+  readonly file: FileManage<
+    FileBase<IFileBaseMeta, IFileBaseMetaUpdate>,
+    IFileBaseMeta,
+    IFileBaseMetaUpdate
+  >;
 
   constructor(rootDir: string) {
     this.rootDir = rootDir;
