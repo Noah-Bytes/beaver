@@ -15,7 +15,11 @@ export class Link extends Drag implements IWebsiteLink {
       !backgroundImage.includes('gradient') &&
       !backgroundImage.includes('data:image')
     ) {
-      this.currentDragElement = element;
+      const virtualDom = document.createElement('img');
+      virtualDom.src = backgroundImage
+        .match(/\((.*?)\)/)![1]
+        .replace(/('|")/g, '');
+      this.currentDragElement = virtualDom;
       return true;
     }
 

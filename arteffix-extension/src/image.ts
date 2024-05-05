@@ -4,6 +4,7 @@ import * as isBase64 from 'is-base64';
 import { Drag } from './drag';
 import {
   getBase64ImageFormat,
+  getImageDescBySize,
   getPictureMaxSource,
   getUrlExtension,
 } from './utils';
@@ -30,24 +31,40 @@ export class Image extends Drag implements IWebsiteImage {
       };
     }
 
-    const sort = {
-      'image/gif': 1,
-      'image/png': 2,
-      'image/jpeg': 3,
-      'image/jpg': 3,
-      '': 4,
-      undefined: 4,
-    };
+    const ext = getUrlExtension(srcText);
 
     if (element.parentElement && element.parentElement.tagName === 'PICTURE') {
-      const [[{ width, url }]] = getPictureMaxSource(element.parentElement);
-      return {
-        width: width,
-        height: (element.naturalHeight / element.naturalWidth) * width,
-        title: element.getAttribute('alt'),
-        src: url,
-        ext: getUrlExtension(srcText),
-      };
+      const source = getPictureMaxSource(element.parentElement);
+      if (source.length > 0) {
+        const [[{ width, url }]] = source;
+        return {
+          width: width,
+          height: Math.ceil(
+            (element.naturalHeight / element.naturalWidth) * width,
+          ),
+          title: element.getAttribute('alt'),
+          src: url,
+          ext,
+        };
+      }
+    }
+
+    if (element.dataset['srcset'] || element.srcset) {
+      const imageDescBySize = getImageDescBySize(
+        element.dataset['srcset'] || element.srcset,
+      );
+      if (imageDescBySize.length > 0) {
+        const [{ width, url }] = imageDescBySize;
+        return {
+          width: width,
+          height: Math.ceil(
+            (element.naturalHeight / element.naturalWidth) * width,
+          ),
+          title: element.getAttribute('alt'),
+          src: url,
+          ext,
+        };
+      }
     }
 
     return {
@@ -55,7 +72,7 @@ export class Image extends Drag implements IWebsiteImage {
       height: element.naturalHeight,
       title: element.getAttribute('alt'),
       src: srcText,
-      ext: getUrlExtension(srcText),
+      ext,
     };
   }
 }

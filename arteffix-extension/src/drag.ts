@@ -1,6 +1,5 @@
 import { IDrag, IDragOptions } from '@beaver/types';
 import * as $ from 'jquery';
-import { document } from 'postcss';
 
 export class Drag implements IDrag {
   dragoverX: number = 0;
@@ -23,6 +22,11 @@ export class Drag implements IDrag {
   initEvent() {
     $(document).on('dragstart', this.targetSelector, (e) => {
       if (this.isTarget(e.target)) {
+        this.initDocumentEvent();
+
+        this.dragoverX = e.originalEvent?.clientX || 0;
+        this.dragoverY = e.originalEvent?.clientY || 0;
+
         setTimeout(() => {
           this.options?.onFirstDrag?.(
             [this.dragoverX, this.dragoverY],
@@ -35,11 +39,8 @@ export class Drag implements IDrag {
           .off('dragend')
           .on('dragend', () => {
             this.options?.onDragEnd?.();
-            $(document)
-              .off('dragover, dragleave')
+            $(document).off('dragover, dragleave');
           });
-
-        this.initDocumentEvent();
       }
     });
   }
@@ -64,8 +65,7 @@ export class Drag implements IDrag {
         }
         leaveAutoClose = setTimeout(() => {
           this.options?.onDragEnd?.();
-          $(document)
-            .off('dragover, dragleave')
+          $(document).off('dragover, dragleave');
         }, 2000);
       });
   }

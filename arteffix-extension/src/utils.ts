@@ -62,14 +62,22 @@ export function getPictureMaxSource(element: HTMLPictureElement) {
     undefined: 4,
   };
 
-  return (
-    $sources
-      .filter((index, source) => source.media === '' || source.media === null)
-      .toArray()
-      // @ts-ignore
-      .sort((a, b) => sortBy[a.type] - sortBy[b.type])
-      .map((elem) => getImageDescBySize(elem.srcset))
-  );
+  if ($sources.length > 0) {
+    return (
+      $sources
+        .filter((index, source) => source.media === '' || source.media === null)
+        .toArray()
+        // @ts-ignore
+        .sort((a, b) => sortBy[a.type] - sortBy[b.type])
+        .map((elem) => getImageDescBySize(elem.srcset))
+    );
+  }
+
+  const $img = $(element).find('img');
+  return $img
+    .toArray()
+    .filter((img) => img.dataset['srcset'] || img.srcset)
+    .map((elem) => getImageDescBySize(elem.dataset['srcset'] || elem.srcset));
 }
 
 /**
