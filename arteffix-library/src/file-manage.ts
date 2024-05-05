@@ -1,3 +1,4 @@
+import { MetaFileManage } from '@beaver/kernel';
 import {
   IFileBaseMeta,
   IFileBaseMetaUpdate,
@@ -5,36 +6,41 @@ import {
   IFileManage,
   IFileOptions,
 } from '@beaver/types';
-import { findIndex } from '@technically/lodash';
 import fg from 'fast-glob';
 import fs from 'fs-extra';
 import path from 'path';
 import { FileBase } from './file-base';
 import { FileDefault } from './file-default';
 
-type IClazz<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate> = new (
-  rootDir: string,
-  options?: IFileOptions<M>,
-) => IFileExtend<M, U> & { filesTypes: string[] };
+type IClazz<
+  F extends FileBase<M, U>,
+  M extends IFileBaseMeta,
+  U extends IFileBaseMetaUpdate,
+> = new (rootDir: string, options?: IFileOptions<M>) => F;
 
-interface IClazzExtend<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
-  extends IClazz<M, U> {
+interface IClazzExtend<
+  F extends FileBase<M, U>,
+  M extends IFileBaseMeta,
+  U extends IFileBaseMetaUpdate,
+> extends IClazz<F, M, U> {
   fileTypes: string[];
 }
 
-export class FileManage<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
-  implements IFileManage<M, U>
+export class FileManage<
+    F extends FileBase<M, U>,
+    M extends IFileBaseMeta,
+    U extends IFileBaseMetaUpdate,
+  >
+  extends MetaFileManage<F, M, U>
+  implements IFileManage<F, M, U>
 {
-  readonly files: IFileExtend<M, U>[] = [];
-  readonly fileMap: Map<string, IFileExtend<M, U>> = new Map();
-  readonly dir: string;
-  readonly extends: IClazzExtend<M, U>[] = [];
+  readonly extends: IClazzExtend<F, M, U>[] = [];
 
   constructor(rootDir: string) {
-    this.dir = path.resolve(rootDir, 'arteffix');
+    super(rootDir, 'arteffix');
   }
 
-  getFileExtend(ext: string): IClazzExtend<M, U> {
+  getFileExtend(ext: string): IClazzExtend<F, M, U> {
     for (let i = 0; i < this.extends.length; i++) {
       if ((this.extends[i].fileTypes || []).includes(ext)) {
         return this.extends[i];
@@ -45,11 +51,11 @@ export class FileManage<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
     return FileDefault;
   }
 
-  registerFile(fileClass: IClazzExtend<M, U>): void {
+  registerFile(fileClass: IClazzExtend<F, M, U>): void {
     this.extends.push(fileClass);
   }
 
-  async init(): Promise<void> {
+  override async init(): Promise<void> {
     const paths = await fg([`*/${FileBase.META_NAME}`], {
       cwd: this.dir,
     });
@@ -59,9 +65,9 @@ export class FileManage<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
 
         const ext = meta.ext;
 
-        const clazz = this.getFileExtend(ext);
+        const Clazz = this.getFileExtend(ext);
 
-        const file = new clazz(this.absPath(), {
+        const file = new Clazz(this.absPath(), {
           meta,
         });
 
@@ -72,15 +78,7 @@ export class FileManage<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
     }
   }
 
-  async batchRemoveFIle(ids: string[]): Promise<void> {
-    for (let id of ids) {
-      if (this.hasFile(id)) {
-        await this.removeFile(id);
-      }
-    }
-  }
-
-  async createFile(filePath: string): Promise<IFileExtend<M, U>> {
+  async createFile(filePath: string): Promise<F> {
     const o = path.parse(filePath);
     const ext = o.ext.replace(/\./g, '').toLowerCase();
     const clazz = this.getFileExtend(ext);
@@ -94,60 +92,10 @@ export class FileManage<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
     return file;
   }
 
-  addFile(file: IFileExtend<M, U>): void {
-    this.files.push(file);
-    this.fileMap.set(file.meta.id, file);
-  }
-
   async addFileByPath(filePath: string): Promise<IFileExtend<M, U>> {
     const file = await this.createFile(filePath);
     this.addFile(file);
     return file;
-  }
-
-  getFiles(): IFileExtend<M, U>[] | undefined {
-    return this.files;
-  }
-
-  async getFileMetas(): Promise<M[]> {
-    const files = this.getFiles();
-    if (files) {
-      const result = [];
-      for (let i = 0; i < files.length; i++) {
-        const meta = await files[i].getMeta();
-        result.push(meta);
-      }
-      return result;
-    }
-    return [];
-  }
-
-  async removeFile(id: string): Promise<void> {
-    if (!this.hasFile(id)) {
-      return;
-    }
-    const file = this.getFile(id)!;
-
-    await file.remove();
-    this.fileMap.delete(id);
-
-    const index = findIndex(this.files, (elem) => elem.meta.id === id);
-
-    if (index > -1) {
-      this.files.slice(index, 1);
-    }
-  }
-
-  hasFile(id: string): boolean {
-    return this.fileMap.has(id);
-  }
-
-  getFile(id: string): IFileExtend<M, U> | undefined {
-    return this.fileMap.get(id);
-  }
-
-  absPath(...p: string[]): string {
-    return path.resolve(this.dir, ...p);
   }
 
   async pushRecycleBin(id: string): Promise<M> {

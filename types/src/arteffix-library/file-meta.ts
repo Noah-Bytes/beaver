@@ -1,17 +1,7 @@
+import { IMetaFileMeta, IMetaFileMetaUpdate } from '../kernel';
 import { Folder } from './workspace';
 
-export interface IFileBaseMeta {
-  /**
-   * uuid
-   */
-  id: string;
-
-  /**
-   * stat.name
-   * 文件名
-   */
-  name: string;
-
+export interface IFileBaseMeta extends IMetaFileMeta {
   /**
    * stats.size
    * 文件有多少个字节
@@ -35,11 +25,6 @@ export interface IFileBaseMeta {
    * 最近一次被访问
    */
   atime: number;
-
-  /**
-   * 文件后缀名
-   */
-  ext: string;
 
   /**
    * tag
@@ -80,18 +65,9 @@ export interface IFileBaseMeta {
    * 评分
    */
   star?: number;
-
-  // 路径动态填入，不会写入文件
-  dir?: string;
 }
 
-export interface IFileBaseMetaUpdate {
-  /**
-   * stat.name
-   * 文件名
-   */
-  name?: string;
-
+export interface IFileBaseMetaUpdate extends IMetaFileMetaUpdate {
   /**
    * tag
    */
