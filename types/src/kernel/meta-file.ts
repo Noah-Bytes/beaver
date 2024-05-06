@@ -24,6 +24,8 @@ export interface IMetaFile<
 
   meta: M;
 
+  init: () => Promise<void>;
+
   createInit: () => Promise<void>;
 
   saveMetadata: () => Promise<boolean>;

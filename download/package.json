@@ -2,5 +2,9 @@
   "name": "@beaver/download",
   "version": "0.0.1",
   "main": "./index.cjs",
-  "typings": "./src/index.d.ts"
+  "typings": "./src/index.d.ts",
+  "peerDependencies": {
+    "fs-extra": "^11.2.0",
+    "fast-glob": "^3.3.2"
+  }
 }

@@ -5,9 +5,10 @@ import {
   IDownloadMeta,
   IMetaFileMetaUpdate,
 } from '@beaver/types';
-import * as fg from 'fast-glob';
-import * as fs from 'fs-extra';
-import * as os from 'os';
+import fg from 'fast-glob';
+import fs from 'fs-extra';
+import os from 'os';
+import path from 'path';
 import { Download } from './download';
 
 export interface IDownloadManageOptions {
@@ -21,6 +22,24 @@ export class DownloadManage
 {
   constructor(options: IDownloadManageOptions) {
     super(options.tmpDir || os.tmpdir(), options.appName);
+  }
+
+  async create(url: string): Promise<IDownload> {
+    const u = new URL(url);
+    const p = path.parse(u.pathname);
+
+    const file = new Download(this.absPath(), {
+      meta: {
+        id: MetaFile.createId(),
+        url,
+        createTime: Date.now(),
+        name: p.name + p.ext,
+        ext: p.ext.replace('.', '').toUpperCase(),
+      },
+    });
+    this.addFile(file);
+
+    return file;
   }
 
   async init(): Promise<void> {

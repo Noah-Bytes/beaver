@@ -3,15 +3,16 @@ import { IMetaFile, IMetaFileMeta, IMetaFileMetaUpdate } from '../kernel';
 
 export interface IDownloadMeta extends IMetaFileMeta {
   url: string;
+  createTime: number;
   size?: number;
   status?: string;
   mime?: string;
   endTime?: number;
   downloadedSize?: number;
   downloadError?: ErrorStats;
-  createTime: number;
   progress?: number;
   speed?: number;
+  extra?: any;
 }
 
 export interface IDownloadMetaUpdate extends IMetaFileMetaUpdate {

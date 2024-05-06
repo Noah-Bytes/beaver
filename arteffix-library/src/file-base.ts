@@ -12,11 +12,7 @@ export class FileBase<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
     super(rootDir, meta);
   }
   async save(data: any) {
-    await fs.ensureDir(this.absPath(), 0o755);
-
-    if (!this.exists(FileBase.META_NAME)) {
-      await this.saveMetadata();
-    }
+    await this.init();
 
     const filePath = this.absPath(this.getFileName());
 
@@ -28,13 +24,7 @@ export class FileBase<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
   }
 
   async copy() {
-    await fs.ensureDir(this.absPath(), {
-      mode: 0o2775,
-    });
-
-    if (!this.exists(FileBase.META_NAME)) {
-      await this.saveMetadata();
-    }
+    await this.init();
 
     const filePath = this.absPath(this.getFileName());
 

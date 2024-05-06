@@ -3,6 +3,8 @@ import { IDownload, IDownloadMeta, IDownloadMetaUpdate } from './download';
 
 export interface IDownloadManage
   extends IMetaFileManage<IDownload, IDownloadMeta, IDownloadMetaUpdate> {
+  create(url: string): Promise<IDownload>;
+
   start(id: string): Promise<boolean>;
   stop(id: string): Promise<boolean>;
   resume(id: string): Promise<boolean>;
@@ -16,7 +18,7 @@ export interface IDownloadManage
   startAll(): Promise<{ [key: string]: boolean }>;
   stopAll(): Promise<{ [key: string]: boolean }>;
   resumeAll(): Promise<{ [key: string]: boolean }>;
-  pauseAll(): Promise<{[key: string]: boolean}>;
+  pauseAll(): Promise<{ [key: string]: boolean }>;
 
   delete(id: string): Promise<void>;
   deleteWithIds(ids: string[]): Promise<void>;

@@ -25,6 +25,16 @@ export class MetaFile<M extends IMetaFileMeta, U extends IMetaFileMetaUpdate>
     this.dir = path.resolve(this.rootDir, meta.id);
   }
 
+  async init(): Promise<void> {
+    await fs.ensureDir(this.absPath(), {
+      mode: 0o2775,
+    });
+
+    if (!this.exists(MetaFile.META_NAME)) {
+      await this.saveMetadata();
+    }
+  }
+
   absPath(...p: string[]): string {
     return path.resolve(this.dir, ...p);
   }
