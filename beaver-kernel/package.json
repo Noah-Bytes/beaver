@@ -3,5 +3,5 @@
   "version": "0.0.1",
   "dependencies": {},
   "main": "./index.cjs",
-  "module": "./index.js"
+  "typings": "./src/index.d.ts"
 }

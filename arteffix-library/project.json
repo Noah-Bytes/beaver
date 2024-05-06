@@ -12,7 +12,7 @@
         "main": "arteffix-library/src/index.ts",
         "tsConfig": "arteffix-library/tsconfig.lib.json",
         "project": "arteffix-library/package.json",
-        "format": ["esm", "cjs"]
+        "format": ["cjs", "esm"]
       }
     },
     "nx-release-publish": {

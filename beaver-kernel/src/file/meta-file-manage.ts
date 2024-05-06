@@ -5,7 +5,7 @@ import {
   IMetaFileMetaUpdate,
 } from '@beaver/types';
 import { findIndex } from '@technically/lodash';
-import path from 'path';
+import * as path from 'path';
 
 export class MetaFileManage<
   F extends IMetaFile<M, U>,

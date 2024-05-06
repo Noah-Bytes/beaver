@@ -1,4 +1,4 @@
-import { FileDefault, Workspace } from '../src';
+import { Workspace } from '../src';
 
 describe('空间测试', () => {
   const wk = new Workspace('/Users/taibai/Documents/我的空间.arteffix');
@@ -6,7 +6,7 @@ describe('空间测试', () => {
     await wk.init();
   });
 
-  it('获取图片列表', () => {
-    console.log(wk.file.getFileMetas());
+  it('获取图片列表', async () => {
+    console.log(await wk.file.getFileMetas());
   });
 });

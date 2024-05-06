@@ -1,7 +1,7 @@
 import { safeAccessSync } from '@beaver/arteffix-utils';
 import { IMetaFile, IMetaFileMeta, IMetaFileMetaUpdate } from '@beaver/types';
-import fs from 'fs-extra';
-import path from 'path';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 import { rimraf } from 'rimraf';
 
 export class MetaFile<M extends IMetaFileMeta, U extends IMetaFileMetaUpdate>

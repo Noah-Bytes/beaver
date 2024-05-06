@@ -5,14 +5,16 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:tsc",
+      "executor": "@nx/rollup:rollup",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/download",
         "tsConfig": "download/tsconfig.lib.json",
         "packageJson": "download/package.json",
+        "project": "download/package.json",
         "main": "download/src/index.ts",
-        "assets": ["download/*.md"]
+        "compiler": "swc",
+        "format": ["cjs", "esm"]
       }
     },
     "nx-release-publish": {
