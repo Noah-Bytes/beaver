@@ -48,7 +48,7 @@ export class DownloadManage
         id: MetaFile.createId(),
         url,
         createTime: Date.now(),
-        name: [name, ext.toLowerCase()].join('.'),
+        name: name,
         ext: ext.toUpperCase(),
       },
     });

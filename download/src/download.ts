@@ -21,7 +21,7 @@ export class Download
       return;
     }
     this.dl = new DownloaderHelper(this.meta.url, this.dir, {
-      fileName: this.meta.name,
+      fileName: this.getFileName(),
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
