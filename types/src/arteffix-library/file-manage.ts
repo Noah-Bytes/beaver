@@ -18,6 +18,10 @@ export interface IFileManage<
 
   createFile: (filePath: string) => Promise<IFileExtend<M, U>>;
 
+  /**
+   * 本地文件
+   * @param filePath
+   */
   addFileByPath: (filePath: string) => Promise<IFileExtend<M, U>>;
 
   pushRecycleBin: (id: string) => Promise<M>;

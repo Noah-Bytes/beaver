@@ -77,7 +77,6 @@
     "@material-tailwind/react": "^2.1.9",
     "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/react-toast": "^1.1.5",
-    "@technically/lodash": "^4.17.0",
     "@xterm/addon-serialize": "^0.12.0",
     "@xterm/xterm": "^5.4.0",
     "ahooks": "^3.7.11",

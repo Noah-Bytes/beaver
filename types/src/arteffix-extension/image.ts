@@ -3,7 +3,7 @@ import { IDrag } from './drag';
 export interface IWebsiteImageMeta {
   src?: string;
   title?: string | null;
-  ext?: string;
+  ext: string;
   width: number;
   height: number;
   base64?: string;

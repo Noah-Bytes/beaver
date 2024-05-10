@@ -1,6 +1,6 @@
 import { IDragOptions, IWebsiteImage, IWebsiteImageMeta } from '@beaver/types';
 // @ts-ignore
-import * as isBase64 from 'is-base64';
+import isBase64 from 'is-base64';
 import { Drag } from './drag';
 import {
   getBase64ImageFormat,
@@ -14,8 +14,36 @@ export class Image extends Drag implements IWebsiteImage {
     super('img', options);
   }
 
+  static getWidth(element: HTMLImageElement): number {
+    return element.naturalWidth || element.width;
+  }
+
+  static getHeight(element: HTMLImageElement) {
+    return element.naturalHeight || element.height;
+  }
+
   static getMeta(element: HTMLImageElement): IWebsiteImageMeta {
-    const srcText = element.src;
+    const srcText = element.dataset['src'] || element.src;
+
+    const ext = getUrlExtension(srcText);
+
+    if (element.dataset['srcset'] || element.srcset) {
+      const imageDescBySize = getImageDescBySize(
+        element.dataset['srcset'] || element.srcset,
+      );
+      if (imageDescBySize.length > 0) {
+        const [{ width, url }] = imageDescBySize;
+        return {
+          width: width,
+          height: Math.ceil(
+            (this.getHeight(element) / this.getWidth(element)) * width,
+          ),
+          title: element.getAttribute('alt'),
+          src: url,
+          ext,
+        };
+      }
+    }
 
     if (
       isBase64(srcText, {
@@ -31,8 +59,6 @@ export class Image extends Drag implements IWebsiteImage {
       };
     }
 
-    const ext = getUrlExtension(srcText);
-
     if (element.parentElement && element.parentElement.tagName === 'PICTURE') {
       const source = getPictureMaxSource(element.parentElement);
       if (source.length > 0) {
@@ -40,25 +66,7 @@ export class Image extends Drag implements IWebsiteImage {
         return {
           width: width,
           height: Math.ceil(
-            (element.naturalHeight / element.naturalWidth) * width,
-          ),
-          title: element.getAttribute('alt'),
-          src: url,
-          ext,
-        };
-      }
-    }
-
-    if (element.dataset['srcset'] || element.srcset) {
-      const imageDescBySize = getImageDescBySize(
-        element.dataset['srcset'] || element.srcset,
-      );
-      if (imageDescBySize.length > 0) {
-        const [{ width, url }] = imageDescBySize;
-        return {
-          width: width,
-          height: Math.ceil(
-            (element.naturalHeight / element.naturalWidth) * width,
+            (this.getHeight(element) / this.getWidth(element)) * width,
           ),
           title: element.getAttribute('alt'),
           src: url,
@@ -68,8 +76,8 @@ export class Image extends Drag implements IWebsiteImage {
     }
 
     return {
-      width: element.naturalWidth,
-      height: element.naturalHeight,
+      width: element.naturalWidth || element.width,
+      height: element.naturalHeight || element.height,
       title: element.getAttribute('alt'),
       src: srcText,
       ext,

@@ -1,7 +1,7 @@
 import { IDrag } from './drag';
 
 export interface IWebsiteSVGMeta {
-  title: string;
+  title?: string;
   ext: string;
   width: number;
   height: number;

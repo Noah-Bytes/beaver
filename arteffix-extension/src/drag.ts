@@ -1,5 +1,5 @@
 import { IDrag, IDragOptions } from '@beaver/types';
-import * as $ from 'jquery';
+import $ from 'jquery';
 
 export class Drag implements IDrag {
   dragoverX: number = 0;

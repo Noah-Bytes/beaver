@@ -4,7 +4,7 @@ import {
   IMetaFileMeta,
   IMetaFileMetaUpdate,
 } from '@beaver/types';
-import { findIndex } from '@technically/lodash';
+import { findIndex } from 'lodash';
 import * as path from 'path';
 
 export class MetaFileManage<
@@ -53,6 +53,28 @@ export class MetaFileManage<
       return result;
     }
     return [];
+  }
+
+  async getFileMetasByIds(ids: string[]): Promise<M[]> {
+    const result: M[] = [];
+    for (let i = 0; i < ids.length; i++) {
+      const file = this.getFile(ids[i]);
+      if (file) {
+        result.push(await file.getMeta());
+      }
+    }
+    return result;
+  }
+
+  getFilesByIds(ids: string[]): F[] {
+    const result: F[] = [];
+    for (let i = 0; i < ids.length; i++) {
+      const file = this.getFile(ids[i]);
+      if (file) {
+        result.push(file);
+      }
+    }
+    return result;
   }
 
   getFiles(): F[] {

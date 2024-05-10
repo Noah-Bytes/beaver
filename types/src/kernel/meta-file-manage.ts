@@ -22,6 +22,10 @@ export interface IMetaFileManage<
 
   getFileMetas: () => Promise<M[]>;
 
+  getFilesByIds: (ids: string[]) => F[];
+
+  getFileMetasByIds: (ids: string[]) => Promise<M[]>;
+
   hasFile: (id: string) => boolean;
 
   getFile: (id: string) => F | undefined;

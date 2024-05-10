@@ -1,5 +1,5 @@
 import { IDragOptions } from '@beaver/types';
-import * as $ from 'jquery';
+import $ from 'jquery';
 import { Link } from '../link';
 import { Website } from '../website';
 

@@ -112,7 +112,7 @@ export class Website implements IWebsite {
   }
 
   getSvgMetas(): IWebsiteSVGMeta[] {
-    const elementsByTagName = Website.getAllTagName<SVGSVGElement>('svg');
+    const elementsByTagName = document.getElementsByTagName('svg');
 
     const result: IWebsiteSVGMeta[] = [];
 
@@ -145,7 +145,11 @@ export class Website implements IWebsite {
         const info = Image.getMeta(e);
         // @ts-ignore
         if (!has[info.src || info.base64]) {
-          result.push(info);
+          result.push({
+            ...info,
+            // @ts-ignore
+            elem: e,
+          });
         }
       }
     }

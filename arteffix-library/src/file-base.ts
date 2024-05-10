@@ -11,17 +11,6 @@ export class FileBase<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
   constructor(rootDir: string, meta: M) {
     super(rootDir, meta);
   }
-  async save(data: any) {
-    await this.init();
-
-    const filePath = this.absPath(this.getFileName());
-
-    if (!this.exists(filePath)) {
-      await fs.promises.writeFile(filePath, data, {
-        mode: '0755',
-      });
-    }
-  }
 
   async copy() {
     await this.init();
