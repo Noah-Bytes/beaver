@@ -4,6 +4,7 @@ import isBase64 from 'is-base64';
 import { Drag } from './drag';
 import {
   getBase64ImageFormat,
+  getFullUrl,
   getImageDescBySize,
   getPictureMaxSource,
   getUrlExtension,
@@ -39,7 +40,7 @@ export class Image extends Drag implements IWebsiteImage {
             (this.getHeight(element) / this.getWidth(element)) * width,
           ),
           title: element.getAttribute('alt'),
-          src: url,
+          src: getFullUrl(url),
           ext,
         };
       }
@@ -69,7 +70,7 @@ export class Image extends Drag implements IWebsiteImage {
             (this.getHeight(element) / this.getWidth(element)) * width,
           ),
           title: element.getAttribute('alt'),
-          src: url,
+          src: getFullUrl(url),
           ext,
         };
       }

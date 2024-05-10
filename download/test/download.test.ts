@@ -14,11 +14,7 @@ describe('空间测试', () => {
 
   it('图片创建', async () => {
     const dl = await dm.create(
-      'https://img2.baidu.com/it/u=3227619927,365499885&fm=253&fmt=auto&app=120&f=JPEG?w=938&h=500',
-      {
-        name: '测试',
-        ext: 'webp',
-      },
+      'https://cdn.dribbble.com/userupload/14365145/file/original-f4d6b483ec7dd49c62158048cd6b7c8e.jpg?resize=1200x900&vertical=center',
     );
     console.log(dm.absPath());
     await dl.start();

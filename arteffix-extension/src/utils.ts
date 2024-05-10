@@ -1,6 +1,12 @@
 import $ from 'jquery';
 import parse from 'srcset-parse';
 
+export function isHttpLink(link: string) {
+  // 正则表达式检查链接是否以 http:// 或 https:// 开头
+  const httpRegex = /^(http|https):\/\//;
+  return httpRegex.test(link);
+}
+
 /**
  * 获取base64图片的格式
  * @param base64Data
@@ -116,4 +122,12 @@ export function getImageDescBySize(srcset: string) {
     width: number;
     density?: number;
   }[];
+}
+
+export function getFullUrl(url: string) {
+  if (isHttpLink(url)) {
+    return url;
+  }
+
+  return window.location.origin + url;
 }
