@@ -1,9 +1,14 @@
 import { IMetaFileManage } from '@beaver/types';
 import { IDownload, IDownloadMeta, IDownloadMetaUpdate } from './download';
 
+export interface IDownloadCreateOptions {
+  name: string
+  ext: string
+}
+
 export interface IDownloadManage
   extends IMetaFileManage<IDownload, IDownloadMeta, IDownloadMetaUpdate> {
-  create(url: string): Promise<IDownload>;
+  create(url: string, options?: IDownloadCreateOptions): Promise<IDownload>;
 
   start(id: string): Promise<boolean>;
   stop(id: string): Promise<boolean>;

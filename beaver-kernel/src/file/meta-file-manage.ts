@@ -6,6 +6,7 @@ import {
 } from '@beaver/types';
 import { findIndex } from 'lodash';
 import * as path from 'path';
+import * as fs from "fs-extra";
 
 export class MetaFileManage<
   F extends IMetaFile<M, U>,

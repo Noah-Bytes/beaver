@@ -13,11 +13,19 @@ describe('空间测试', () => {
   });
 
   it('图片创建', async () => {
-    await dm.create('https://gd-filems.dancf.com/gaoding/cms/mcm79j/mcm79j/09622/aa4af2d0-81d9-486f-b4d5-c815c1ab3fb52140871.png?x-oss-process=image/resize,w_600,type_6/interlace,1/format,webp')
+    const dl = await dm.create(
+      'https://img2.baidu.com/it/u=3227619927,365499885&fm=253&fmt=auto&app=120&f=JPEG?w=938&h=500',
+      {
+        name: '测试',
+        ext: 'webp',
+      },
+    );
+    console.log(dm.absPath());
+    await dl.start();
     console.log(await dm.getFileMetas());
-  })
+  });
 
   it('图片下载', async () => {
-    await dm.start('1714979615115_OEJ178ZCLA')
-  })
+    await dm.start('1715335989481_D5XZAEQVXCC');
+  });
 });

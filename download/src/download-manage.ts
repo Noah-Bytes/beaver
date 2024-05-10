@@ -1,6 +1,7 @@
 import { MetaFile, MetaFileManage } from '@beaver/kernel';
 import {
   IDownload,
+  IDownloadCreateOptions,
   IDownloadManage,
   IDownloadMeta,
   IMetaFileMetaUpdate,
@@ -24,19 +25,31 @@ export class DownloadManage
     super(options.tmpDir || os.tmpdir(), options.appName);
   }
 
-  async create(url: string): Promise<IDownload> {
-    const u = new URL(url);
-    const p = path.parse(u.pathname);
+  async create(
+    url: string,
+    options?: IDownloadCreateOptions,
+  ): Promise<IDownload> {
+    let name: string, ext: string;
+    if (options) {
+      name = options.name;
+      ext = options.ext;
+    } else {
+      const u = new URL(url);
+      const p = path.parse(u.pathname);
+      name = p.name;
+      ext = p.ext.replace('.', '');
+    }
 
     const file = new Download(this.absPath(), {
       meta: {
         id: MetaFile.createId(),
         url,
         createTime: Date.now(),
-        name: p.name + p.ext,
-        ext: p.ext.replace('.', '').toUpperCase(),
+        name: [name, ext.toLowerCase()].join('.'),
+        ext: ext.toUpperCase(),
       },
     });
+    await file.init();
     this.addFile(file);
 
     return file;
