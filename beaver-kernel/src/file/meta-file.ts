@@ -87,7 +87,7 @@ export class MetaFile<M extends IMetaFileMeta, U extends IMetaFileMetaUpdate>
     return true;
   }
 
-  async updateMeta(meta: U): Promise<void> {
+  async updateMeta(meta: U, updateTime = true): Promise<void> {
     if (meta.name) {
       await fs.promises.rename(
         this.absPath(this.getFileName()),
@@ -98,8 +98,11 @@ export class MetaFile<M extends IMetaFileMeta, U extends IMetaFileMetaUpdate>
     this.meta = {
       ...this.meta,
       ...meta,
-      lastModified: Date.now(),
     };
+    if (updateTime) {
+      // @ts-ignore
+      this.meta['lastModified'] = Date.now();
+    }
     await this.saveMetadata();
   }
 

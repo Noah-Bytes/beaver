@@ -42,7 +42,6 @@ export class FileDefault extends FileBase<
         url: filePath,
         modificationTime: Date.now(),
         lastModified: Date.now(),
-        ...(options?.metaUpdate || {}),
       };
     }
     super(rootDir, meta);

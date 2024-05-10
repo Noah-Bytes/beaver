@@ -29,7 +29,7 @@ export interface IMetaFile<
   createInit: () => Promise<void>;
 
   saveMetadata: () => Promise<boolean>;
-  updateMeta: (meta: U) => Promise<void>;
+  updateMeta: (meta: U, updateTime?: boolean) => Promise<void>;
   readMetaData: () => Promise<M>;
 
   getMeta: () => Promise<M>;

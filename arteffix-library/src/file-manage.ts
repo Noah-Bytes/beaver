@@ -78,16 +78,12 @@ export class FileManage<
     }
   }
 
-  async createFile(
-    filePath: string,
-    metaUpdate?: IFileBaseMetaUpdate,
-  ): Promise<F> {
+  async createFile(filePath: string): Promise<F> {
     const o = path.parse(filePath);
     const ext = o.ext.replace(/\./g, '').toLowerCase();
     const clazz = this.getFileExtend(ext);
     const file = new clazz(this.absPath(), {
       filePath,
-      metaUpdate,
     });
 
     await file.copy();
@@ -98,9 +94,12 @@ export class FileManage<
 
   async addFileByPath(
     filePath: string,
-    metaUpdate?: IFileBaseMetaUpdate,
+    metaUpdate?: U,
   ): Promise<IFileExtend<M, U>> {
-    const file = await this.createFile(filePath, metaUpdate);
+    const file = await this.createFile(filePath);
+    if (metaUpdate) {
+      await file.updateMeta(metaUpdate, false);
+    }
     this.addFile(file);
     return file;
   }

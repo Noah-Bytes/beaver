@@ -16,13 +16,16 @@ export interface IFileManage<
 
   init: (rootDir: string) => Promise<void>;
 
-  createFile: (filePath: string, metaUpdate?: IFileBaseMetaUpdate) => Promise<IFileExtend<M, U>>;
+  createFile: (filePath: string) => Promise<IFileExtend<M, U>>;
 
   /**
    * 本地文件
    * @param filePath
    */
-  addFileByPath: (filePath: string, metaUpdate?: IFileBaseMetaUpdate) => Promise<IFileExtend<M, U>>;
+  addFileByPath: (
+    filePath: string,
+    metaUpdate?: U,
+  ) => Promise<IFileExtend<M, U>>;
 
   pushRecycleBin: (id: string) => Promise<M>;
 }

@@ -5,6 +5,7 @@ export interface IWebsiteSVGMeta {
   ext: string;
   width: number;
   height: number;
+  origin?: string;
   svg: string;
 }
 

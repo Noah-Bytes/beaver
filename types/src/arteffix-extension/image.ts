@@ -6,8 +6,8 @@ export interface IWebsiteImageMeta {
   ext: string;
   width: number;
   height: number;
+  origin?: string;
   base64?: string;
 }
 
-export interface IWebsiteImage extends IDrag {
-}
+export interface IWebsiteImage extends IDrag {}
