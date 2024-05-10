@@ -2,8 +2,8 @@ import { IMetaFileManage } from '@beaver/types';
 import { IDownload, IDownloadMeta, IDownloadMetaUpdate } from './download';
 
 export interface IDownloadCreateOptions {
-  name: string
-  ext: string
+  name?: string
+  ext?: string
 }
 
 export interface IDownloadManage

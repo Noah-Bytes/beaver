@@ -29,15 +29,18 @@ export class DownloadManage
     url: string,
     options?: IDownloadCreateOptions,
   ): Promise<IDownload> {
-    let name: string, ext: string;
+    const u = new URL(url);
+    const p = path.parse(u.pathname);
+    let name = p.name;
+    let ext = p.ext.replace('.', '');
+
     if (options) {
-      name = options.name;
-      ext = options.ext;
-    } else {
-      const u = new URL(url);
-      const p = path.parse(u.pathname);
-      name = p.name;
-      ext = p.ext.replace('.', '');
+      if (options.name) {
+        name = options.name;
+      }
+      if (options.ext) {
+        ext = options.ext;
+      }
     }
 
     const file = new Download(this.absPath(), {
