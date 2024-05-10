@@ -101,5 +101,6 @@ export interface IFileBaseMetaUpdate extends IMetaFileMetaUpdate {
 
 export type IFileOptions<T> = {
   filePath?: string;
+  metaUpdate?: IFileBaseMetaUpdate;
   meta?: T;
 };
