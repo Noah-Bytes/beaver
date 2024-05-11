@@ -5,7 +5,7 @@ export class Svg extends Drag implements IWebsiteSvg {
   constructor(options?: IDragOptions) {
     super('svg', options);
   }
-  static getMeta(element: SVGSVGElement): IWebsiteSVGMeta {
+  getMeta(element: SVGSVGElement): IWebsiteSVGMeta {
     return {
       title: '',
       ext: 'SVG',

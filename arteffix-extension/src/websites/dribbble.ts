@@ -1,7 +1,9 @@
 import { IDragOptions } from '@beaver/types';
 import $ from 'jquery';
 import { Link } from '../link';
+import { Image } from '../image';
 import { Website } from '../website';
+import {options} from "prettier-plugin-tailwindcss";
 
 export class DribbbleLink extends Link {
   constructor(options?: IDragOptions) {
@@ -29,6 +31,16 @@ export class DribbbleLink extends Link {
       return true;
     }
     return this.hasBgImage(element);
+  }
+}
+
+export class DribbbleImage extends Image {
+  constructor(options?: IDragOptions) {
+    super(options);
+  }
+
+  override getOrigin(element: HTMLElement): string | undefined {
+    return super.getOrigin(element);
   }
 }
 

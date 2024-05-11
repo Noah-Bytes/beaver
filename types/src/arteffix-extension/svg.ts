@@ -8,4 +8,6 @@ export interface IWebsiteSVGMeta {
   svg: string;
 }
 
-export interface IWebsiteSvg extends IDrag {}
+export interface IWebsiteSvg extends IDrag {
+  getMeta: (element: SVGSVGElement) => IWebsiteSVGMeta;
+}

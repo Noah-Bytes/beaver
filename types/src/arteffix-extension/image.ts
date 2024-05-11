@@ -4,8 +4,11 @@ export interface IWebsiteImageMeta {
   type: string;
   src?: string;
   title?: string;
-  origin?: string
+  origin?: string;
   base64?: string;
 }
 
-export interface IWebsiteImage extends IDrag {}
+export interface IWebsiteImage extends IDrag {
+  getOrigin: (element: HTMLElement) => string | undefined;
+  getMeta: (element: HTMLElement) => IWebsiteImageMeta | undefined;
+}
