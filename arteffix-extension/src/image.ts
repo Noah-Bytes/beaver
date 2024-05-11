@@ -3,7 +3,6 @@ import { IDragOptions, IWebsiteImage, IWebsiteImageMeta } from '@beaver/types';
 import isBase64 from 'is-base64';
 import { Drag } from './drag';
 import {
-  getBase64ImageFormat,
   getFullUrl,
   getImageDescBySize,
   getPictureMaxSource,
@@ -29,6 +28,7 @@ export class Image extends Drag implements IWebsiteImage {
         return {
           title: element.getAttribute('alt') || undefined,
           src: getFullUrl(url),
+          type: 'image',
         };
       }
     }
@@ -39,8 +39,9 @@ export class Image extends Drag implements IWebsiteImage {
       })
     ) {
       return {
-        title: element.getAttribute('alt')  || undefined,
+        title: element.getAttribute('alt') || undefined,
         base64: srcText,
+        type: 'image',
       };
     }
 
@@ -49,8 +50,9 @@ export class Image extends Drag implements IWebsiteImage {
       if (source.length > 0) {
         const [[{ width, url }]] = source;
         return {
-          title: element.getAttribute('alt')  || undefined,
+          title: element.getAttribute('alt') || undefined,
           src: getFullUrl(url),
+          type: 'image',
         };
       }
     }
@@ -58,6 +60,7 @@ export class Image extends Drag implements IWebsiteImage {
     return {
       title: element.getAttribute('alt') || undefined,
       src: srcText,
+      type: 'image',
     };
   }
 }
