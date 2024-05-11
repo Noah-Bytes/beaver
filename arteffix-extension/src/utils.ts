@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import mime from 'mime';
 import parse from 'srcset-parse';
 
 export function isHttpLink(link: string) {
@@ -130,4 +131,48 @@ export function getFullUrl(url: string) {
   }
 
   return window.location.origin + url;
+}
+
+export async function toDataURL(
+  url: string,
+  timeout = 2000,
+): Promise<string | undefined> {
+  const r = new AbortController();
+  const a = setTimeout(() => r.abort(), timeout);
+  try {
+    const t = await (
+      await fetch(url, {
+        signal: r.signal,
+      })
+    ).blob();
+    const n = new FileReader();
+    n.readAsDataURL(t);
+    return new Promise((r, e) => {
+      n.onerror = e;
+      n.onloadend = () => {
+        const e = n.result;
+        if (typeof e === 'string' && e.startsWith('data:image')) {
+          r(e);
+        } else if (e instanceof ArrayBuffer) {
+          console.log(e);
+        }
+      };
+    });
+  } catch (e) {
+    return undefined;
+  } finally {
+    clearTimeout(a);
+  }
+}
+
+export function getBase64Ext(base64: string) {
+  const base64Parts = base64.split(';base64,');
+  const imageType = base64Parts[0].split(':')[1];
+  return mime.getExtension(imageType) || undefined;
+}
+
+export function uuid(prefix = 'beaver') {
+  const timestamp = new Date().getTime() // 获取当前时间的时间戳
+  const randomPart = Math.random().toString(36).substring(2, 15) // 生成一个随机字符串
+  return `${prefix}_${timestamp}_${randomPart}` // 组合成一个唯一ID
 }

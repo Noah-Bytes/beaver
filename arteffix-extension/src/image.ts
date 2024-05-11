@@ -2,7 +2,13 @@ import { IDragOptions, IWebsiteImage, IWebsiteImageMeta } from '@beaver/types';
 // @ts-ignore
 import isBase64 from 'is-base64';
 import { Drag } from './drag';
-import { getFullUrl, getImageDescBySize, getPictureMaxSource } from './utils';
+import {
+  getBase64Ext,
+  getFullUrl,
+  getImageDescBySize,
+  getPictureMaxSource,
+  toDataURL,
+} from './utils';
 
 export class Image extends Drag implements IWebsiteImage {
   constructor(options?: IDragOptions) {
@@ -24,7 +30,7 @@ export class Image extends Drag implements IWebsiteImage {
     return getFullUrl(url);
   }
 
-  getMeta(element: HTMLElement): IWebsiteImageMeta | undefined {
+  async getMeta(element: HTMLElement): Promise<IWebsiteImageMeta | undefined> {
     const title = this.getTitle(element);
     const origin = this.getOrigin(element);
     if (element instanceof HTMLImageElement) {
@@ -36,6 +42,19 @@ export class Image extends Drag implements IWebsiteImage {
         );
         if (imageDescBySize.length > 0) {
           const [{ width, url }] = imageDescBySize;
+
+          const base64 = await toDataURL(this.getRealUrl(url), 5000);
+          if (base64) {
+            const ext = getBase64Ext(base64);
+            return {
+              title,
+              origin,
+              base64,
+              ext,
+              type: 'image',
+            };
+          }
+
           return {
             title,
             origin,
@@ -50,10 +69,13 @@ export class Image extends Drag implements IWebsiteImage {
           allowMime: true,
         })
       ) {
+        const ext = getBase64Ext(srcText);
+
         return {
           title,
           origin,
           base64: srcText,
+          ext,
           type: 'image',
         };
       }
@@ -69,7 +91,20 @@ export class Image extends Drag implements IWebsiteImage {
     if (element.parentElement && element.parentElement.tagName === 'PICTURE') {
       const source = getPictureMaxSource(element.parentElement);
       if (source.length > 0) {
-        const [[{ width, url }]] = source;
+        const [[{ url }]] = source;
+
+        const base64 = await toDataURL(this.getRealUrl(url), 5000);
+        if (base64) {
+          const ext = getBase64Ext(base64);
+          return {
+            title,
+            origin,
+            base64,
+            ext,
+            type: 'image',
+          };
+        }
+
         return {
           title,
           origin,

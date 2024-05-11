@@ -5,6 +5,7 @@
   "typings": "./src/index.d.ts",
   "peerDependencies": {
     "fs-extra": "^11.2.0",
-    "fast-glob": "^3.3.2"
+    "fast-glob": "^3.3.2",
+    "mime": "^4.0.3"
   }
 }

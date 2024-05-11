@@ -99,6 +99,7 @@
     "isomorphic-git": "^1.25.7",
     "jquery": "^3.7.1",
     "lodash": "^4.17.21",
+    "mime": "^4.0.3",
     "next": "14.0.4",
     "node-downloader-helper": "^2.1.9",
     "node-pty": "^1.0.0",

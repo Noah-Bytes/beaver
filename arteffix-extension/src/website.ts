@@ -9,6 +9,7 @@ import {
 import { Image } from './image';
 import { Link } from './link';
 import { Svg } from './svg';
+import { getBase64Ext, toDataURL, uuid } from './utils';
 
 export class Website implements IWebsite {
   readonly metaSelector = {
@@ -79,7 +80,7 @@ export class Website implements IWebsite {
   /**
    * 获取页面所有bg图片
    */
-  getBgImageMetas(): IWebsiteImageMeta[] {
+  async getBgImageMetas(): Promise<IWebsiteImageMeta[]> {
     const arr = document.querySelectorAll('body, body *');
 
     const result: IWebsiteImageMeta[] = [];
@@ -99,10 +100,21 @@ export class Website implements IWebsite {
         const { width, height } = element.getBoundingClientRect();
 
         if (width > 5 && height > 5) {
-          result.push({
-            src: url,
-            type: 'image',
-          });
+          const base64 = await toDataURL(url, 5000);
+          if (base64) {
+            const ext = getBase64Ext(base64);
+            result.push({
+              title: uuid(),
+              base64,
+              ext,
+              type: 'image',
+            });
+          } else {
+            result.push({
+              src: url,
+              type: 'image',
+            });
+          }
         }
       }
     }
@@ -132,7 +144,7 @@ export class Website implements IWebsite {
     return result;
   }
 
-  getImageMetas(): IWebsiteImageMeta[] {
+  async getImageMetas(): Promise<IWebsiteImageMeta[]> {
     const result: IWebsiteImageMeta[] = [];
     const elements = Website.getAllTagName<HTMLImageElement>('img');
     // 去重
@@ -141,7 +153,7 @@ export class Website implements IWebsite {
     for (let i = 0; i < elements.length; i++) {
       const e = elements[i];
       if (e.width > 5 && e.height > 5 && !!e.src) {
-        const info = this.image!.getMeta(e);
+        const info = await this.image!.getMeta(e);
         // @ts-ignore
         if (!has[info.src || info.base64]) {
           result.push({
