@@ -30,37 +30,44 @@ export class Image extends Drag implements IWebsiteImage {
     return getFullUrl(url);
   }
 
-  async getMeta(element: HTMLElement): Promise<IWebsiteImageMeta | undefined> {
+  async getBase64Meta(
+    element: HTMLElement,
+  ): Promise<IWebsiteImageMeta | undefined> {
+    const meta = this.getMeta(element);
+
+    if (meta?.base64) {
+      return meta;
+    }
+
+    if (meta?.src) {
+      const base64 = await toDataURL(this.getRealUrl(meta?.src), 5000);
+      if (base64) {
+        const ext = getBase64Ext(base64);
+        return {
+          ...meta,
+          base64,
+          ext,
+        };
+      }
+    }
+
+    console.error(element);
+    throw new Error('error');
+  }
+
+  getMeta(element: HTMLElement): IWebsiteImageMeta | undefined {
     const title = this.getTitle(element);
     const origin = this.getOrigin(element);
     if (element instanceof HTMLImageElement) {
-      const srcText = element.dataset['src'] || element.src;
+      let srcText = element.dataset['src'] || element.src;
 
       if (element.dataset['srcset'] || element.srcset) {
         const imageDescBySize = getImageDescBySize(
           element.dataset['srcset'] || element.srcset,
         );
         if (imageDescBySize.length > 0) {
-          const [{ width, url }] = imageDescBySize;
-
-          const base64 = await toDataURL(this.getRealUrl(url), 5000);
-          if (base64) {
-            const ext = getBase64Ext(base64);
-            return {
-              title,
-              origin,
-              base64,
-              ext,
-              type: 'image',
-            };
-          }
-
-          return {
-            title,
-            origin,
-            src: this.getRealUrl(url),
-            type: 'image',
-          };
+          const [{ url }] = imageDescBySize;
+          srcText = url;
         }
       }
 
@@ -69,13 +76,11 @@ export class Image extends Drag implements IWebsiteImage {
           allowMime: true,
         })
       ) {
-        const ext = getBase64Ext(srcText);
-
         return {
           title,
           origin,
           base64: srcText,
-          ext,
+          ext: getBase64Ext(srcText),
           type: 'image',
         };
       }
@@ -83,7 +88,7 @@ export class Image extends Drag implements IWebsiteImage {
       return {
         title,
         origin,
-        src: srcText,
+        src: this.getRealUrl(srcText),
         type: 'image',
       };
     }
@@ -92,19 +97,6 @@ export class Image extends Drag implements IWebsiteImage {
       const source = getPictureMaxSource(element.parentElement);
       if (source.length > 0) {
         const [[{ url }]] = source;
-
-        const base64 = await toDataURL(this.getRealUrl(url), 5000);
-        if (base64) {
-          const ext = getBase64Ext(base64);
-          return {
-            title,
-            origin,
-            base64,
-            ext,
-            type: 'image',
-          };
-        }
-
         return {
           title,
           origin,

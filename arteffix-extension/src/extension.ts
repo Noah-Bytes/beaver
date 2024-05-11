@@ -32,13 +32,12 @@ export class Extension implements IExtension {
   }
 
   collectAll() {
+    const imgs = this.website?.getImageMetas();
+    const bgImgs = this.website?.getBgImageMetas();
     return {
       website: this.collectWebsite(),
       media: {
-        image: [
-          ...(this.website?.getImageMetas() || []),
-          ...(this.website?.getBgImageMetas() || []),
-        ],
+        image: [...(imgs || []), ...(bgImgs || [])],
         svg: this.website?.getSvgMetas() || [],
       },
     };

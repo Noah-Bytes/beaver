@@ -71,14 +71,7 @@ export class MetaFile<M extends IMetaFileMeta, U extends IMetaFileMetaUpdate>
   }
 
   async rename(name: string): Promise<void> {
-    // 第一步修改 文件名称
-    await fs.promises.rename(
-      this.absPath(this.getFileName()),
-      this.absPath(this.getFileName(name)),
-    );
     this.meta.name = name;
-
-    // 第二步 保存
     await this.saveMetadata();
   }
 
@@ -88,13 +81,6 @@ export class MetaFile<M extends IMetaFileMeta, U extends IMetaFileMetaUpdate>
   }
 
   async updateMeta(meta: U, updateTime = true): Promise<void> {
-    if (meta.name) {
-      await fs.promises.rename(
-        this.absPath(this.getFileName()),
-        this.absPath(this.getFileName(meta.name)),
-      );
-    }
-
     this.meta = {
       ...this.meta,
       ...meta,
@@ -107,6 +93,6 @@ export class MetaFile<M extends IMetaFileMeta, U extends IMetaFileMetaUpdate>
   }
 
   public getFileName(name?: string): string {
-    return `${name ? name : this.meta.name}.${this.meta.ext}`;
+    return `${name ? name : this.meta.id}.${this.meta.ext}`;
   }
 }

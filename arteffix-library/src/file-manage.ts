@@ -87,6 +87,7 @@ export class FileManage<
     });
 
     await file.copy();
+
     await file.createInit();
 
     return file;

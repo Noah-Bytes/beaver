@@ -27,10 +27,5 @@ export interface IFileManage<
     metaUpdate?: U,
   ) => Promise<IFileExtend<M, U>>;
 
-  addFileByBase64: (
-    base64: string,
-    metaUpdate?: U,
-  ) => Promise<IFileExtend<M, U>>;
-
   pushRecycleBin: (id: string) => Promise<M>;
 }

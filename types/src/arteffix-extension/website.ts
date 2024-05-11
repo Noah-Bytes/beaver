@@ -32,8 +32,8 @@ export interface IWebsite {
   initSvg: () => void;
   initLink: () => void;
 
-  getBgImageMetas: () => Promise<IWebsiteImageMeta[]>;
-  getImageMetas: () => Promise<IWebsiteImageMeta[]>;
+  getBgImageMetas: () => IWebsiteImageMeta[];
+  getImageMetas: () => IWebsiteImageMeta[];
 
   getSvgMetas: () => IWebsiteSVGMeta[];
 }

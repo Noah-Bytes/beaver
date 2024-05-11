@@ -20,5 +20,10 @@ export class FileBase<M extends IFileBaseMeta, U extends IFileBaseMetaUpdate>
     if (!this.exists(filePath)) {
       await fs.copyFile(this.meta.url!, filePath);
     }
+
+    await fs.promises.rename(
+      this.absPath(this.getFileName()),
+      this.absPath(this.getFileName(this.meta.id)),
+    );
   }
 }
