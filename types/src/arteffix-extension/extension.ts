@@ -1,7 +1,7 @@
 import {
-  IDragOptions,
   IWebsite,
-  IWebsiteImageMeta, IWebsiteInstance,
+  IWebsiteImageMeta,
+  IWebsiteInstance,
   IWebsiteMeta,
   IWebsiteSVGMeta,
 } from '@beaver/types';
@@ -12,7 +12,7 @@ export interface IMediaAll {
 }
 
 export interface IExtensionProps {
-  onDragEnd?: () => void
+  onDragEnd?: () => void;
 }
 
 export interface IExtension {

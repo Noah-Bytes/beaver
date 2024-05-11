@@ -15,14 +15,6 @@ export class Image extends Drag implements IWebsiteImage {
     super('img', options);
   }
 
-  static getWidth(element: HTMLImageElement): number {
-    return element.naturalWidth || element.width;
-  }
-
-  static getHeight(element: HTMLImageElement) {
-    return element.naturalHeight || element.height;
-  }
-
   static getMeta(element: HTMLImageElement): IWebsiteImageMeta {
     const srcText = element.dataset['src'] || element.src;
 
@@ -35,13 +27,8 @@ export class Image extends Drag implements IWebsiteImage {
       if (imageDescBySize.length > 0) {
         const [{ width, url }] = imageDescBySize;
         return {
-          width: width,
-          height: Math.ceil(
-            (this.getHeight(element) / this.getWidth(element)) * width,
-          ),
-          title: element.getAttribute('alt'),
+          title: element.getAttribute('alt') || undefined,
           src: getFullUrl(url),
-          ext,
         };
       }
     }
@@ -52,11 +39,8 @@ export class Image extends Drag implements IWebsiteImage {
       })
     ) {
       return {
-        width: element.naturalWidth,
-        height: element.naturalHeight,
-        title: element.getAttribute('alt'),
+        title: element.getAttribute('alt')  || undefined,
         base64: srcText,
-        ext: getBase64ImageFormat(srcText),
       };
     }
 
@@ -65,23 +49,15 @@ export class Image extends Drag implements IWebsiteImage {
       if (source.length > 0) {
         const [[{ width, url }]] = source;
         return {
-          width: width,
-          height: Math.ceil(
-            (this.getHeight(element) / this.getWidth(element)) * width,
-          ),
-          title: element.getAttribute('alt'),
+          title: element.getAttribute('alt')  || undefined,
           src: getFullUrl(url),
-          ext,
         };
       }
     }
 
     return {
-      width: element.naturalWidth || element.width,
-      height: element.naturalHeight || element.height,
-      title: element.getAttribute('alt'),
+      title: element.getAttribute('alt') || undefined,
       src: srcText,
-      ext,
     };
   }
 }

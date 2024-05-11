@@ -101,8 +101,6 @@ export class Website implements IWebsite {
         if (width > 5 && height > 5) {
           result.push({
             src: url,
-            width,
-            height,
           });
         }
       }
