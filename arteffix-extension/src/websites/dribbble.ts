@@ -1,9 +1,9 @@
 import { IDragOptions } from '@beaver/types';
 import $ from 'jquery';
-import { Link } from '../link';
 import { Image } from '../image';
+import { Link } from '../link';
+import { getFullUrl, isHttpLink } from '../utils';
 import { Website } from '../website';
-import {options} from "prettier-plugin-tailwindcss";
 
 export class DribbbleLink extends Link {
   constructor(options?: IDragOptions) {
@@ -40,7 +40,21 @@ export class DribbbleImage extends Image {
   }
 
   override getOrigin(element: HTMLElement): string | undefined {
+    const $a = $(element).parent().siblings('a');
+    if ($a.length > 0) {
+      const href = $a[0].getAttribute('href');
+      if (href) {
+        return getFullUrl(href);
+      }
+    }
     return super.getOrigin(element);
+  }
+
+  override getRealUrl(url: string): string {
+    if (isHttpLink(url)) {
+      return url.split('?')[0];
+    }
+    return super.getRealUrl(url);
   }
 }
 
@@ -51,5 +65,9 @@ export class Dribbble extends Website {
 
   override initLink() {
     this.link = new DribbbleLink(this.options);
+  }
+
+  override initImage() {
+    this.image = new DribbbleImage(this.options);
   }
 }

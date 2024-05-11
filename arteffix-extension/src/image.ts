@@ -9,11 +9,24 @@ export class Image extends Drag implements IWebsiteImage {
     super('img', options);
   }
 
-  getOrigin(element: HTMLElement): string | undefined {
+  getOrigin(targetElement: HTMLElement): string | undefined {
+    if (targetElement instanceof HTMLLinkElement) {
+      return targetElement.href;
+    }
+    return location.href;
+  }
+
+  getTitle(element: HTMLElement): string | undefined {
     return element.getAttribute('alt') || undefined;
   }
 
+  getRealUrl(url: string): string {
+    return getFullUrl(url);
+  }
+
   getMeta(element: HTMLElement): IWebsiteImageMeta | undefined {
+    const title = this.getTitle(element);
+    const origin = this.getOrigin(element);
     if (element instanceof HTMLImageElement) {
       const srcText = element.dataset['src'] || element.src;
 
@@ -24,8 +37,9 @@ export class Image extends Drag implements IWebsiteImage {
         if (imageDescBySize.length > 0) {
           const [{ width, url }] = imageDescBySize;
           return {
-            title: this.getOrigin(element),
-            src: getFullUrl(url),
+            title,
+            origin,
+            src: this.getRealUrl(url),
             type: 'image',
           };
         }
@@ -37,14 +51,16 @@ export class Image extends Drag implements IWebsiteImage {
         })
       ) {
         return {
-          title: this.getOrigin(element),
+          title,
+          origin,
           base64: srcText,
           type: 'image',
         };
       }
 
       return {
-        title: this.getOrigin(element),
+        title,
+        origin,
         src: srcText,
         type: 'image',
       };
@@ -55,8 +71,9 @@ export class Image extends Drag implements IWebsiteImage {
       if (source.length > 0) {
         const [[{ width, url }]] = source;
         return {
-          title: this.getOrigin(element),
-          src: getFullUrl(url),
+          title,
+          origin,
+          src: this.getRealUrl(url),
           type: 'image',
         };
       }
