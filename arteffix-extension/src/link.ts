@@ -1,46 +1,86 @@
-import { IDragOptions, IWebsiteLink } from '@beaver/types';
+import {
+  IDragOptions,
+  IWebsiteImageMeta,
+  IWebsiteLink,
+  IWebsiteSVGMeta,
+} from '@beaver/types';
+import isBase64 from 'is-base64';
 import { Drag } from './drag';
+import { getBase64Ext, getFullUrl, getImageDescBySize } from './utils';
 
 export class Link extends Drag implements IWebsiteLink {
   constructor(options?: IDragOptions) {
     super('a', options);
   }
 
-  hasBgImage(element: HTMLElement) {
-    // 检查当前元素的背景图片
-    const computedStyle = window.getComputedStyle(element);
-    const backgroundImage = computedStyle.getPropertyValue('background-image');
-    if (
-      backgroundImage !== 'none' &&
-      !backgroundImage.includes('gradient') &&
-      !backgroundImage.includes('data:image')
-    ) {
-      const virtualDom = document.createElement('img');
-      virtualDom.src = backgroundImage
-        .match(/\((.*?)\)/)![1]
-        .replace(/('|")/g, '');
-      this.currentDragElement = virtualDom;
-      return true;
-    }
+  override getMetaData(): IWebsiteImageMeta | IWebsiteSVGMeta {
+    const src = this.getSrc();
+    const origin = this.getRealUrl(this.getOrigin());
 
-    // 递归遍历子元素
-    const children = element.children;
-    for (let i = 0; i < children.length; i++) {
-      if (this.hasBgImage(children[i] as HTMLElement)) {
-        return true;
+    if (src) {
+      const result: IWebsiteImageMeta = {
+        title: this.getTitle(),
+        origin,
+        type: 'image',
+      };
+      if (
+        isBase64(src, {
+          allowMime: true,
+        })
+      ) {
+        result.base64 = src;
+        result.ext = getBase64Ext(src);
+      } else {
+        result.src = this.getRealUrl(src);
       }
+
+      return result;
     }
 
-    // 若当前元素及其子元素均不包含图片，则返回 false
-    return false;
+    return {
+      title: this.getTitle(),
+      origin,
+      type: 'svg',
+      svg: this.dragElement!.querySelector('svg')!.outerHTML,
+    };
   }
 
-  override isTarget(element: HTMLElement): boolean {
-    let target = element.querySelector('img, svg');
-    if (target !== null) {
-      this.currentDragElement = target as HTMLElement;
-      return true;
+  getOrigin(): string {
+    return this.dragElement?.getAttribute('href') || location.href;
+  }
+
+  getTitle(): string | undefined {
+    return this.dragElement!.getAttribute('alt') || undefined;
+  }
+
+  getSrc(): string | undefined {
+    let dom = this.dragElement!.querySelector('img')!;
+
+    if (dom instanceof HTMLImageElement) {
+      let srcText = dom.dataset['src'] || dom.src;
+
+      if (dom.dataset['srcset'] || dom.srcset) {
+        const imageDescBySize = getImageDescBySize(
+          dom.dataset['srcset'] || dom.srcset,
+        );
+        if (imageDescBySize.length > 0) {
+          const [{ url }] = imageDescBySize;
+          srcText = url;
+        }
+      }
+
+      return srcText;
     }
-    return this.hasBgImage(element);
+
+    return undefined;
+  }
+
+  getRealUrl(url: string): string {
+    return getFullUrl(url);
+  }
+
+  override isTarget(): boolean {
+    let target = this.dragElement!.querySelector('img, svg');
+    return !!target;
   }
 }

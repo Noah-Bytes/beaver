@@ -1,9 +1,12 @@
+import { IWebsiteImageMeta } from './image';
+import { IWebsiteSVGMeta } from './svg';
+
 export interface IDragOptions {
+  log?: boolean;
   onDragEnd?: () => void;
   onFirstDrag?: (
     position: [number, number],
-    dragElement: HTMLElement,
-    dragTargetElement?: HTMLElement,
+    metaData: IWebsiteImageMeta | IWebsiteSVGMeta | undefined,
   ) => void;
 }
 
@@ -11,8 +14,9 @@ export interface IDrag {
   dragoverX: number;
   dragoverY: number;
   targetSelector: string;
-  currentDragElement?: HTMLElement;
-  isTarget: (element: HTMLElement) => boolean;
+  dragElement?: HTMLElement;
+  isTarget: () => boolean;
   initEvent: () => void;
+  getMetaData: () => IWebsiteImageMeta | IWebsiteSVGMeta | undefined;
   initDocumentEvent: () => void;
 }

@@ -1,5 +1,8 @@
-import { IDrag } from '@beaver/types';
+import {IDrag, IWebsiteImageMeta} from '@beaver/types';
 
 export interface IWebsiteLink extends IDrag {
-  hasBgImage: (element: HTMLElement) => void;
+  getOrigin: () => string;
+  getTitle: () => string | undefined;
+  getSrc: () => string | undefined;
+  getRealUrl: (url: string) => string;
 }

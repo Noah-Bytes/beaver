@@ -5,7 +5,7 @@ export interface IMetaFileManage<
   M extends IMetaFileMeta,
   U extends IMetaFileMetaUpdate,
 > {
-  readonly files: F[];
+  files: F[];
   readonly fileMap: Map<string, F>;
 
   readonly dir: string;

@@ -121,7 +121,9 @@ export class Website implements IWebsite {
     for (let i = 0; i < elementsByTagName.length; i++) {
       const e = elementsByTagName[i];
       if (e.width.baseVal.value > 5 && e.height.baseVal.value > 5) {
-        const info = this.svg!.getMeta(e);
+        // @ts-ignore
+        this.svg!.dragElement = e;
+        const info = this.svg!.getMetaData();
         if (!has[info.svg]) {
           has[info.svg] = true;
           result.push(info);
@@ -141,7 +143,8 @@ export class Website implements IWebsite {
     for (let i = 0; i < elements.length; i++) {
       const e = elements[i];
       if (e.width > 5 && e.height > 5 && !!e.src) {
-        const info = this.image!.getMeta(e);
+        this.image!.dragElement = e;
+        const info = this.image!.getMetaData();
         // @ts-ignore
         if (!has[info.src || info.base64]) {
           result.push({

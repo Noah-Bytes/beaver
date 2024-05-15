@@ -130,6 +130,10 @@ export function getFullUrl(url: string) {
     return url;
   }
 
+  if (url.startsWith('//')) {
+    return window.location.protocol + url;
+  }
+
   return window.location.origin + url;
 }
 
@@ -172,7 +176,22 @@ export function getBase64Ext(base64: string) {
 }
 
 export function uuid(prefix = 'beaver') {
-  const timestamp = new Date().getTime() // 获取当前时间的时间戳
-  const randomPart = Math.random().toString(36).substring(2, 15) // 生成一个随机字符串
-  return `${prefix}_${timestamp}_${randomPart}` // 组合成一个唯一ID
+  const timestamp = new Date().getTime(); // 获取当前时间的时间戳
+  const randomPart = Math.random().toString(36).substring(2, 15); // 生成一个随机字符串
+  return `${prefix}_${timestamp}_${randomPart}`; // 组合成一个唯一ID
+}
+
+export function getSrcSet(dom: HTMLImageElement) {
+  let srcText;
+  if (dom.dataset['srcset'] || dom.srcset) {
+    const imageDescBySize = getImageDescBySize(
+      dom.dataset['srcset'] || dom.srcset,
+    );
+    if (imageDescBySize.length > 0) {
+      const [{ url }] = imageDescBySize;
+      srcText = url;
+    }
+  }
+
+  return srcText;
 }

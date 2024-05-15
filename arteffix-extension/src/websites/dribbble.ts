@@ -2,7 +2,7 @@ import { IDragOptions } from '@beaver/types';
 import $ from 'jquery';
 import { Image } from '../image';
 import { Link } from '../link';
-import { getFullUrl, isHttpLink } from '../utils';
+import { getFullUrl, getSrcSet, isHttpLink } from '../utils';
 import { Website } from '../website';
 
 export class DribbbleLink extends Link {
@@ -10,13 +10,12 @@ export class DribbbleLink extends Link {
     super(options);
   }
 
-  override isTarget(element: HTMLElement): boolean {
+  override isTarget(): boolean {
     let result = false;
-    $(element)
+    $(this.dragElement!)
       .siblings('figure')
       .find('img')
       .each((index, element) => {
-        this.currentDragElement = element as HTMLElement;
         result = true;
         return false;
       });
@@ -25,12 +24,50 @@ export class DribbbleLink extends Link {
       return true;
     }
 
-    let target = element.querySelector('img, svg');
-    if (target !== null) {
-      this.currentDragElement = target as HTMLElement;
-      return true;
+    let target = this.dragElement!.querySelector('img, svg');
+    return !!target;
+  }
+
+  override getOrigin(): string {
+    const a = this.dragElement! as HTMLLinkElement;
+    const href = a.getAttribute('href');
+    if (href) {
+      return getFullUrl(href);
     }
-    return this.hasBgImage(element);
+
+    return location.href;
+  }
+
+  override getRealUrl(url: string): string {
+    if (isHttpLink(url)) {
+      return url.split('?')[0];
+    }
+    return super.getRealUrl(url);
+  }
+
+  private findImg() {
+    const dom = this.dragElement!.querySelector('img');
+    if (dom) {
+      return dom;
+    }
+
+    return $(this.dragElement!).siblings('figure').find('img')[0];
+  }
+
+  override getSrc(): string | undefined {
+    const dom = this.findImg();
+    if (dom) {
+      return getSrcSet(dom) || dom.src;
+    }
+    return undefined;
+  }
+
+  override getTitle(): string | undefined {
+    const dom = this.findImg();
+    if (dom) {
+      return dom.alt;
+    }
+    return undefined;
   }
 }
 
@@ -39,15 +76,15 @@ export class DribbbleImage extends Image {
     super(options);
   }
 
-  override getOrigin(element: HTMLElement): string | undefined {
-    const $a = $(element).parent().siblings('a');
+  override getOrigin(): string | undefined {
+    const $a = $(this.dragElement!).parent().siblings('a');
     if ($a.length > 0) {
       const href = $a[0].getAttribute('href');
       if (href) {
         return getFullUrl(href);
       }
     }
-    return super.getOrigin(element);
+    return super.getOrigin();
   }
 
   override getRealUrl(url: string): string {

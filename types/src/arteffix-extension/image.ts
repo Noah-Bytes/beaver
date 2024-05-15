@@ -10,9 +10,9 @@ export interface IWebsiteImageMeta {
 }
 
 export interface IWebsiteImage extends IDrag {
-  getOrigin: (targetElement: HTMLElement) => string | undefined;
-  getTitle: (element: HTMLElement) => string | undefined;
-  getMeta: (element: HTMLElement) => IWebsiteImageMeta | undefined;
-  getBase64Meta: (element: HTMLElement) => Promise<IWebsiteImageMeta | undefined>;
+  getOrigin: () => string | undefined;
+  getTitle: () => string | undefined;
+  getSrc: () => string;
+  getBase64Meta: () => Promise<IWebsiteImageMeta | undefined>;
   getRealUrl: (url: string) => string;
 }

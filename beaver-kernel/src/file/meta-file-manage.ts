@@ -4,9 +4,7 @@ import {
   IMetaFileMeta,
   IMetaFileMetaUpdate,
 } from '@beaver/types';
-import { findIndex } from 'lodash';
 import * as path from 'path';
-import * as fs from "fs-extra";
 
 export class MetaFileManage<
   F extends IMetaFile<M, U>,
@@ -16,7 +14,7 @@ export class MetaFileManage<
 {
   readonly dir: string;
   readonly fileMap: Map<string, F> = new Map();
-  readonly files: F[] = [];
+  files: F[] = [];
 
   constructor(rootDir: string, appName: string) {
     this.dir = path.resolve(rootDir, appName);
@@ -90,16 +88,12 @@ export class MetaFileManage<
     if (!this.hasFile(id)) {
       return;
     }
-    const file = this.getFile(id)!;
 
+    this.files = this.files.filter((file) => file.meta.id !== id);
+
+    const file = this.getFile(id)!;
     await file.remove();
     this.fileMap.delete(id);
-
-    const index = findIndex(this.files, (elem) => elem.meta.id === id);
-
-    if (index > -1) {
-      this.files.slice(index, 1);
-    }
   }
 
   init(rootDir: string): Promise<void> {
