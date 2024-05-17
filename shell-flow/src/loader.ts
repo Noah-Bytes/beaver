@@ -1,9 +1,9 @@
-import * as yaml from 'yaml';
-import * as fs from 'fs';
 import { parse } from 'csv-parse';
-import * as path from 'path';
+import fs from 'fs-extra';
+import path from 'path';
+import vm from 'vm';
+import yaml from 'yaml';
 import { createLogger } from './logger';
-import * as vm from 'vm';
 
 const logger = createLogger(`loader`);
 
@@ -15,7 +15,7 @@ export async function loader(filePath: string) {
 
   switch (extension) {
     case '.json':
-      resolved = requireJSON(filePath);
+      resolved = fs.readJsonSync(filePath);
       break;
     case '.js':
       resolved = await requireJS(filePath);
@@ -35,16 +35,6 @@ export async function loader(filePath: string) {
     extension,
     dirname,
   };
-}
-
-export async function requireJSON(filePath: string) {
-  const content = await fs.promises.readFile(filePath, 'utf8');
-
-  try {
-    return JSON.parse(content);
-  } catch (e) {
-    logger.error(e);
-  }
 }
 
 export async function requireJS(filePath: string) {

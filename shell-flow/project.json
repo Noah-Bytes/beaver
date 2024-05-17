@@ -5,17 +5,15 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/js:swc",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "@nx/rollup:rollup",
+      "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/shell-flow",
-        "main": "shell-flow/src/index.ts",
         "tsConfig": "shell-flow/tsconfig.lib.json",
-        "assets": [
-          "shell-flow/*.md"
-        ]
+        "project": "shell-flow/package.json",
+        "main": "shell-flow/src/index.ts",
+        "format": ["cjs", "esm"],
+        "external": ["@beaver/arteffix-utils"]
       }
     },
     "nx-release-publish": {

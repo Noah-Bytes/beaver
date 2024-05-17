@@ -4,13 +4,10 @@ import { Node } from '../../src/bin/module/node';
 jest.setTimeout(1000000);
 
 describe('node 测试', () => {
-  const shellFlow = new ShellFlow(
-    'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
-    {
-      isMirror: true,
-    },
-  );
+  const shellFlow = new ShellFlow('Beaver', {
+    isMirror: true,
+    homeDir: '/Users/taibai/workspace/beaver/beaver',
+  });
   const node = new Node(shellFlow);
 
   it('node 安装', async () => {

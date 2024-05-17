@@ -1,8 +1,7 @@
-import * as systemInfo from 'systeminformation';
-import { ISystemInfoTypes } from './types/system-info-types';
-import { Systeminformation } from 'systeminformation';
-import * as os from 'os';
+import os from 'os';
+import systemInfo, { Systeminformation } from 'systeminformation';
 import { createLogger } from './logger';
+import { ISystemInfoTypes } from './types';
 
 const logger = createLogger('system-info');
 

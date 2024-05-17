@@ -1,16 +1,13 @@
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 import { Logger } from 'winston';
 import { AppManager } from './app';
 import { Bin } from './bin';
 import { createLogger } from './logger';
 import { ShellManager } from './shell/shell-manager';
 import { SystemInfo } from './system-info';
-import {
-  IShellFlowOptionsTypes,
-  IShellFlowTypes,
-} from './types';
+import { IShellFlowOptionsTypes, IShellFlowTypes } from './types';
 
 export class ShellFlow implements IShellFlowTypes {
   static CACHE_FOLDERS = [
@@ -79,6 +76,10 @@ export class ShellFlow implements IShellFlowTypes {
     }
 
     this._init = true;
+  }
+
+  destroy(): Promise<void> {
+    return Promise.resolve(undefined);
   }
 
   absPath(...arg: string[]): string {

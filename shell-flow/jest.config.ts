@@ -4,8 +4,8 @@ export default {
   preset: '../jest.preset.js',
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
+    '^.+\\.[tj]s$': 'babel-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../coverage/shell-flow',
+  coverageDirectory: '../coverage/shell-flow'
 };

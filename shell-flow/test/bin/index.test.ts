@@ -5,9 +5,9 @@ jest.setTimeout(100000);
 describe('bin 测试', () => {
   const shellFlow = new ShellFlow(
     'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
     {
       isMirror: true,
+      homeDir: '/Users/taibai/workspace/beaver/beaver',
     },
   );
 

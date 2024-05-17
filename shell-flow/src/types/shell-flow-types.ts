@@ -15,5 +15,7 @@ export interface IShellFlowTypes {
 
   init: () => Promise<void>;
 
+  destroy: () => Promise<void>;
+
   absPath: (p: string) => string;
 }

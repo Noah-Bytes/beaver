@@ -18,11 +18,15 @@ import pty from 'node-pty';
 import os from 'os';
 import path from 'path';
 import process from 'process';
-// @ts-ignore
-import { shellPathSync } from 'shell-path';
+import { shellEnvSync } from 'shell-env';
 import sudoPrompt from 'sudo-prompt';
 import { Logger } from 'winston';
 import { mirrorUrl } from '../mirror';
+
+export function shellPathSync() {
+  const { PATH } = shellEnvSync();
+  return PATH;
+}
 
 export class Shell implements IShellTypes {
   static STATUS = {

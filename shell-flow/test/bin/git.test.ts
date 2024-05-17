@@ -1,16 +1,13 @@
 import { ShellFlow } from '../../src';
-import {Git} from "../../src/bin/module/git";
+import { Git } from '../../src/bin/module/git';
 
 jest.setTimeout(1000000);
 
 describe('git 测试', () => {
-  const shellFlow = new ShellFlow(
-    'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
-    {
-      isMirror: true,
-    },
-  );
+  const shellFlow = new ShellFlow('Beaver', {
+    isMirror: true,
+    homeDir: '/Users/taibai/workspace/beaver/beaver',
+  });
   const git = new Git(shellFlow);
 
   it('git 安装', async () => {
