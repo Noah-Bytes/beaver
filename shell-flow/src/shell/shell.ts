@@ -21,7 +21,6 @@ import process from 'process';
 import { shellEnvSync } from 'shell-env';
 import sudoPrompt from 'sudo-prompt';
 import { Logger } from 'winston';
-import { mirrorUrl } from '../mirror';
 
 export function shellPathSync() {
   const { PATH } = shellEnvSync();
@@ -52,9 +51,6 @@ export class Shell implements IShellTypes {
   private ptyProcess: IPty | undefined;
   private readonly logger: Logger;
   private readonly _ctx: ShellFlow;
-  private readonly mirror: {
-    [key: string]: string;
-  } = require('../mirror.json');
   eventBus: IEventBus;
   readonly groupName: string;
 
@@ -310,7 +306,7 @@ export class Shell implements IShellTypes {
     let msg = this.buildCmd(params);
 
     if (ctxOptions?.isMirror) {
-      msg = mirrorUrl(msg);
+      msg = this._ctx.mirrorUrl(msg);
     }
 
     this.logger.info(msg);
@@ -337,7 +333,7 @@ export class Shell implements IShellTypes {
     let msg = this.buildCmd(params);
 
     if (ctxOptions?.isMirror) {
-      msg = mirrorUrl(msg);
+      msg = this._ctx.mirrorUrl(msg);
     }
 
     this.logger.info(msg);

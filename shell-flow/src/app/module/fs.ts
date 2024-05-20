@@ -6,7 +6,6 @@ import path from 'path';
 import Pdrive from 'pdrive';
 import { rimraf } from 'rimraf';
 import { Logger } from 'winston';
-import { mirrorUrl } from '../../mirror';
 
 export class Fs {
   private readonly _ctx: ShellFlow;
@@ -75,7 +74,7 @@ export class Fs {
     let targetURL = url;
 
     if (options?.isMirror) {
-      targetURL = mirrorUrl(targetURL);
+      targetURL = this._ctx.mirrorUrl(targetURL);
       this.logger.info('Using mirror: ' + targetURL);
     }
 

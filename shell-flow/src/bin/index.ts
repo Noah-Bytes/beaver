@@ -7,7 +7,6 @@ import path from 'path';
 import wget from 'wget-improved';
 import { Logger } from 'winston';
 import { createLogger } from '../logger';
-import { mirrorUrl } from '../mirror';
 import { ShellFlow } from '../shell-flow';
 import { IBinModuleTypes, IBinTypes } from '../types/bin-types';
 import * as modules from './module';
@@ -66,7 +65,7 @@ export class Bin implements IBinTypes {
     let targetURL = url;
 
     if (options?.isMirror) {
-      targetURL = mirrorUrl(targetURL);
+      targetURL = this._ctx.mirrorUrl(targetURL);
       this.logger.info('Using mirror: ' + targetURL);
     }
 
@@ -112,7 +111,7 @@ export class Bin implements IBinTypes {
     let targetURL = url;
 
     if (options?.isMirror) {
-      targetURL = mirrorUrl(targetURL);
+      targetURL = this._ctx.mirrorUrl(targetURL);
       this.logger.info('Using mirror: ' + targetURL);
     }
 

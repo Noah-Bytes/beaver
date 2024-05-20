@@ -34,11 +34,13 @@ export class ShellFlow implements IShellFlowTypes {
   readonly logger: Logger;
   readonly options?: IShellFlowOptionsTypes;
   private _init: boolean = false;
+  private readonly mirror: Record<string, string>;
 
   constructor(appName: string, options?: IShellFlowOptionsTypes) {
     this.homeDir = options?.homeDir || os.homedir();
     this.appName = appName;
     this.options = options;
+    this.mirror = options?.mirror || {};
 
     this.logger = createLogger('shell-flow');
     this.systemInfo = new SystemInfo();
@@ -87,5 +89,15 @@ export class ShellFlow implements IShellFlowTypes {
       return path.resolve(this.homeDir, ...arg);
     }
     throw new Error('homeDir is not set');
+  }
+
+  mirrorUrl(url: string): string {
+    for (let mirrorKey in this.mirror) {
+      if (url.includes(mirrorKey)) {
+        return url.replace(new RegExp(mirrorKey, 'gm'), this.mirror[mirrorKey]);
+      }
+    }
+
+    return url;
   }
 }
