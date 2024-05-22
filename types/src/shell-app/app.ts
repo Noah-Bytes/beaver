@@ -26,6 +26,9 @@ export interface IShellAppRunParams {
     platform: string;
     mirror?: boolean;
   }) => string | string[];
+  on?: {
+    event: string
+  }[]
   path?: string;
   venv?: string;
   cmd?: string; // 执行命令
@@ -55,4 +58,9 @@ export interface IShellAppRequires {
 export interface IShellApp {
   run: IShellAppRun[];
   requires: IShellAppRequires[];
+}
+
+
+export interface IRequirement extends IShellAppRequires {
+  installed?: boolean
 }

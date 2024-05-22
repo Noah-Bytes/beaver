@@ -1,3 +1,5 @@
+import { EventBus } from '@beaver/arteffix-utils';
+import EventEmitter from 'events';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
@@ -28,6 +30,7 @@ export class ShellFlow implements IShellFlowTypes {
   bin: Bin;
   app: AppManager;
   shell: ShellManager;
+  eventBus: EventBus = new EventBus(new EventEmitter(), 'shell-flow');
   readonly appName: string;
   homeDir: string;
   readonly systemInfo: SystemInfo;
@@ -58,8 +61,6 @@ export class ShellFlow implements IShellFlowTypes {
     }
 
     await this.systemInfo.init();
-    await this.bin.init();
-    await this.app.init();
 
     try {
       // 文件目录初始化
@@ -76,6 +77,11 @@ export class ShellFlow implements IShellFlowTypes {
       this.logger.error(`initialization failed`);
       this.logger.error(e);
     }
+
+    this.logger.info('开始初始化 bin');
+    await this.bin.init();
+    this.logger.info('开始初始化 app');
+    await this.app.init();
 
     this._init = true;
   }

@@ -13,7 +13,6 @@ import {
 } from '@beaver/shell-flow';
 import { IKey } from '@beaver/types';
 import fs from 'fs';
-import type { IPty } from 'node-pty';
 import pty from 'node-pty';
 import os from 'os';
 import path from 'path';
@@ -21,6 +20,8 @@ import process from 'process';
 import { shellEnvSync } from 'shell-env';
 import sudoPrompt from 'sudo-prompt';
 import { Logger } from 'winston';
+
+type IPty = pty.IPty;
 
 export function shellPathSync() {
   const { PATH } = shellEnvSync();
@@ -226,6 +227,11 @@ export class Shell implements IShellTypes {
     const { bin } = this._ctx;
     const envs = bin.envs(options?.env);
 
+    console.log({
+      ...this.env,
+      ...this.parseEnv(envs),
+    });
+
     this.ptyProcess = pty.spawn(this._terminal, this.args, {
       name: this.name,
       cols: options?.cols || 100,
@@ -238,7 +244,6 @@ export class Shell implements IShellTypes {
     });
 
     this.ptyProcess.onData((data) => {
-      console.log(data);
       this.eventBus.emit(this._event_name_data, data);
     });
 
@@ -394,9 +399,7 @@ export class Shell implements IShellTypes {
           const result = stream
             .replace(reg, '')
             // TODO 多余标记没有清除
-            .replace(new RegExp(Shell.END_FLAG, 'gm'), '');
-
-          this.kill();
+            .replace(new RegExp('; echo \\$\\?', 'gm'), '');
 
           if (exitStatus === 0) {
             this.status = Shell.STATUS.IDLE;
@@ -405,6 +408,8 @@ export class Shell implements IShellTypes {
             this.status = Shell.STATUS.IDLE;
             reject(new Error(result));
           }
+
+          this.kill();
         }
       });
 
@@ -559,14 +564,14 @@ export class Shell implements IShellTypes {
       return {};
     }
 
-    let PATH_KEY;
+    let PATH_KEY: string | undefined;
     if (env['Path']) {
       PATH_KEY = 'Path';
     } else if (env['PATH']) {
       PATH_KEY = 'PATH';
     }
 
-    const result: { [key: string]: string } = {};
+    const result: Record<string, string> = {};
 
     if (isWin32) {
       // ignore

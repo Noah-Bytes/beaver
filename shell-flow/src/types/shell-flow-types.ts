@@ -4,6 +4,7 @@ export interface IShellFlowOptionsTypes {
   isMirror?: boolean;
   mirror?: Record<string, string>;
   homeDir?: string;
+  termWrite?: (data: string) => void
 }
 
 export interface IShellFlowTypes {
@@ -19,4 +20,6 @@ export interface IShellFlowTypes {
   destroy: () => Promise<void>;
 
   absPath: (p: string) => string;
+
+  mirrorUrl: (url: string) => string;
 }

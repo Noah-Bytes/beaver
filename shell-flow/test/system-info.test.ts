@@ -1,4 +1,4 @@
-import { SystemInfo } from '../src';
+import { SystemInfo } from '../src/system-info';
 
 describe('system-info 系统信息', () => {
   let systemInfo: SystemInfo = new SystemInfo();
@@ -17,16 +17,16 @@ describe('system-info 系统信息', () => {
 
   it('获取CPU信息', () => {
     const info = systemInfo?.cpu;
-    expect(info).toBeDefined;
+    console.log(info);
   });
 
   it('获取内存信息', () => {
     const info = systemInfo?.mem;
-    expect(info).toBeDefined;
+    console.log(info);
   });
 
   it('获得GPU', () => {
     const info = systemInfo?.GPU;
-    expect(info).toBeDefined;
+    console.log(info);
   });
 });

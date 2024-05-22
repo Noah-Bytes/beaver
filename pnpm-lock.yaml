@@ -56,6 +56,9 @@ importers:
       decompress:
         specifier: ^4.2.1
         version: 4.2.1
+      events:
+        specifier: ^3.3.0
+        version: 3.3.0
       exifreader:
         specifier: ^4.22.1
         version: 4.22.1
@@ -8394,7 +8397,7 @@ snapshots:
 
   '@babel/helper-builder-binary-assignment-operator-visitor@7.22.15':
     dependencies:
-      '@babel/types': 7.24.0
+      '@babel/types': 7.24.5
 
   '@babel/helper-compilation-targets@7.23.6':
     dependencies:
@@ -8441,7 +8444,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.24.3
       '@babel/helper-compilation-targets': 7.23.6
-      '@babel/helper-plugin-utils': 7.24.0
+      '@babel/helper-plugin-utils': 7.24.5
       debug: 4.3.4(supports-color@8.1.1)
       lodash.debounce: 4.0.8
       resolve: 1.22.8
@@ -8530,7 +8533,7 @@ snapshots:
     dependencies:
       '@babel/helper-function-name': 7.23.0
       '@babel/template': 7.24.0
-      '@babel/types': 7.24.0
+      '@babel/types': 7.24.5
 
   '@babel/helpers@7.24.1':
     dependencies:
@@ -8594,7 +8597,7 @@ snapshots:
   '@babel/plugin-syntax-bigint@7.8.3(@babel/core@7.24.3)':
     dependencies:
       '@babel/core': 7.24.3
-      '@babel/helper-plugin-utils': 7.24.0
+      '@babel/helper-plugin-utils': 7.24.5
 
   '@babel/plugin-syntax-class-properties@7.12.13(@babel/core@7.24.3)':
     dependencies:
@@ -8634,7 +8637,7 @@ snapshots:
   '@babel/plugin-syntax-import-meta@7.10.4(@babel/core@7.24.3)':
     dependencies:
       '@babel/core': 7.24.3
-      '@babel/helper-plugin-utils': 7.24.0
+      '@babel/helper-plugin-utils': 7.24.5
 
   '@babel/plugin-syntax-json-strings@7.8.3(@babel/core@7.24.3)':
     dependencies:
@@ -8846,7 +8849,7 @@ snapshots:
       '@babel/helper-hoist-variables': 7.22.5
       '@babel/helper-module-transforms': 7.23.3(@babel/core@7.24.3)
       '@babel/helper-plugin-utils': 7.24.5
-      '@babel/helper-validator-identifier': 7.22.20
+      '@babel/helper-validator-identifier': 7.24.5
 
   '@babel/plugin-transform-modules-umd@7.24.1(@babel/core@7.24.3)':
     dependencies:
@@ -8912,7 +8915,7 @@ snapshots:
   '@babel/plugin-transform-private-methods@7.24.1(@babel/core@7.24.3)':
     dependencies:
       '@babel/core': 7.24.3
-      '@babel/helper-create-class-features-plugin': 7.24.1(@babel/core@7.24.3)
+      '@babel/helper-create-class-features-plugin': 7.24.5(@babel/core@7.24.3)
       '@babel/helper-plugin-utils': 7.24.5
 
   '@babel/plugin-transform-private-property-in-object@7.24.5(@babel/core@7.24.3)':
@@ -9129,7 +9132,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.24.3
       '@babel/helper-plugin-utils': 7.24.5
-      '@babel/types': 7.24.0
+      '@babel/types': 7.24.5
       esutils: 2.0.3
 
   '@babel/preset-react@7.24.1(@babel/core@7.24.3)':
@@ -9145,7 +9148,7 @@ snapshots:
   '@babel/preset-typescript@7.24.1(@babel/core@7.24.3)':
     dependencies:
       '@babel/core': 7.24.3
-      '@babel/helper-plugin-utils': 7.24.0
+      '@babel/helper-plugin-utils': 7.24.5
       '@babel/helper-validator-option': 7.23.5
       '@babel/plugin-syntax-jsx': 7.24.1(@babel/core@7.24.3)
       '@babel/plugin-transform-modules-commonjs': 7.24.1(@babel/core@7.24.3)

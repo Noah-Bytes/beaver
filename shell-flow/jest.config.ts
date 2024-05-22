@@ -7,5 +7,10 @@ export default {
     '^.+\\.[tj]s$': 'babel-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../coverage/shell-flow'
+  coverageDirectory: '../coverage/shell-flow',
+  transformIgnorePatterns: ['node_modules/(?!(execa)/)'],
+  moduleNameMapper: {
+    '@beaver/arteffix-utils':
+      '/Users/taibai/workspace/beaver/dist/arteffix-utils',
+  },
 };

@@ -1,39 +1,51 @@
+import { ShellFlow } from '../../src/shell-flow';
 import { Shell } from '../../src/shell/shell';
-import { ShellFlow } from '../../src';
 
 describe('终端测试', () => {
-  const shellFlow = new ShellFlow(
-    'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
-    {
-      isMirror: true,
-    },
-  );
+  const shellFlow = new ShellFlow('Beaver', {
+    isMirror: true,
+    homeDir: '/Users/taibai/Documents/我的智流.shell',
+  });
 
-  const shell = new Shell('test', shellFlow);
-  const shell1 = new Shell('并发', shellFlow);
-  const sync = new Shell('同步', shellFlow);
+  const shell = new Shell('test', 'test', shellFlow);
+  const shell1 = new Shell('并发', 'test', shellFlow);
+  const sync = new Shell('同步', 'test', shellFlow);
 
   jest.setTimeout(20000);
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    await shellFlow.init()
     shell.init();
     shell1.init();
     sync.init();
   });
 
   it('控制台输入', () => {
-    shell.send('ls', false);
-    shell.send(' -lh', true);
-    shell.send('pwd', true);
+    shell.send('ls', {
+      isRun: false,
+    });
+    shell.send(' -lh', {
+      isRun: true
+    });
+    shell.send('pwd', {
+      isRun: true
+    });
   });
 
   it('控制台并发', async () => {
-    shell.send('pwd', true);
+    shell.send('pwd', {
+      isRun: true,
+    });
 
-    shell1.send('ls', false);
-    shell1.send(' -lh', true);
-    shell1.send('pwd', true);
+    shell1.send('ls', {
+      isRun: false,
+    });
+    shell1.send(' -lh', {
+      isRun: true,
+    });
+    shell1.send('pwd', {
+      isRun: true,
+    });
   });
 
   it('同步执行', async () => {

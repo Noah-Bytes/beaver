@@ -44,10 +44,12 @@ export class AppManager {
       this.removeAllModule();
 
       for (let modulesKey in modules) {
+        // @ts-ignore
+        const mod = modules[modulesKey];
         if (this.getModule(modulesKey.toLowerCase())) {
-        } else {
+        } else if (typeof mod === 'function') {
           // @ts-ignore
-          const m = new modules[modulesKey](this._ctx);
+          const m = new mod(this._ctx);
           if (m?.init) {
             await m.init();
           }

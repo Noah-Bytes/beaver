@@ -89,6 +89,7 @@
     "csv-parse": "^5.5.5",
     "dayjs": "^1.11.10",
     "decompress": "^4.2.1",
+    "events": "^3.3.0",
     "exifreader": "^4.22.1",
     "fast-glob": "^3.3.2",
     "fs-extra": "^11.2.0",

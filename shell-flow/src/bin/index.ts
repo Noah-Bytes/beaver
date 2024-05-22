@@ -38,21 +38,24 @@ export class Bin implements IBinTypes {
   async init(): Promise<void> {
     await fs.promises.mkdir(this._dir, { recursive: true });
 
-    await this.checkInstalled();
-
     this.removeAllModule();
 
     for (let modulesKey in modules) {
+      // @ts-ignore
+      const mod = modules[modulesKey];
       if (this.getModule(modulesKey.toLowerCase())) {
-      } else {
+      } else if (typeof mod === 'function') {
+        this.logger.info(`开始初始化 ${modulesKey}`);
         // @ts-ignore
-        const m = new modules[modulesKey](this._ctx);
+        const m = new mod(this._ctx);
         if (m?.init) {
           await m.init();
         }
         this.createModule(modulesKey.toLowerCase(), m);
       }
     }
+
+    await this.checkInstalled();
   }
 
   download(url: string, dest: string): Promise<void> {
@@ -184,7 +187,6 @@ export class Bin implements IBinTypes {
   }
 
   createModule(name: string, instantiate: IBinModuleTypes): void {
-    console.log(name);
     this.moduleMap.set(name, instantiate);
     this.moduleList.push(instantiate);
   }

@@ -33,15 +33,19 @@ export class Shell {
       `app/shell/running/${uuid()}`,
       ctx.name,
     );
+    sh.onShellData((data) => {
+      if (params.on) {
+        params.on.forEach((elem) => {
+          this._ctx.eventBus.emit(elem.event, data);
+        });
+      }
+    });
     sh.execute(params, {
       cwd: params.cwd,
       path: params.path,
       env: params.env,
     }).catch((e) => {
       console.error(e);
-    });
-    sh.onShellData((data) => {
-      console.log(data);
     });
 
     return sh;
