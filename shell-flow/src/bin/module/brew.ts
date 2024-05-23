@@ -1,22 +1,19 @@
+import { ShellFlow } from '@beaver/shell-flow';
 import decompress from 'decompress';
-import { IBinModuleTypes } from '@beaver/shell-flow';
+import { BinModule } from './bin-module';
 
 // @ts-ignore
 const _decompress = decompress as unknown as typeof decompress.default;
 
-export class Brew implements IBinModuleTypes {
+export class Brew extends BinModule {
   static DOWNLOAD_URL =
     'https://github.com/cocktailpeanut/bin/releases/download/homebrew/homebrew.zip';
 
-  private readonly _ctx: any;
-  readonly shell: any;
-
-  constructor(ctx: any) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('brew');
+  constructor(ctx: ShellFlow) {
+    super('brew', ctx);
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     const { bin } = this._ctx;
     const fileName = 'homebrew.zip';
 
@@ -39,13 +36,13 @@ export class Brew implements IBinModuleTypes {
     }
   }
 
-  installed(): boolean {
+  override installed(): boolean {
     const { bin } = this._ctx;
 
     return bin.exists('homebrew');
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     const { bin } = this._ctx;
     await bin.rm('homebrew');
   }

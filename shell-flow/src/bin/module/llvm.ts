@@ -1,16 +1,13 @@
 import { isDarwin } from '@beaver/arteffix-utils';
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
+import { BinModule } from './bin-module';
 
-export class LLVM implements IBinModuleTypes {
-  private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
-
+export class LLVM extends BinModule {
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('llvm');
+    super('llvm', ctx);
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     if (isDarwin) {
       await this.shell.run({
         message: 'brew install llvm',
@@ -22,7 +19,7 @@ export class LLVM implements IBinModuleTypes {
     }
   }
 
-  async installed(): Promise<boolean> {
+  override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
 
     let groupName;
@@ -36,7 +33,7 @@ export class LLVM implements IBinModuleTypes {
     return await bin.checkIsInstalled('llvm', groupName);
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     await this.shell.run({
       message: 'conda remove -y llvm',
     });

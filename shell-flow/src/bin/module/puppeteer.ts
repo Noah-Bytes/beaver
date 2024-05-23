@@ -1,16 +1,13 @@
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
 import fs from 'fs';
+import { BinModule } from './bin-module';
 
-export class Puppeteer implements IBinModuleTypes {
-  private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
-
+export class Puppeteer extends BinModule {
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('puppeteer');
+    super('puppeteer', ctx);
   }
 
-  async install() {
+  override async install() {
     const { bin, options } = this._ctx;
     const dir = bin.absPath('puppet');
     await fs.promises.mkdir(dir, { recursive: true });
@@ -38,12 +35,12 @@ export class Puppeteer implements IBinModuleTypes {
     );
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     const { bin } = this._ctx;
     await bin.rm('puppet');
   }
 
-  installed(): boolean | Promise<boolean> {
+  override installed(): boolean | Promise<boolean> {
     const { bin } = this._ctx;
     return (
       bin.exists('puppet') &&

@@ -41,6 +41,15 @@ export class App implements IAppTypes {
     this.name = name;
     this.git = git;
     this.logger = createLogger(`app:${name}`);
+    ctx.eventBus.on([name, 'start'].join(':'), function (data: string) {
+      ctx.options?.start?.(name, data);
+    });
+    ctx.eventBus.on([name, 'install'].join(':'), function (data: string) {
+      ctx.options?.install?.(name, data);
+    });
+    ctx.eventBus.on([name, 'update'].join(':'), function (data: string) {
+      ctx.options?.update?.(name, data);
+    });
   }
 
   isInit() {
@@ -103,7 +112,10 @@ export class App implements IAppTypes {
     const m: any = (await loader(p)).resolved;
     if (m) {
       if (m.constructor.name === 'AsyncFunction') {
-        return await m({ platform: systemInfo.platform, arch: systemInfo.arch });
+        return await m({
+          platform: systemInfo.platform,
+          arch: systemInfo.arch,
+        });
       } else if (m.constructor.name === 'Function') {
         return m({ platform: systemInfo.platform, arch: systemInfo.arch });
       }

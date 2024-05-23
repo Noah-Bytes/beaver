@@ -1,16 +1,13 @@
 import { isWin32 } from '@beaver/arteffix-utils';
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
+import { BinModule } from './bin-module';
 
-export class Cuda implements IBinModuleTypes {
-  private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
-
+export class Cuda extends BinModule {
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('cuda');
+    super('cuda', ctx);
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     if (isWin32) {
       await this.shell.run({
         message: 'conda install -y cudnn libzlib-wapi -c conda-forge',
@@ -29,7 +26,7 @@ export class Cuda implements IBinModuleTypes {
     }
   }
 
-  async installed(): Promise<boolean> {
+  override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
 
     const cudnn = await bin.checkIsInstalled('cudnn', 'conda');
@@ -43,7 +40,7 @@ export class Cuda implements IBinModuleTypes {
     return cudnn && cuda;
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     await this.shell.run({
       message: 'conda remove -y cudnn cuda',
     });

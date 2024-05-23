@@ -1,5 +1,6 @@
 import {IKey, IShellAppRequires} from '@beaver/types';
 import type { IShellTypes } from './shell-types';
+import {ShellFlow} from "../shell-flow";
 
 export interface IBinTypes {
   dir: string;
@@ -40,6 +41,7 @@ export interface IBinTypes {
 }
 
 export interface IBinModuleTypes {
+  readonly _ctx: ShellFlow;
   readonly dependencies?: string[];
   readonly shell: IShellTypes;
   env?: () => { [key: string]: any } | undefined;

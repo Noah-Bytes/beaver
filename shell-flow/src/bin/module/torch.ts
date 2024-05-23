@@ -1,17 +1,14 @@
-import type { IShellTypes } from '@beaver/shell-flow';
-import { IBinModuleTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
+import { BinModule } from './bin-module';
 
-export class Torch implements IBinModuleTypes {
-  readonly dependencies: string[] = ['conda'];
-  private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
+export class Torch extends BinModule {
+  override readonly dependencies: string[] = ['conda'];
 
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('torch');
+    super('torch', ctx);
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     const { options } = this._ctx;
     const {
       systemInfo: { platform, GPUs },
@@ -58,7 +55,7 @@ export class Torch implements IBinModuleTypes {
     });
   }
 
-  async installed(): Promise<boolean> {
+  override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
     if (bin.hasModule('conda')) {
       return !!bin.getModule('conda')?.exists?.('torch*');
@@ -67,7 +64,7 @@ export class Torch implements IBinModuleTypes {
     return false;
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     await this.shell.run({
       message: 'pip3 uninstall torch torchvision torchaudio',
     });

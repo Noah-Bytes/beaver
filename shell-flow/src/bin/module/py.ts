@@ -1,15 +1,12 @@
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
+import { BinModule } from './bin-module';
 
-export class Py implements IBinModuleTypes {
-  private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
-
+export class Py extends BinModule {
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('py');
+    super('py', ctx);
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     const { bin, options } = this._ctx;
     await this.shell.run(
       {
@@ -29,12 +26,12 @@ export class Py implements IBinModuleTypes {
     );
   }
 
-  installed(): boolean | Promise<boolean> {
+  override installed(): boolean | Promise<boolean> {
     const { bin } = this._ctx;
     return bin.exists('py');
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     const { bin } = this._ctx;
     await bin.rm('py');
   }

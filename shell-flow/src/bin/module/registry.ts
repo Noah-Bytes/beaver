@@ -1,19 +1,17 @@
 import { isWin32 } from '@beaver/arteffix-utils';
 import type { IShellTypes } from '@beaver/shell-flow';
 import { IBinModuleTypes, ShellFlow } from '@beaver/shell-flow';
+import {BinModule} from "./bin-module";
 
-export class Registry implements IBinModuleTypes {
+export class Registry extends BinModule {
   readonly description =
     'Look for a dialog requesting admin permission and approve it to proceed. This will allow long paths on your machine, which is required for installing certain python packages.';
-  private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
 
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('registry');
+    super('registry', ctx);
   }
 
-  async installed() {
+  override async installed() {
     if (!isWin32) {
       return false;
     }
@@ -36,7 +34,7 @@ export class Registry implements IBinModuleTypes {
 
     return false;
   }
-  async install() {
+  override async install() {
     // 1. Set registry to allow long paths
     await this.shell.run(
       {
@@ -49,7 +47,7 @@ export class Registry implements IBinModuleTypes {
     );
   }
 
-  async uninstall() {
+  override async uninstall() {
     await this.shell.run(
       {
         message:

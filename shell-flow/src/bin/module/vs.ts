@@ -2,22 +2,20 @@ import { isWin32 } from '@beaver/arteffix-utils';
 import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 import { glob } from 'glob';
 import path from 'path';
+import {BinModule} from "./bin-module";
 
-export class Vs implements IBinModuleTypes {
+export class Vs extends BinModule {
   static DOWNLOAD_URL =
     'https://github.com/cocktailpeanut/bin/releases/download/vs_buildtools/vs_buildtools.exe';
   static FILTER_NAME = 'vs_buildtools.exe';
   readonly description =
     'Look for a dialog requesting admin permission and approve it to proceed. This will install Microsoft visual studio build tools, which is required for building several python wheels.';
-  readonly dependencies: string[] = ['zip'];
-  readonly shell: IShellTypes;
+  override readonly dependencies: string[] = ['zip'];
 
-  private readonly _ctx: ShellFlow;
   private _env: { [key: string]: string[] | string } = {};
 
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('win');
+    super('win', ctx);
   }
 
   private cmd(mode: 'install' | 'uninstall') {
@@ -105,7 +103,7 @@ export class Vs implements IBinModuleTypes {
     };
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     const { bin, systemInfo } = this._ctx;
     bin.logger.info(`downloading ${Vs.DOWNLOAD_URL}`);
     await bin.download(Vs.DOWNLOAD_URL, Vs.FILTER_NAME);
@@ -159,7 +157,7 @@ export class Vs implements IBinModuleTypes {
     }
   }
 
-  installed(): boolean {
+  override installed(): boolean {
     if (isWin32) {
       const paths = this.getPaths();
       return !!(paths.MSVC_PATH && paths.BUILD_PATH && paths.CMAKE_PATH);
@@ -167,7 +165,7 @@ export class Vs implements IBinModuleTypes {
     return false;
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     const { bin } = this._ctx;
     if (isWin32) {
       const resp = await this.shell.run(

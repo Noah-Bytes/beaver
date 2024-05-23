@@ -1,17 +1,15 @@
 import { isWin32 } from '@beaver/arteffix-utils';
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
 import fs from 'fs';
 import path from 'path';
+import { BinModule } from './bin-module';
 
-export class Git implements IBinModuleTypes {
+export class Git extends BinModule {
   static GIT_CONFIG = '.gitconfig';
-  private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
-  readonly dependencies: string[] = ['conda'];
+  override readonly dependencies: string[] = ['conda'];
 
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('git');
+    super('git', ctx);
   }
 
   env() {
@@ -25,7 +23,7 @@ export class Git implements IBinModuleTypes {
     return undefined;
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     await this.shell.run({
       message: 'conda install -y -c conda-forge git git-lfs',
     });
@@ -42,13 +40,13 @@ export class Git implements IBinModuleTypes {
     }
   }
 
-  async installed(): Promise<boolean> {
+  override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
 
     return await bin.checkIsInstalled('git', 'conda');
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     const { bin } = this._ctx;
     await this.shell.run({
       message: 'conda remove -y git git-lfs',

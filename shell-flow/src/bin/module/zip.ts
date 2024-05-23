@@ -1,30 +1,27 @@
 import { isWin32 } from '@beaver/arteffix-utils';
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
+import { BinModule } from './bin-module';
 
-export class Zip implements IBinModuleTypes {
-  readonly shell: IShellTypes;
-
-  private readonly _ctx: any;
+export class Zip extends BinModule {
   private readonly packageName: string;
 
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('zip');
+    super('zip', ctx);
     this.packageName = isWin32 ? '7zip' : 'p7zip';
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     await this.shell.run({
       message: `conda install -y -c conda-forge ${this.packageName}`,
     });
   }
 
-  installed(): boolean {
+  override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
-    return bin.checkIsInstalled(this.packageName, 'conda');
+    return await bin.checkIsInstalled(this.packageName, 'conda');
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     await this.shell.run({
       message: `conda remove -y ${this.packageName}`,
     });

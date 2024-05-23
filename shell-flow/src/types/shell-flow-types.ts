@@ -4,7 +4,10 @@ export interface IShellFlowOptionsTypes {
   isMirror?: boolean;
   mirror?: Record<string, string>;
   homeDir?: string;
-  termWrite?: (data: string) => void
+  requirement?: (data: string) => void;
+  update?: (name: string, data: string) => void;
+  install?: (name: string, data: string) => void;
+  start?: (name: string, data: string) => void;
 }
 
 export interface IShellFlowTypes {

@@ -1,10 +1,9 @@
 import { isDarwin, isWin32 } from '@beaver/arteffix-utils';
-import type { IShellTypes } from '@beaver/shell-flow';
-import { IBinModuleTypes } from '@beaver/shell-flow';
 import fs from 'fs';
 import { glob } from 'glob';
 import path from 'path';
 import { ShellFlow } from '../../shell-flow';
+import { BinModule } from './bin-module';
 
 interface PlatformUrls {
   [key: string]: {
@@ -18,7 +17,7 @@ interface PlatformUrls {
  * miniconda windows 64位安装包大小为51.4 Mb，只包含了conda、python、和一些必备的软件工具
  * anaconda windows 64位安装包大小为462 Mb，是miniconda的扩展，包含了数据科学和机器学习要用到的很多软件
  */
-export class Conda implements IBinModuleTypes {
+export class Conda extends BinModule {
   static URLS: PlatformUrls = {
     darwin: {
       x64: 'https://repo.anaconda.com/miniconda/Miniconda3-py310_23.5.2-0-MacOSX-x86_64.sh',
@@ -71,14 +70,9 @@ export class Conda implements IBinModuleTypes {
     ],
   };
 
-  private readonly _ctx: ShellFlow;
-
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('conda');
+    super('conda', ctx);
   }
-
-  readonly shell: IShellTypes;
 
   env() {
     const { bin, systemInfo } = this._ctx;
@@ -125,7 +119,7 @@ export class Conda implements IBinModuleTypes {
     return false;
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     if (this.installed()) {
       return;
     }
@@ -210,7 +204,7 @@ export class Conda implements IBinModuleTypes {
     await bin.rm(installer);
   }
 
-  installed(): boolean {
+  override installed(): boolean {
     const { bin, systemInfo } = this._ctx;
     // @ts-ignore
     for (let p of Conda.PATHS[systemInfo.platform]) {
@@ -227,7 +221,7 @@ export class Conda implements IBinModuleTypes {
     return ['eval "$(conda shell.bash hook)"'];
   }
 
-  async uninstall() {
+  override async uninstall() {
     const { bin } = this._ctx;
     await bin.rm(path.resolve(bin.dir, 'miniconda'));
   }

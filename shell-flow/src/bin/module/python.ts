@@ -4,6 +4,7 @@ import { ShellFlow } from '@beaver/shell-flow';
 import path from 'path';
 import decompress from 'decompress';
 import fs from 'fs';
+import {BinModule} from "./bin-module";
 
 // @ts-ignore
 const _decompress = decompress as unknown as typeof decompress.default;
@@ -15,7 +16,7 @@ interface PlatformUrls {
   };
 }
 
-export class Python implements IBinModuleTypes {
+export class Python extends BinModule {
   static URLS: PlatformUrls = {
     darwin: {
       x64: 'https://github.com/indygreg/python-build-standalone/releases/download/20220802/cpython-3.10.6%2B20220802-x86_64-apple-darwin-install_only.tar.gz',
@@ -32,15 +33,11 @@ export class Python implements IBinModuleTypes {
     },
   };
 
-  private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
-
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('python');
+    super('python', ctx);
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     const { systemInfo, bin } = this._ctx;
 
     if (!Python.URLS[systemInfo.platform]) {
@@ -73,12 +70,12 @@ export class Python implements IBinModuleTypes {
     }
   }
 
-  installed(): boolean {
+  override installed(): boolean {
     const { bin } = this._ctx;
     return bin.exists('python');
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     const { bin } = this._ctx;
     await bin.rm('python');
     bin.logger.info('remove python');

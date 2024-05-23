@@ -1,26 +1,23 @@
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
+import { BinModule } from './bin-module';
 
-export class Ffmpeg implements IBinModuleTypes {
-  private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
-
+export class Ffmpeg extends BinModule {
   constructor(ctx: ShellFlow) {
-    this._ctx = ctx;
-    this.shell = ctx.shell.createShell('ffmpeg');
+    super('ffmpeg', ctx);
   }
 
-  async install(): Promise<void> {
+  override async install(): Promise<void> {
     await this.shell.run({
       message: 'conda install -y -c conda-forge ffmpeg',
     });
   }
 
-  async installed(): Promise<boolean> {
+  override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
     return bin.checkIsInstalled('ffmpeg', 'conda');
   }
 
-  async uninstall(): Promise<void> {
+  override async uninstall(): Promise<void> {
     await this.shell.run({
       message: 'conda remove -y ffmpeg',
     });
