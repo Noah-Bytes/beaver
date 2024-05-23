@@ -52,6 +52,10 @@ export class App implements IAppTypes {
     });
   }
 
+  readLog(name: string): Promise<string> {
+    return fs.readFile(this.absPath(name + '.log'), 'utf8');
+  }
+
   isInit() {
     return this._init;
   }

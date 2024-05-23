@@ -23,6 +23,6 @@ export interface IAppTypes {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   update: () => Promise<void>;
-
+  readLog: (name: string) => Promise<string>;
   logs: () => Promise<ReadCommitResult[]>;
 }
