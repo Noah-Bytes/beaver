@@ -7,7 +7,7 @@ export class BinModule implements IBinModuleTypes {
 
   constructor(name: string, ctx: ShellFlow) {
     this._ctx = ctx;
-    this.shell = ctx.shell.createShell('aria2');
+    this.shell = ctx.shell.createShell(name);
     this.shell.onShellData(function (data: string) {
       ctx.options?.requirement?.(data);
     });

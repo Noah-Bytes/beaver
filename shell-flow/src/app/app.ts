@@ -5,7 +5,7 @@ import {
   ShellFlow,
 } from '@beaver/shell-flow';
 import { IShellApp, IShellAppMeta, IShellAppRun } from '@beaver/types';
-import fs from 'fs';
+import fs from 'fs-extra';
 import git, { ReadCommitResult } from 'isomorphic-git';
 import path from 'path';
 import { Logger } from 'winston';
@@ -41,14 +41,14 @@ export class App implements IAppTypes {
     this.name = name;
     this.git = git;
     this.logger = createLogger(`app:${name}`);
-    ctx.eventBus.on([name, 'start'].join(':'), function (data: string) {
-      ctx.options?.start?.(name, data);
-    });
-    ctx.eventBus.on([name, 'install'].join(':'), function (data: string) {
-      ctx.options?.install?.(name, data);
-    });
-    ctx.eventBus.on([name, 'update'].join(':'), function (data: string) {
-      ctx.options?.update?.(name, data);
+
+    ['start', 'install', 'update'].forEach((elem) => {
+      const outputStream = fs.createWriteStream(this.absPath(elem + '.log'), {
+        flags: 'a',
+      });
+      ctx.eventBus.on([name, elem].join(':'), function (data) {
+        outputStream.write(data);
+      });
     });
   }
 
