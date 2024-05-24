@@ -9,7 +9,7 @@ export class BinModule implements IBinModuleTypes {
     this._ctx = ctx;
     this.shell = ctx.shell.createShell(name);
     this.shell.onShellData(function (data: string) {
-      ctx.options?.requirement?.(data);
+      ctx.bin.writeLog(data);
     });
   }
 

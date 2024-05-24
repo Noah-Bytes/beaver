@@ -7,6 +7,7 @@ export interface IBinTypes {
   readLog: () => Promise<string>;
   init: () => Promise<void>;
   download: (url: string, dest: string) => Promise<void>;
+  writeLog: (data: string) => void;
   wget: (url: string, dest: string) => Promise<void>;
   rm: (src: string) => Promise<void>;
   mv: (src: string, dest: string) => Promise<void>;

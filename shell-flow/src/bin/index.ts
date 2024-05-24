@@ -1,5 +1,6 @@
 import { IShellTypes } from '@beaver/shell-flow';
 import { IKey, IShellAppRequires } from '@beaver/types';
+import { WriteStream } from 'fs';
 import fs from 'fs-extra';
 import { DownloaderHelper } from 'node-downloader-helper';
 import path from 'path';
@@ -14,6 +15,7 @@ export class Bin implements IBinTypes {
   private readonly _dir: string;
   private readonly _ctx: ShellFlow;
   readonly logger: Logger;
+  private logStream: WriteStream | undefined;
   private moduleList: IBinModuleTypes[] = [];
   private moduleMap: Map<string, IBinModuleTypes> = new Map();
   private _installed = {
@@ -32,12 +34,6 @@ export class Bin implements IBinTypes {
     this._dir = ctx.absPath('bin');
     this.logger = createLogger(`bin`);
     this.shell = ctx.shell.createShell('bin');
-    const outputStream = fs.createWriteStream(this.absPath('bin.log'), {
-      flags: 'a',
-    });
-    this.shell.onShellData((data) => {
-      outputStream.write(data);
-    });
   }
 
   readLog(): Promise<string> {
@@ -48,6 +44,13 @@ export class Bin implements IBinTypes {
     await fs.promises.mkdir(this._dir, { recursive: true });
 
     this.removeAllModule();
+
+    this.logStream = fs.createWriteStream(this.absPath('bin.log'), {
+      flags: 'a',
+    });
+    this.shell.onShellData((data) => {
+      this.logStream?.write(data);
+    });
 
     for (let modulesKey in modules) {
       // @ts-ignore
@@ -65,6 +68,10 @@ export class Bin implements IBinTypes {
     }
 
     await this.checkInstalled();
+  }
+
+  writeLog(data: string) {
+    this.logStream?.write(data);
   }
 
   download(url: string, dest: string): Promise<void> {
