@@ -54,11 +54,17 @@ export class Shell {
   async run(params: IShellAppRunParams) {
     params.message = this.parseMessage(params);
 
-    await this.shell.run(params, {
+    const result = await this.shell.run(params, {
       cwd: params.cwd,
       path: params.path,
       env: params.env,
     });
+
+    if (params.on) {
+      params.on.forEach((elem) => {
+        this._ctx.eventBus.emit(elem.event, result);
+      });
+    }
   }
 
   async stop() {

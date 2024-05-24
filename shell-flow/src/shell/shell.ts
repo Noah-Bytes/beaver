@@ -227,11 +227,6 @@ export class Shell implements IShellTypes {
     const { bin } = this._ctx;
     const envs = bin.envs(options?.env);
 
-    console.log({
-      ...this.env,
-      ...this.parseEnv(envs),
-    });
-
     this.ptyProcess = pty.spawn(this._terminal, this.args, {
       name: this.name,
       cols: options?.cols || 100,
