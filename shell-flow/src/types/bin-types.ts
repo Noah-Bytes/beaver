@@ -1,9 +1,10 @@
-import {IKey, IShellAppRequires} from '@beaver/types';
+import { IKey, IShellAppRequires } from '@beaver/types';
+import { ShellFlow } from '../shell-flow';
 import type { IShellTypes } from './shell-types';
-import {ShellFlow} from "../shell-flow";
 
 export interface IBinTypes {
   dir: string;
+  readLog: () => Promise<string>;
   init: () => Promise<void>;
   download: (url: string, dest: string) => Promise<void>;
   wget: (url: string, dest: string) => Promise<void>;

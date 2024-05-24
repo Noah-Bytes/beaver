@@ -1,7 +1,6 @@
 import { IShellTypes } from '@beaver/shell-flow';
 import { IKey, IShellAppRequires } from '@beaver/types';
-import fs from 'fs';
-import fse from 'fs-extra';
+import fs from 'fs-extra';
 import { DownloaderHelper } from 'node-downloader-helper';
 import path from 'path';
 import wget from 'wget-improved';
@@ -33,6 +32,16 @@ export class Bin implements IBinTypes {
     this._dir = ctx.absPath('bin');
     this.logger = createLogger(`bin`);
     this.shell = ctx.shell.createShell('bin');
+    const outputStream = fs.createWriteStream(this.absPath('bin.log'), {
+      flags: 'a',
+    });
+    this.shell.onShellData((data) => {
+      outputStream.write(data);
+    });
+  }
+
+  readLog(): Promise<string> {
+    return fs.readFile(this.absPath('bin.log'), 'utf8');
   }
 
   async init(): Promise<void> {
@@ -144,7 +153,7 @@ export class Bin implements IBinTypes {
 
   async mv(src: string, dest: string): Promise<void> {
     this.logger.info(`mv ${src} ${dest}`);
-    await fse.move(this.absPath(src), this.absPath(dest));
+    await fs.move(this.absPath(src), this.absPath(dest));
     this.logger.info(`mv success`);
   }
 
@@ -322,6 +331,7 @@ export class Bin implements IBinTypes {
         this._isMatch(systemInfo.arch, elem.arch) &&
         this._isMatch(systemInfo.GPU!, elem.gpu),
     );
+    await fs.truncate(this.absPath('bin.log'), 0);
     for (let { name, args, type } of _list) {
       if (await this.checkIsInstalled(name, type)) {
         this.logger.info(`已安装 ${name}`);
