@@ -6,15 +6,19 @@ export interface IAppMeta extends IShellAppMeta {
   status: number;
   git: string;
   dir: string;
+  lastModified?: number
+}
+
+export interface IAppMetaUpdate {
+  status?: number
 }
 
 export interface IAppTypes {
   readonly name: string;
   readonly git: string;
 
-  isInit: () => boolean;
   init: () => Promise<void>;
-  getMeta: () => IAppMeta;
+  getMeta: () => Promise<IAppMeta>;
   absPath: (...arg: string[]) => string;
   exists: (...p: string[]) => boolean;
   install: () => Promise<void>;
@@ -25,4 +29,7 @@ export interface IAppTypes {
   update: () => Promise<void>;
   readLog: (name: string) => Promise<string>;
   logs: () => Promise<ReadCommitResult[]>;
+  saveMetadata: () => Promise<boolean>
+  readMetaData: () => Promise<IAppMeta | undefined>
+  updateMeta: (meta: IAppMetaUpdate) => Promise<void>;
 }

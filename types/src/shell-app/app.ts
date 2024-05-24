@@ -14,8 +14,6 @@ export interface IShellAppMeta {
   start?: string;
   update?: string;
   stop?: string;
-
-  isInstalled?: (app: any) => boolean;
 }
 
 export interface IShellAppRunParams {

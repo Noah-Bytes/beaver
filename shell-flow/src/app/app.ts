@@ -1,5 +1,9 @@
+import { safeAccessSync } from '@beaver/arteffix-utils';
+import { MetaFile } from '@beaver/kernel';
 import {
   createLogger,
+  IAppMeta, IAppMetaUpdate,
+  IAppTypes,
   loader,
   requireImage,
   ShellFlow,
@@ -9,7 +13,6 @@ import fs from 'fs-extra';
 import git, { ReadCommitResult } from 'isomorphic-git';
 import path from 'path';
 import { Logger } from 'winston';
-import { IAppMeta, IAppTypes } from '../types/app-types';
 
 export class App implements IAppTypes {
   static STATUS = {
@@ -20,16 +23,15 @@ export class App implements IAppTypes {
     STARTED: 4,
     STOPPING: 5,
     STOPPED: 6,
-    ERROR: 7,
+    INSTALL_ERROR: 7,
+    START_ERROR: 8,
   };
 
   readonly name: string;
   readonly git: string;
 
-  private meta: IShellAppMeta | undefined;
+  private meta: IAppMeta | undefined;
   private readonly dir: string;
-  status: number = App.STATUS.INIT;
-  private _init: boolean = false;
 
   private readonly _ctx: ShellFlow;
   private readonly logger: Logger;
@@ -56,45 +58,49 @@ export class App implements IAppTypes {
     return fs.readFile(this.absPath(name + '.log'), 'utf8');
   }
 
-  isInit() {
-    return this._init;
-  }
-
   async init() {
-    if (this.isInit()) {
+    if (this.meta) {
       throw new Error(`${this.name} is already initialized.`);
     }
 
-    const appInfo = (await this.load('beaver.js')) as IShellAppMeta;
+    if (!this.exists(MetaFile.META_NAME)) {
+      const appInfo = (await this.load('beaver.js')) as IShellAppMeta;
+      if (appInfo.icon) {
+        appInfo.icon =
+          `data:image/*;base64,` +
+          (await requireImage(`${this.dir}/${appInfo.icon}`));
+      }
 
-    if (appInfo.icon) {
-      appInfo.icon =
-        `data:image/*;base64,` +
-        (await requireImage(`${this.dir}/${appInfo.icon}`));
+      // @ts-ignore
+      this.meta = {
+        ...appInfo,
+        name: this.name,
+        git: this.git,
+        status: App.STATUS.INIT,
+      };
+
+      await this.saveMetadata();
+    } else {
+      await this.getMeta();
     }
-
-    if (appInfo.isInstalled && appInfo.isInstalled(this)) {
-      this.status = App.STATUS.INSTALLED;
-    }
-
-    this.meta = appInfo;
-    this._init = true;
   }
 
-  getMeta(): IAppMeta {
-    if (!this.isInit()) {
-      throw new Error(`${this.name} not initialized`);
+  async getMeta(): Promise<IAppMeta> {
+    let m = this.meta;
+    if (!m) {
+      m = await this.readMetaData();
     }
 
-    return {
-      name: this.name,
-      title: this.meta?.title,
-      description: this.meta?.description,
-      icon: this.meta?.icon,
-      status: this.status,
-      git: this.git,
-      dir: this.dir,
-    };
+    this.meta = m;
+
+    if (m) {
+      return {
+        ...m,
+        dir: this.dir,
+      };
+    }
+
+    throw new Error('meta not');
   }
 
   absPath(...arg: string[]): string {
@@ -102,12 +108,8 @@ export class App implements IAppTypes {
   }
 
   exists(...p: string[]): boolean {
-    try {
-      fs.accessSync(this.absPath(...p), fs.constants.F_OK);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    const path = this.absPath(...p);
+    return fs.pathExistsSync(path);
   }
 
   async load(filename: string): Promise<any> {
@@ -176,14 +178,16 @@ export class App implements IAppTypes {
   }
 
   async install() {
-    if (!this.isInit()) {
+    if (!this.meta) {
       throw new Error(`${this.name} is not initialized`);
     }
 
-    this.status = App.STATUS.INSTALLING;
+    await this.updateMeta({
+      status: App.STATUS.INSTALLING,
+    })
 
     const { bin } = this._ctx;
-    const { install } = this.meta!;
+    const { install } = this.meta;
 
     try {
       if (install) {
@@ -197,29 +201,32 @@ export class App implements IAppTypes {
           await this._runs(sh.run);
         }
 
-        this.status = App.STATUS.INSTALLED;
+        await this.updateMeta({
+          status: App.STATUS.INSTALLED,
+        })
       } else {
-        this.status = App.STATUS.INIT;
+        await this.updateMeta({
+          status: App.STATUS.INSTALL_ERROR,
+        })
         // 安装脚本不存在
         this.logger.warn('the installation script does not exist');
       }
     } catch (e) {
-      this.status = App.STATUS.INIT;
+      await this.updateMeta({
+        status: App.STATUS.INSTALL_ERROR,
+      })
       this.logger.error(e);
       throw new Error(`Failed to install ${this.name}`);
     }
   }
 
   async unInstall(): Promise<void> {
-    if (!this.isInit()) {
+    if (!this.meta) {
       throw new Error(`${this.name} is not initialized`);
     }
 
     await this.stop();
 
-    const oldStatus = this.status;
-
-    this.status = App.STATUS.INIT;
     const { unInstall } = this.meta!;
 
     try {
@@ -229,36 +236,38 @@ export class App implements IAppTypes {
           await this._runs(sh.run);
         }
 
-        this.status = App.STATUS.INSTALLED;
+        await this.updateMeta({
+          status: App.STATUS.INIT,
+        })
       } else {
-        this.status = oldStatus;
         // 安装脚本不存在
         this.logger.warn('the installation script does not exist');
       }
     } catch (e) {
-      this.status = oldStatus;
       this.logger.error(e);
       throw new Error(`Failed to install ${this.name}`);
     }
   }
 
   async start(): Promise<void> {
-    const oldStatus = this.status;
-
-    this.status = App.STATUS.STARTING;
-
     const { start } = this.meta!;
-
     if (start) {
+      await this.updateMeta({
+        status: App.STATUS.STARTING,
+      })
       const sh = (await this.load(start)) as IShellApp;
 
       if (sh.run) {
         await this._runs(sh.run);
       }
 
-      this.status = App.STATUS.STARTED;
+      await this.updateMeta({
+        status: App.STATUS.STARTED,
+      })
     } else {
-      this.status = oldStatus;
+      await this.updateMeta({
+        status: App.STATUS.START_ERROR,
+      })
       // 脚本不存在
       throw new Error('the start script does not exist');
     }
@@ -266,8 +275,11 @@ export class App implements IAppTypes {
 
   async stop(): Promise<void> {
     const { shell } = this._ctx;
-    this.status = App.STATUS.STOPPED;
+    await this.updateMeta({
+      status: App.STATUS.STOPPED,
+    })
     shell.removeAllShell(this.name);
+    await fs.truncate(this.absPath('start.log'), 0);
   }
 
   async update(): Promise<void> {
@@ -285,13 +297,35 @@ export class App implements IAppTypes {
     }
   }
 
-  async logs(): Promise<ReadCommitResult[]> {
-    let commits = await git.log({
+  logs(): Promise<ReadCommitResult[]> {
+    return git.log({
       fs,
       dir: this.absPath('app'),
       depth: 50,
     });
+  }
 
-    return commits;
+  async saveMetadata(): Promise<boolean> {
+    const meta = this.getMeta();
+    await fs.writeJson(this.absPath(MetaFile.META_NAME), this.meta);
+    return true;
+  }
+
+  async readMetaData(): Promise<IAppMeta | undefined> {
+    safeAccessSync(this.absPath());
+    this.meta = await fs.readJson(this.absPath(MetaFile.META_NAME));
+    return this.meta;
+  }
+
+  async updateMeta(meta: IAppMetaUpdate): Promise<void> {
+    if (!this.meta) {
+      throw new Error(`${this.name} not initialized`)
+    }
+    this.meta = {
+      ...this.meta,
+      ...meta,
+      lastModified: Date.now(),
+    };
+    await this.saveMetadata();
   }
 }
