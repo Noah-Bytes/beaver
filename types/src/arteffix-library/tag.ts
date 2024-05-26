@@ -1,3 +1,5 @@
+import {IFileJson} from "./file-json";
+
 export interface ITagMeta {
   id: string;
   name: string;

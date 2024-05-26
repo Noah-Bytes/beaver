@@ -32,7 +32,7 @@ export class FileJson<O> implements IFileJson<O> {
       return undefined;
     }
   }
-  async save(json: object): Promise<boolean> {
+  async save(json: any): Promise<boolean> {
     try {
       await fs.writeJson(this.filepath, json);
       return true;

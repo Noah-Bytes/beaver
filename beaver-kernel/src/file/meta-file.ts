@@ -1,4 +1,4 @@
-import { safeAccessSync } from '@beaver/arteffix-utils';
+import { safeAccessSync, uuid } from '@beaver/arteffix-utils';
 import { IMetaFile, IMetaFileMeta, IMetaFileMetaUpdate } from '@beaver/types';
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -14,9 +14,7 @@ export class MetaFile<M extends IMetaFileMeta, U extends IMetaFileMetaUpdate>
   meta: M;
 
   static createId(): string {
-    const timestamp = new Date().getTime(); // 获取当前时间的时间戳
-    const randomPart = Math.random().toString(36).substring(2, 15); // 生成一个随机字符串
-    return `${timestamp}_${randomPart.toUpperCase()}`; // 组合成一个唯一ID
+    return uuid('file'); // 组合成一个唯一ID
   }
 
   constructor(rootDir: string, meta: M) {
