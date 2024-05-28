@@ -10,6 +10,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { FileBase } from './file-base';
 import { FileManage } from './file-manage';
+import { Folder } from './folder';
 import { Tag } from './tag';
 
 export class Workspace implements IWorkspace {
@@ -53,6 +54,7 @@ export class Workspace implements IWorkspace {
     modificationTime: Date.now(),
   };
   tags: Tag;
+  folder: Folder;
   readonly file: FileManage<
     FileBase<IFileBaseMeta, IFileBaseMetaUpdate>,
     IFileBaseMeta,
@@ -63,6 +65,7 @@ export class Workspace implements IWorkspace {
     this.rootDir = rootDir;
     this.file = new FileManage(rootDir);
     this.tags = new Tag(rootDir);
+    this.folder = new Folder(rootDir);
   }
 
   async init() {

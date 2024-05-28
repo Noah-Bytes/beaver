@@ -2,8 +2,9 @@ export interface IFileJson<O> {
   readonly rootDir: string
   readonly filename: string
   readonly filepath: string
+  readonly defaultValue: O
 
-  read: () => Promise<O | undefined>
+  init: () => Promise<void>
 
   destroy: () => Promise<boolean>
 
