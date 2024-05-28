@@ -5,12 +5,17 @@ export interface IFolderPassword {
   tip?: string;
 }
 
+export interface IIcon {
+  html: string;
+  color: string;
+}
+
 export interface IFolderMeta {
   id: string;
   name: string;
   createTime: number;
   updTime: number;
-  icon?: string;
+  icon?: IIcon;
   children: string[];
   password?: IFolderPassword;
   description?: string;
@@ -22,7 +27,7 @@ export type IFolderMetaUpdate = Partial<
 
 export type IFolderMetaCreate = Pick<IFolderMeta, 'name'> & IFolderMetaUpdate;
 
-export type IFolder = Record<string, IFolderMeta>
+export type IFolder = Record<string, IFolderMeta>;
 
 export interface IFolderImpl extends IFileJson<IFolder> {
   add: (folder: IFolderMetaCreate, parentId?: string) => Promise<IFolderMeta>;
