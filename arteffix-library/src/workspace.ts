@@ -49,7 +49,6 @@ export class Workspace implements IWorkspace {
       },
     },
     quickAccess: [],
-    tagsGroups: [],
     applicationVersion: Workspace.version,
     modificationTime: Date.now(),
   };

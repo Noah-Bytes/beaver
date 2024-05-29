@@ -4,13 +4,14 @@ import {
   IFolderImpl,
   IFolderMeta,
   IFolderMetaCreate,
+  IFolderMetaCreateOptions,
   IFolderMetaUpdate,
 } from '@beaver/types';
 import { FileJson } from './file-json';
 
 export class Folder extends FileJson<IFolder> implements IFolderImpl {
   constructor(rootDir: string) {
-    super(rootDir, 'tag.json', {
+    super(rootDir, 'folder.json', {
       root: {
         id: 'root',
         children: [],
@@ -23,23 +24,34 @@ export class Folder extends FileJson<IFolder> implements IFolderImpl {
 
   async add(
     folder: IFolderMetaCreate,
-    parentId?: string,
+    options?: IFolderMetaCreateOptions,
   ): Promise<IFolderMeta> {
     const now = Date.now();
     const id = uuid('D');
     const data = {
       createTime: now,
-      description: folder.description,
-      icon: folder.icon,
       id: id,
-      name: folder.name,
       updTime: now,
-      password: folder.password,
       children: [],
+      ...folder,
     };
 
-    if (parentId && this.json[parentId]) {
-      this.json[parentId].children.push(id);
+    if (options) {
+      let parentId = options.parentId;
+      if (!parentId) {
+        parentId = 'root';
+      }
+
+      if (options.currentId) {
+        const index = this.json[parentId].children.indexOf(options.currentId);
+        if (index > -1) {
+          this.json[parentId].children.splice(index + 1, 0, id);
+        } else {
+          this.json[parentId].children.push(id);
+        }
+      } else {
+        this.json[parentId].children.push(id);
+      }
     } else {
       this.json['root'].children.push(id);
     }
@@ -72,11 +84,33 @@ export class Folder extends FileJson<IFolder> implements IFolderImpl {
     }
   }
 
-  async update(folderId: string, update: IFolderMetaUpdate): Promise<void> {
+  async update(
+    folderId: string,
+    update: IFolderMetaUpdate,
+  ): Promise<IFolderMeta> {
     this.json[folderId] = {
       ...this.json[folderId],
       ...update,
+      updTime: Date.now(),
     };
+    await this.save();
+    return this.json[folderId];
+  }
+
+  async toggleExpand(folderId: string, expand: boolean, self = false) {
+    const that = this;
+    function run(ids: string[]) {
+      for (let i = 0; i < ids.length; i++) {
+        that.json[ids[i]].isExpanded = expand;
+        run(that.json[ids[i]].children);
+      }
+    }
+
+    if (self) {
+      this.json[folderId].isExpanded = expand;
+    }
+    run(this.json[folderId].children);
+
     await this.save();
   }
 }

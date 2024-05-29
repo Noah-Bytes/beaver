@@ -2,7 +2,6 @@ export interface IWorkspaceMeta {
   folders: { [key: string]: TreeItem<Folder> };
   smartFolders: { [key: string]: TreeItem<SmartFolder> };
   quickAccess: QuickAccess[];
-  tagsGroups: TagsGroup[];
   modificationTime: number;
   applicationVersion: string;
 }
@@ -11,7 +10,6 @@ export interface IWorkspaceMetaUpdate {
   folders?: { [key: string]: TreeItem<Folder> };
   smartFolders?: { [key: string]: TreeItem<SmartFolder> };
   quickAccess?: QuickAccess[];
-  tagsGroups?: TagsGroup[];
 }
 
 export interface TreeItem<T = any> {
@@ -62,12 +60,6 @@ export interface Folder {
   password?: string;
   passwordTips?: string;
   coverId?: string;
-}
-
-export interface TagsGroup {
-  id: string;
-  name: string;
-  tags: string[];
 }
 
 export interface IWorkspace {
