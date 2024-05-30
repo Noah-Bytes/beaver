@@ -1,6 +1,6 @@
 {
   "name": "@beaver/arteffix-utils",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "dependencies": {},
   "peerDependencies": {
     "exifreader": "^4.22.1"

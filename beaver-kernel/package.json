@@ -1,6 +1,6 @@
 {
   "name": "@beaver/kernel",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "dependencies": {},
   "main": "./index.cjs",
   "typings": "./src/index.d.ts"
