@@ -1,6 +1,6 @@
 {
   "name": "@beaver/shell-flow",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "peerDependencies": {
     "winston": "^3.13.0",
     "core-js": "^3.37.1",
@@ -15,6 +15,7 @@
     "rimraf": "^5.0.7",
     "decompress": "^4.2.1",
     "glob": "^10.3.15",
-    "events": "^3.3.0"
+    "events": "^3.3.0",
+    "strip-ansi": "^7.1.0"
   }
 }

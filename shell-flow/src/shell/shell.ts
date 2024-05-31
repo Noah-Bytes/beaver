@@ -18,6 +18,7 @@ import os from 'os';
 import path from 'path';
 import process from 'process';
 import { shellEnvSync } from 'shell-env';
+import stripAnsi from 'strip-ansi';
 import sudoPrompt from 'sudo-prompt';
 import { Logger } from 'winston';
 
@@ -168,6 +169,8 @@ export class Shell implements IShellTypes {
       'GRADIO_TEMP_DIR',
     );
     this.env['PIP_CONFIG_FILE'] = path.resolve(ctx.homeDir, 'pipconfig');
+
+    this.env['TERM'] = 'vt100'
   }
 
   env: {
@@ -380,21 +383,27 @@ export class Shell implements IShellTypes {
     return new Promise((resolve, reject) => {
       let stream: string = '';
       const off = this.onShellData((data) => {
-        stream += data;
+        stream += stripAnsi(data);
 
         const reg = /^(\d+)$/m;
 
         const match = stream.match(reg); // 假设退出状态是输出的最后一部分
 
         if (match && match.length > 0) {
-          const exitStatus = parseInt(match[1], 10);
-          off();
-          this.clear();
-
           const result = stream
             .replace(reg, '')
             // TODO 多余标记没有清除
-            .replace(new RegExp('; echo \\$\\?', 'gm'), '');
+            .replace(
+              new RegExp(
+                isWin32 ? '& echo %errorlevel%' : '; echo \\$\\?',
+                'gm',
+              ),
+              '',
+            );
+          stream = '';
+          const exitStatus = parseInt(match[1], 10);
+          off();
+          this.clear();
 
           if (exitStatus === 0) {
             this.status = Shell.STATUS.IDLE;
