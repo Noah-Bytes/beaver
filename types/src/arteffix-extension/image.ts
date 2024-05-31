@@ -2,6 +2,7 @@ import { IDrag } from './drag';
 
 export interface IWebsiteImageMeta {
   type: string;
+  folderId?: string;
   src?: string;
   ext?: string;
   title?: string;

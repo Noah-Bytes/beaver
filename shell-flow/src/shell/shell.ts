@@ -69,7 +69,7 @@ export class Shell implements IShellTypes {
     this.groupName = groupName;
 
     if (isWin32) {
-      this._terminal = 'powershell.exe';
+      this._terminal = 'cmd.exe';
       /**
        * 参数解释
        * --NoProfile 不加载用户的配置文件
