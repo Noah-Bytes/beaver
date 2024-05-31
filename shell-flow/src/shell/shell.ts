@@ -170,7 +170,7 @@ export class Shell implements IShellTypes {
     );
     this.env['PIP_CONFIG_FILE'] = path.resolve(ctx.homeDir, 'pipconfig');
 
-    this.env['TERM'] = 'vt100'
+    this.env['TERM'] = 'vt100';
   }
 
   env: {
@@ -242,7 +242,7 @@ export class Shell implements IShellTypes {
     });
 
     this.ptyProcess.onData((data) => {
-      this.eventBus.emit(this._event_name_data, data);
+      this.eventBus.emit(this._event_name_data, this._filterOutput(data));
     });
 
     this.ptyProcess.onExit((result) => {
@@ -322,6 +322,24 @@ export class Shell implements IShellTypes {
     });
   }
 
+  // 自定义过滤函数，移除各种类型的控制字符
+  _filterOutput(data: string) {
+    // 移除 ANSI 控制字符
+    let cleanedData = stripAnsi(data);
+
+    // 移除其他类型的控制字符
+    cleanedData = cleanedData.replace(/[\u0000-\u001F\u007F-\u009F]+/g, ''); // 控制字符
+    cleanedData = cleanedData.replace(/\u001b\[\?25[hl]/g, ''); // 光标隐藏和显示
+    cleanedData = cleanedData.replace(/\u001b\[\d+;\d+[Hf]/g, ''); // 光标定位
+    cleanedData = cleanedData.replace(/\u001b\[\d*[JK]/g, ''); // 擦除屏幕
+    cleanedData = cleanedData.replace(/\u001b\[\d*;?\d*[mG]/g, ''); // SGR参数重置
+    cleanedData = cleanedData.replace(/\u001b\]0;.*?\u0007/g, ''); // OSC控制序列
+    cleanedData = cleanedData.replace(/\u001b\[\d+;\d+[rm]/g, ''); // 设置模式和重置模式
+    cleanedData = cleanedData.replace(/\u001b\[\d*P/g, ''); // DCS序列
+
+    return cleanedData;
+  }
+
   async run(
     params: IShellRunParams,
     options?: IShellRunOptions,
@@ -383,7 +401,7 @@ export class Shell implements IShellTypes {
     return new Promise((resolve, reject) => {
       let stream: string = '';
       const off = this.onShellData((data) => {
-        stream += stripAnsi(data);
+        stream += data;
 
         const reg = /^(\d+)$/m;
 
