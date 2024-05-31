@@ -327,8 +327,8 @@ export class Shell implements IShellTypes {
     // 移除 ANSI 控制字符
     let cleanedData = stripAnsi(data);
 
-    // 移除其他类型的控制字符
-    cleanedData = cleanedData.replace(/[\u0000-\u001F\u007F-\u009F]+/g, ''); // 控制字符
+    // 移除其他类型的控制字符，同时保留换行符
+    cleanedData = cleanedData.replace(/[\u0000-\u0008\u000B-\u001F\u007F-\u009F]+/g, ''); // 控制字符
     cleanedData = cleanedData.replace(/\u001b\[\?25[hl]/g, ''); // 光标隐藏和显示
     cleanedData = cleanedData.replace(/\u001b\[\d+;\d+[Hf]/g, ''); // 光标定位
     cleanedData = cleanedData.replace(/\u001b\[\d*[JK]/g, ''); // 擦除屏幕
