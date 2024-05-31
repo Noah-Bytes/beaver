@@ -40,7 +40,7 @@ export class Shell implements IShellTypes {
   status: number = Shell.STATUS.INIT;
 
   private readonly _name: string;
-  static END_FLAG = '; echo $?';
+  static END_FLAG = isWin32 ? '&& echo %errorlevel%' : '; echo $?';
 
   get name(): string {
     return this._name;
