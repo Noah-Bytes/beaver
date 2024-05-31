@@ -41,7 +41,7 @@ export class Shell implements IShellTypes {
   status: number = Shell.STATUS.INIT;
 
   private readonly _name: string;
-  static END_FLAG = isWin32 ? '& echo %errorlevel% & echo(' : '; echo $?';
+  static END_FLAG = isWin32 ? '& echo %errorlevel% & echo.' : '; echo $?';
 
   get name(): string {
     return this._name;
@@ -422,7 +422,7 @@ export class Shell implements IShellTypes {
             // TODO 多余标记没有清除
             .replace(
               new RegExp(
-                isWin32 ? '& echo %errorlevel% & echo(' : '; echo \\$\\?',
+                isWin32 ? '& echo %errorlevel% & echo.' : '; echo \\$\\?',
                 'gm',
               ),
               '',
