@@ -316,6 +316,9 @@ export class Bin implements IBinTypes {
       default:
         if (this.hasModule(name)) {
           const isInstalled = await this.getModule(name)?.installed();
+          this.logger.info(
+            `检测 ${name} 安装状态: ${!!isInstalled}`,
+          );
           return !!isInstalled;
         }
         return false;

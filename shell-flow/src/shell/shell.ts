@@ -40,7 +40,7 @@ export class Shell implements IShellTypes {
   status: number = Shell.STATUS.INIT;
 
   private readonly _name: string;
-  static END_FLAG = isWin32 ? '&& echo %errorlevel%' : '; echo $?';
+  static END_FLAG = isWin32 ? '& echo %errorlevel%' : '; echo $?';
 
   get name(): string {
     return this._name;
@@ -197,7 +197,7 @@ export class Shell implements IShellTypes {
       isFlag?: boolean;
     },
   ) {
-    if (options.isFlag && message.includes(`; echo $?`)) {
+    if (options.isFlag && message.includes(Shell.END_FLAG)) {
       throw new Error('Cannot contain reserved system commands');
     }
 

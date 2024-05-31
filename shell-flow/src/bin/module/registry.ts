@@ -1,7 +1,6 @@
 import { isWin32 } from '@beaver/arteffix-utils';
-import type { IShellTypes } from '@beaver/shell-flow';
-import { IBinModuleTypes, ShellFlow } from '@beaver/shell-flow';
-import {BinModule} from "./bin-module";
+import { ShellFlow } from '@beaver/shell-flow';
+import { BinModule } from './bin-module';
 
 export class Registry extends BinModule {
   readonly description =
@@ -16,6 +15,8 @@ export class Registry extends BinModule {
       return false;
     }
 
+    // 该命令的作用是查询注册表路径 HKLM\SYSTEM\CurrentControlSet\Control\FileSystem 下名为 LongPathsEnabled 的值。
+    // 这项设置与 Windows 文件系统是否支持超过 260 个字符的长路径有关。
     let result = await this.shell.run({
       message:
         'reg query HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled',
