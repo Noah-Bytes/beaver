@@ -41,7 +41,7 @@ export class Shell implements IShellTypes {
   status: number = Shell.STATUS.INIT;
 
   private readonly _name: string;
-  static END_FLAG = isWin32 ? '& echo %errorlevel%' : '; echo $?';
+  static END_FLAG = isWin32 ? '& echo %errorlevel% & echo(' : '; echo $?';
 
   get name(): string {
     return this._name;
@@ -213,7 +213,13 @@ export class Shell implements IShellTypes {
     }
   }
   clear(): void {
-    this.ptyProcess?.clear();
+    if (isWin32) {
+      // For Windows
+      this.ptyProcess?.write('\x1Bc');
+    } else {
+      // For Unix-like systems (Linux, macOS)
+      this.ptyProcess?.write('\x1B[2J\x1B[3J\x1B[H');
+    }
   }
 
   pause(): void {
@@ -328,7 +334,10 @@ export class Shell implements IShellTypes {
     let cleanedData = stripAnsi(data);
 
     // 移除其他类型的控制字符，同时保留换行符
-    cleanedData = cleanedData.replace(/[\u0000-\u0008\u000B-\u001F\u007F-\u009F]+/g, ''); // 控制字符
+    cleanedData = cleanedData.replace(
+      /[\u0000-\u0008\u000B-\u001F\u007F-\u009F]+/g,
+      '',
+    ); // 控制字符
     cleanedData = cleanedData.replace(/\u001b\[\?25[hl]/g, ''); // 光标隐藏和显示
     cleanedData = cleanedData.replace(/\u001b\[\d+;\d+[Hf]/g, ''); // 光标定位
     cleanedData = cleanedData.replace(/\u001b\[\d*[JK]/g, ''); // 擦除屏幕
@@ -413,7 +422,7 @@ export class Shell implements IShellTypes {
             // TODO 多余标记没有清除
             .replace(
               new RegExp(
-                isWin32 ? '& echo %errorlevel%' : '; echo \\$\\?',
+                isWin32 ? '& echo %errorlevel% & echo(' : '; echo \\$\\?',
                 'gm',
               ),
               '',
