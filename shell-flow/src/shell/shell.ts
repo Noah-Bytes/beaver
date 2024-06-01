@@ -345,6 +345,7 @@ export class Shell implements IShellTypes {
     cleanedData = cleanedData.replace(/\u001b\]0;.*?\u0007/g, ''); // OSC控制序列
     cleanedData = cleanedData.replace(/\u001b\[\d+;\d+[rm]/g, ''); // 设置模式和重置模式
     cleanedData = cleanedData.replace(/\u001b\[\d*P/g, ''); // DCS序列
+    cleanedData = cleanedData.replace(/;管理员: C:\\Windows\\SYSTEM32\\cmd.exe/g, ''); // 移除标题行
 
     return cleanedData;
   }
