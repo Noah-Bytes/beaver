@@ -41,7 +41,6 @@ export class Shell implements IShellTypes {
   status: number = Shell.STATUS.INIT;
 
   private readonly _name: string;
-  static END_FLAG = isWin32 ? ';Write-Output $?' : '; echo $?';
 
   get name(): string {
     return this._name;
@@ -70,7 +69,7 @@ export class Shell implements IShellTypes {
     this.groupName = groupName;
 
     if (isWin32) {
-      this._terminal = 'powershell.exe';
+      this._terminal = 'cmd.exe';
       /**
        * 参数解释
        * --NoProfile 不加载用户的配置文件
@@ -200,16 +199,19 @@ export class Shell implements IShellTypes {
       isFlag?: boolean;
     },
   ) {
-    if (options.isFlag && message.includes(Shell.END_FLAG)) {
-      throw new Error('Cannot contain reserved system commands');
-    }
-
     this.write(message);
-    if (options.isFlag) {
-      this.write(Shell.END_FLAG);
-    }
+
     if (options.isRun) {
       this.write(os.EOL);
+
+      if (options.isFlag) {
+        if (isWin32) {
+          // 在win32系统中，用来判断上一条命令执行结果
+          this.write('echo %errorlevel%&&echo .' + os.EOL)
+        } else {
+          this.write('echo $?' + os.EOL)
+        }
+      }
     }
   }
   clear(): void {
@@ -412,15 +414,12 @@ export class Shell implements IShellTypes {
       const off = this.onShellData((data) => {
         stream += data;
 
-        const reg = isWin32 ? /^(True|False)$/m : /^(\d+)$/m;
+        const reg = /^(\d+)$/m;
 
         const match = stream.match(reg); // 假设退出状态是输出的最后一部分
 
         if (match && match.length > 0) {
           let exitStatus = parseInt(match[1], 10);
-          if (isNaN(exitStatus)) {
-            exitStatus = match[1] === 'True' ? 0 : 999
-          }
           off();
           this.clear();
 
@@ -451,7 +450,7 @@ export class Shell implements IShellTypes {
     }
 
     if (Array.isArray(params.message)) {
-      let delimiter = isWin32 ? ' ; ' : ' && ';
+      let delimiter = ' && ';
       return params.message
         .filter((m) => {
           return m && !/^\s+$/.test(m);

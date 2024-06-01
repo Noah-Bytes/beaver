@@ -290,12 +290,14 @@ export class Bin implements IBinTypes {
       }
 
       this._installed.brew = new Set(brew);
+
+      console.log(this._installed)
     }
   }
 
   private async _isInstalled(
     name: string,
-    type: string | undefined,
+    type?: string | undefined,
   ): Promise<boolean> {
     switch (type) {
       case 'conda':
@@ -315,11 +317,15 @@ export class Bin implements IBinTypes {
         return this._installed.brew.has(name);
       default:
         if (this.hasModule(name)) {
-          const isInstalled = await this.getModule(name)?.installed();
-          this.logger.info(
-            `检测 ${name} 安装状态: ${!!isInstalled}`,
-          );
-          return !!isInstalled;
+          try {
+            const isInstalled = await this.getModule(name)?.installed();
+            this.logger.info(
+              `检测 ${name} 安装状态: ${!!isInstalled}`,
+            );
+            return !!isInstalled;
+          } catch {
+            return false
+          }
         }
         return false;
     }
@@ -385,7 +391,7 @@ export class Bin implements IBinTypes {
 
   async checkIsInstalled(
     name: string | string[],
-    type: string | undefined,
+    type?: string | undefined,
   ): Promise<boolean> {
     if (Array.isArray(name)) {
       for (let n of name) {
