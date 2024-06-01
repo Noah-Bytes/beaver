@@ -4,13 +4,10 @@ import { Python } from '../../src/bin/module/python';
 jest.setTimeout(1000000);
 
 describe('python 测试', () => {
-  const shellFlow = new ShellFlow(
-    'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
-    {
-      isMirror: true,
-    },
-  );
+  const shellFlow = new ShellFlow('Beaver', {
+    isMirror: true,
+    homeDir: '/Users/taibai/Documents/我的智流.shell',
+  });
   const python = new Python(shellFlow);
 
   it('python 安装', async () => {

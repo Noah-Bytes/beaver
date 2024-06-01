@@ -4,13 +4,9 @@ export default {
   preset: '../jest.preset.js',
   testEnvironment: 'node',
   transform: {
-    '^.+\\.[tj]s$': 'babel-jest',
+    '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../coverage/shell-flow',
-  transformIgnorePatterns: ['node_modules/(?!(execa)/)'],
-  moduleNameMapper: {
-    '@beaver/arteffix-utils':
-      '/Users/taibai/workspace/beaver/dist/arteffix-utils',
-  },
+  transformIgnorePatterns: ['node_modules/(?!(execa)/)']
 };

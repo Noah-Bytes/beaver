@@ -41,7 +41,7 @@ export class Shell implements IShellTypes {
   status: number = Shell.STATUS.INIT;
 
   private readonly _name: string;
-  static END_FLAG = isWin32 ? '& echo %errorlevel%' : '; echo $?';
+  static END_FLAG = isWin32 ? ';Write-Output $?' : '; echo $?';
 
   get name(): string {
     return this._name;
@@ -70,7 +70,7 @@ export class Shell implements IShellTypes {
     this.groupName = groupName;
 
     if (isWin32) {
-      this._terminal = 'cmd.exe';
+      this._terminal = 'powershell.exe';
       /**
        * 参数解释
        * --NoProfile 不加载用户的配置文件
@@ -345,7 +345,6 @@ export class Shell implements IShellTypes {
     cleanedData = cleanedData.replace(/\u001b\]0;.*?\u0007/g, ''); // OSC控制序列
     cleanedData = cleanedData.replace(/\u001b\[\d+;\d+[rm]/g, ''); // 设置模式和重置模式
     cleanedData = cleanedData.replace(/\u001b\[\d*P/g, ''); // DCS序列
-    cleanedData = cleanedData.replace(/;管理员: C:\\Windows\\SYSTEM32\\cmd.exe/g, ''); // 移除标题行
 
     return cleanedData;
   }
@@ -413,25 +412,19 @@ export class Shell implements IShellTypes {
       const off = this.onShellData((data) => {
         stream += data;
 
-        const reg = /^(\d+)$/m;
+        const reg = isWin32 ? /^(True|False)$/m : /^(\d+)$/m;
 
         const match = stream.match(reg); // 假设退出状态是输出的最后一部分
 
         if (match && match.length > 0) {
-          const result = stream
-            .replace(reg, '')
-            // TODO 多余标记没有清除
-            .replace(
-              new RegExp(
-                isWin32 ? '\\& echo \\%errorlevel\\%' : '; echo \\$\\?',
-                'gm',
-              ),
-              '',
-            );
-          stream = '';
-          const exitStatus = parseInt(match[1], 10);
+          let exitStatus = parseInt(match[1], 10);
+          if (isNaN(exitStatus)) {
+            exitStatus = match[1] === 'True' ? 0 : 999
+          }
           off();
           this.clear();
+
+          const result = stream;
 
           if (exitStatus === 0) {
             this.status = Shell.STATUS.IDLE;
@@ -458,7 +451,7 @@ export class Shell implements IShellTypes {
     }
 
     if (Array.isArray(params.message)) {
-      let delimiter = ' && ';
+      let delimiter = isWin32 ? ' ; ' : ' && ';
       return params.message
         .filter((m) => {
           return m && !/^\s+$/.test(m);
