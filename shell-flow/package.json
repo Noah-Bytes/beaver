@@ -2,20 +2,20 @@
   "name": "@beaver/shell-flow",
   "version": "0.0.12",
   "peerDependencies": {
-    "winston": "^3.13.0",
     "core-js": "^3.37.1",
+    "decompress": "^4.2.1",
+    "events": "^3.3.0",
     "fs-extra": "^11.2.0",
+    "glob": "^10.3.15",
     "isomorphic-git": "^1.25.10",
-    "systeminformation": "^5.22.9",
-    "node-pty": "^1.0.0",
-    "shell-env": "^4.0.1",
-    "sudo-prompt": "^9.2.1",
     "node-downloader-helper": "^2.1.9",
+    "node-pty": "^1.0.0",
     "pdrive": "^0.0.23",
     "rimraf": "^5.0.7",
-    "decompress": "^4.2.1",
-    "glob": "^10.3.15",
-    "events": "^3.3.0",
-    "strip-ansi": "^7.1.0"
+    "shell-env": "^4.0.1",
+    "strip-ansi": "^7.1.0",
+    "sudo-prompt": "^9.2.1",
+    "systeminformation": "^5.22.9",
+    "winston": "^3.13.0"
   }
 }

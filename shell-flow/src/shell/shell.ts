@@ -13,7 +13,7 @@ import {
 } from '@beaver/shell-flow';
 import { IKey } from '@beaver/types';
 import fs from 'fs';
-import pty from 'node-pty';
+import * as pty from 'node-pty';
 import os from 'os';
 import path from 'path';
 import process from 'process';

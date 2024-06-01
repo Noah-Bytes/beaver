@@ -7,6 +7,5 @@ export default {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../coverage/shell-flow',
-  transformIgnorePatterns: ['node_modules/(?!(execa)/)']
+  coverageDirectory: '../coverage/shell-flow'
 };
