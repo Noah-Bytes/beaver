@@ -290,8 +290,6 @@ export class Bin implements IBinTypes {
       }
 
       this._installed.brew = new Set(brew);
-
-      console.log(this._installed)
     }
   }
 
