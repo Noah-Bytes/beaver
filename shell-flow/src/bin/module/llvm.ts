@@ -22,6 +22,10 @@ export class LLVM extends BinModule {
   override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
 
+    if (this.isInstalled) {
+      return true;
+    }
+
     let groupName;
 
     if (isDarwin) {
@@ -30,12 +34,15 @@ export class LLVM extends BinModule {
       groupName = 'conda';
     }
 
-    return await bin.checkIsInstalled('llvm', groupName);
+    this.isInstalled = await bin.checkIsInstalled('llvm', groupName);
+
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {
     await this.shell.run({
       message: 'conda remove -y llvm',
     });
+    this.isInstalled = false;
   }
 }

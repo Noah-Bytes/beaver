@@ -2,6 +2,7 @@ import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 
 export class BinModule implements IBinModuleTypes {
   readonly _ctx: ShellFlow;
+  isInstalled = false
   readonly dependencies: string[] = [];
   readonly shell: IShellTypes;
 

@@ -215,11 +215,9 @@ export class Shell implements IShellTypes {
         } else {
           this.write(`; echo ${Shell.END_FLAG}$?${Shell.END_FLAG}`);
         }
-
-        this.write(os.EOL);
-      } else {
-        this.write(os.EOL);
       }
+
+      this.write(os.EOL);
     }
   }
   clear(): void {
@@ -429,9 +427,10 @@ export class Shell implements IShellTypes {
             10,
           );
           off();
-          this.clear();
 
           const result = stream;
+
+          // this.kill();
 
           if (exitStatus === 0) {
             this.status = Shell.STATUS.IDLE;
@@ -440,8 +439,6 @@ export class Shell implements IShellTypes {
             this.status = Shell.STATUS.IDLE;
             reject(new Error(result));
           }
-
-          this.kill();
         }
       });
 

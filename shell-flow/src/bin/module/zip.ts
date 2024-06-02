@@ -18,12 +18,18 @@ export class Zip extends BinModule {
 
   override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
-    return await bin.checkIsInstalled(this.packageName, 'conda');
+    if (this.isInstalled) {
+      return true;
+    }
+
+    this.isInstalled = await bin.checkIsInstalled(this.packageName, 'conda');
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {
     await this.shell.run({
       message: `conda remove -y ${this.packageName}`,
     });
+    this.isInstalled = false;
   }
 }

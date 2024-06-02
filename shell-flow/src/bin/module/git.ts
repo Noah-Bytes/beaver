@@ -43,7 +43,13 @@ export class Git extends BinModule {
   override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
 
-    return await bin.checkIsInstalled('git', 'conda');
+    if (this.isInstalled) {
+      return true;
+    }
+
+    this.isInstalled = await bin.checkIsInstalled('git', 'conda');
+
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {
@@ -51,5 +57,6 @@ export class Git extends BinModule {
     await this.shell.run({
       message: 'conda remove -y git git-lfs',
     });
+    this.isInstalled = false;
   }
 }
