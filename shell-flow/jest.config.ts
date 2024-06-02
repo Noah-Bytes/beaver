@@ -6,6 +6,7 @@ export default {
   transform: {
     '^.+\\.[tj]s$': 'ts-jest',
   },
+  setupFilesAfterEnv: ['./test/jest.setup.ts'],
   moduleFileExtensions: ['ts', 'js', 'html'],
   coverageDirectory: '../coverage/shell-flow'
 };

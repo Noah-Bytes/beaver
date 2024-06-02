@@ -1,29 +1,38 @@
-import { ShellFlow } from '../../src';
-import { Conda } from '../../src/bin/module/conda';
-
-jest.setTimeout(1000000);
+import { getShellFlow } from './get-shell-flow';
 
 describe('conda 测试', () => {
-  const shellFlow = new ShellFlow('Beaver', {
-    isMirror: true,
-    homeDir: '/Users/taibai/Documents/我的智流.shell',
-  });
-  const conda = new Conda(shellFlow);
+  const shellFlow = getShellFlow();
 
   beforeAll(async () => {
     await shellFlow.init();
   });
 
   it('conda 安装', async () => {
-    await conda.install();
+    const conda = shellFlow.bin.getModule('conda');
+    if (conda) {
+      await conda.install();
+    }
   });
 
   it('conda 是否安装', async () => {
-    console.log(shellFlow)
-    console.log(conda.installed());
+    const conda = shellFlow.bin.getModule('conda');
+    if (conda) {
+      console.log(await conda.installed());
+    }
   });
 
   it('conda 卸载', async () => {
-    await conda.uninstall();
+    const conda = shellFlow.bin.getModule('conda');
+    if (conda) {
+      await conda.uninstall();
+    }
+  });
+
+  it('conda set mirror', async () => {
+    const conda = shellFlow.bin.getModule('conda');
+    if (conda) {
+      // @ts-ignore
+      await conda.setMirror();
+    }
   });
 });

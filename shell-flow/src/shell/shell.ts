@@ -2,6 +2,7 @@ import {
   createModuleEventBus,
   IEventBus,
   isWin32,
+  omit,
 } from '@beaver/arteffix-utils';
 import {
   createLogger,
@@ -19,7 +20,7 @@ import path from 'path';
 import process from 'process';
 import { shellEnvSync } from 'shell-env';
 import stripAnsi from 'strip-ansi';
-import sudoPrompt from 'sudo-prompt';
+import sudo from 'sudo-prompt';
 import { Logger } from 'winston';
 
 type IPty = pty.IPty;
@@ -30,6 +31,7 @@ export function shellPathSync() {
 }
 
 export class Shell implements IShellTypes {
+  static END_FLAG = '__finish__';
   static STATUS = {
     INIT: 0,
     RUNNING: 1,
@@ -92,7 +94,7 @@ export class Shell implements IShellTypes {
     this.logger = createLogger(`shell:${name}`);
     this.eventBus = createModuleEventBus(`shell:event:${name}`);
 
-    this.env = Object.assign({}, process.env);
+    this.env = Object.assign({}, process.env) as Record<string, string>;
 
     if (this.env['PYTHONPATH']) {
       delete this.env['PYTHONPATH'];
@@ -173,8 +175,12 @@ export class Shell implements IShellTypes {
   }
 
   env: {
-    [key: string]: string | undefined;
+    [key: string]: string;
   };
+
+  envCache: {
+    [key: string]: string;
+  } = {};
 
   static exists(absPath: string): boolean {
     try {
@@ -202,15 +208,17 @@ export class Shell implements IShellTypes {
     this.write(message);
 
     if (options.isRun) {
-      this.write(os.EOL);
-
       if (options.isFlag) {
         if (isWin32) {
           // 在win32系统中，用来判断上一条命令执行结果
-          this.write('echo %errorlevel%&&echo .' + os.EOL)
+          this.write(`& echo ${Shell.END_FLAG}%errorlevel%${Shell.END_FLAG}`);
         } else {
-          this.write('echo $?' + os.EOL)
+          this.write(`; echo ${Shell.END_FLAG}$?${Shell.END_FLAG}`);
         }
+
+        this.write(os.EOL);
+      } else {
+        this.write(os.EOL);
       }
     }
   }
@@ -237,16 +245,17 @@ export class Shell implements IShellTypes {
   init(options?: IShellRunOptions): void {
     const { bin } = this._ctx;
     const envs = bin.envs(options?.env);
+    this.envCache = {
+      ...this.env,
+      ...this.parseEnv(envs),
+    };
 
     this.ptyProcess = pty.spawn(this._terminal, this.args, {
       name: this.name,
       cols: options?.cols || 100,
       rows: options?.rows || 30,
       cwd: options?.path || options?.cwd || process.cwd(),
-      env: {
-        ...this.env,
-        ...this.parseEnv(envs),
-      },
+      env: this.envCache,
     });
 
     this.ptyProcess.onData((data) => {
@@ -311,7 +320,7 @@ export class Shell implements IShellTypes {
       this.init(options);
     }
 
-    const { options: ctxOptions, appName } = this._ctx;
+    const { options: ctxOptions } = this._ctx;
 
     params = await this.activate(params);
     let msg = this.buildCmd(params);
@@ -347,6 +356,10 @@ export class Shell implements IShellTypes {
     cleanedData = cleanedData.replace(/\u001b\]0;.*?\u0007/g, ''); // OSC控制序列
     cleanedData = cleanedData.replace(/\u001b\[\d+;\d+[rm]/g, ''); // 设置模式和重置模式
     cleanedData = cleanedData.replace(/\u001b\[\d*P/g, ''); // DCS序列
+    cleanedData = cleanedData.replace(
+      /;管理员: C:\\Windows\\SYSTEM32\\cmd.exe.*/s,
+      '',
+    ); // DCS序列
 
     return cleanedData;
   }
@@ -356,6 +369,7 @@ export class Shell implements IShellTypes {
     options?: IShellRunOptions,
   ): Promise<string> {
     if (!this.isInit()) {
+      this.logger.info('start init');
       this.init(options);
     }
 
@@ -377,15 +391,14 @@ export class Shell implements IShellTypes {
       return new Promise((resolve, reject) => {
         this.logger.info(`sudo ${msg}`);
 
-        let oldEnv = {
-          ...process.env,
-        };
-        sudoPrompt.exec(
+        sudo.exec(
           msg,
           {
             name: appName,
+            env: omit(this.envCache, 'CommonProgramFiles(x86)'),
           },
           (error, stdout, stderr) => {
+            console.log(error, stdout, stderr);
             if (error) {
               this.status = Shell.STATUS.IDLE;
               reject(error);
@@ -398,14 +411,6 @@ export class Shell implements IShellTypes {
             }
           },
         );
-
-        // Immediately revert env back to original
-        Object.keys(process.env).forEach((key) => {
-          if (!(key in oldEnv)) {
-            delete process.env[key];
-          }
-        });
-        Object.assign(process.env, oldEnv);
       });
     }
 
@@ -414,12 +419,15 @@ export class Shell implements IShellTypes {
       const off = this.onShellData((data) => {
         stream += data;
 
-        const reg = /^(\d+)$/m;
+        const reg = new RegExp(`${Shell.END_FLAG}(\\d+)${Shell.END_FLAG}`, 'm');
 
         const match = stream.match(reg); // 假设退出状态是输出的最后一部分
 
         if (match && match.length > 0) {
-          let exitStatus = parseInt(match[1], 10);
+          let exitStatus = parseInt(
+            match[1].replace(Shell.END_FLAG, '').replace(Shell.END_FLAG, ''),
+            10,
+          );
           off();
           this.clear();
 
@@ -471,7 +479,7 @@ export class Shell implements IShellTypes {
       if (typeof params.conda === 'string') {
         condaPath = params.conda;
       } else if (params.conda.skip) {
-        condaArgs = params.conda.args;
+        // condaArgs = params.conda.args;
       } else {
         condaArgs = params.conda.args;
         condaPath = params.conda.path;
@@ -589,9 +597,9 @@ export class Shell implements IShellTypes {
     }
 
     let PATH_KEY: string | undefined;
-    if (env['Path']) {
+    if (this.env['Path']) {
       PATH_KEY = 'Path';
-    } else if (env['PATH']) {
+    } else if (this.env['PATH']) {
       PATH_KEY = 'PATH';
     }
 
@@ -618,15 +626,15 @@ export class Shell implements IShellTypes {
           // "path" is a special case => merge with process.env.PATH
           if (env['path'] && Array.isArray(env['path'])) {
             result[PATH_KEY] =
-              `${env['path'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
+              `${env['path'].join(path.delimiter)}${path.delimiter}${this.env[PATH_KEY]}`;
           }
           if (env['PATH'] && Array.isArray(env['PATH'])) {
             result[PATH_KEY] =
-              `${env['PATH'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
+              `${env['PATH'].join(path.delimiter)}${path.delimiter}${this.env[PATH_KEY]}`;
           }
           if (env['Path'] && Array.isArray(env['Path'])) {
             result[PATH_KEY] =
-              `${env['Path'].join(path.delimiter)}${path.delimiter}${result[PATH_KEY]}`;
+              `${env['Path'].join(path.delimiter)}${path.delimiter}${this.env[PATH_KEY]}`;
           }
         } else if (Array.isArray(val)) {
           if (env[envKey]) {

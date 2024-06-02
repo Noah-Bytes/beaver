@@ -57,12 +57,12 @@ export class Bin implements IBinTypes {
       const mod = modules[modulesKey];
       if (this.getModule(modulesKey.toLowerCase())) {
       } else if (typeof mod === 'function') {
-        this.logger.info(`开始初始化 ${modulesKey}`);
         // @ts-ignore
         const m = new mod(this._ctx);
         if (m?.init) {
           await m.init();
         }
+        this.logger.info(`初始化 ${modulesKey}`);
         this.createModule(modulesKey.toLowerCase(), m);
       }
     }
@@ -214,23 +214,27 @@ export class Bin implements IBinTypes {
     const conda = new Set<string>();
 
     if (existsConda) {
-      const result = await this.shell.run({
-        message: 'conda list',
-      });
+      try {
+        const result = await this.shell.run({
+          message: 'conda list',
+        });
 
-      const lines = result.split(/[\r\n]+/);
-      let start;
-      for (let line of lines) {
-        if (start) {
-          let chunks = line.split(/\s+/).filter((x) => x);
-          if (chunks.length > 1) {
-            conda.add(chunks[0]);
-          }
-        } else {
-          if (/name.*version.*build.*channel/i.test(line)) {
-            start = true;
+        const lines = result.split(/[\r\n]+/);
+        let start;
+        for (let line of lines) {
+          if (start) {
+            let chunks = line.split(/\s+/).filter((x) => x);
+            if (chunks.length > 1) {
+              conda.add(chunks[0]);
+            }
+          } else {
+            if (/name.*version.*build.*channel/i.test(line)) {
+              start = true;
+            }
           }
         }
+      } catch (e) {
+        this.logger.error('conda list', e)
       }
     }
 
@@ -240,23 +244,27 @@ export class Bin implements IBinTypes {
     const pip = new Set<string>();
 
     if (existsConda) {
-      const result = await this.shell.run({
-        message: 'pip list',
-      });
+      try {
+        const result = await this.shell.run({
+          message: 'pip list',
+        });
 
-      const lines = result.split(/[\r\n]+/);
-      let start;
-      for (let line of lines) {
-        if (start) {
-          let chunks = line.split(/\s+/).filter((x) => x);
-          if (chunks.length > 1) {
-            pip.add(chunks[0]);
-          }
-        } else {
-          if (/-------.*/i.test(line)) {
-            start = true;
+        const lines = result.split(/[\r\n]+/);
+        let start;
+        for (let line of lines) {
+          if (start) {
+            let chunks = line.split(/\s+/).filter((x) => x);
+            if (chunks.length > 1) {
+              pip.add(chunks[0]);
+            }
+          } else {
+            if (/-------.*/i.test(line)) {
+              start = true;
+            }
           }
         }
+      } catch (e) {
+        this.logger.error('pip list', e)
       }
     }
 

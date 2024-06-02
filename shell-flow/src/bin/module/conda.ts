@@ -151,7 +151,7 @@ export class Conda extends BinModule {
     // 2. run the script
     const installPath = path.resolve(bin.dir, 'miniconda');
     const cmd = isWin32
-      ? `start /wait ${installer} /InstallationType=JustMe /RegisterPython=0 /S /D=${installPath}`
+      ? `start /wait ${installer} /InstallationType=JustMe /Regi sterPython=0 /S /D=${installPath}`
       : `bash ${installer} -b -p ${installPath}`;
 
     bin.logger.info(cmd);
@@ -168,19 +168,9 @@ export class Conda extends BinModule {
       },
     );
 
-    // setting mirror
-    if (options?.isMirror) {
-      await this.shell.run({
-        message: [
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/',
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/',
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/',
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/',
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/',
-          'conda config --set show_channel_urls yes',
-        ],
-      });
-    }
+    await this.setMirror();
+
+    bin.logger.info('start set config create_default_packages');
 
     await this.shell.run({
       message: [
@@ -192,6 +182,7 @@ export class Conda extends BinModule {
     });
 
     if (isWin32) {
+      bin.logger.info('python.exe to python3.exe');
       await fs.promises.copyFile(
         path.resolve(bin.dir, 'miniconda', 'python.exe'),
         path.resolve(bin.dir, 'miniconda', 'python3.exe'),
@@ -202,6 +193,24 @@ export class Conda extends BinModule {
 
     // 3. remove the installer
     await bin.rm(installer);
+  }
+
+  async setMirror() {
+    const { bin, options } = this._ctx;
+    // setting mirror
+    if (options?.isMirror) {
+      bin.logger.info('start set config mirror');
+      const resp = await this.shell.run({
+        message: [
+          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/',
+          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/',
+          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/',
+          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/',
+          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/',
+          'conda config --set show_channel_urls yes',
+        ],
+      });
+    }
   }
 
   override installed(): boolean {

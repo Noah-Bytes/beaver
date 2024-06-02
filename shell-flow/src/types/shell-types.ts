@@ -45,7 +45,7 @@ export interface IShellTypes {
   args: string[];
 
   env: {
-    [key: string]: string | undefined;
+    [key: string]: string;
   };
 
   /**

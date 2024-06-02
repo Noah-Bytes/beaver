@@ -124,7 +124,6 @@
     "tslib": "^2.6.2",
     "wget-improved": "^3.4.0",
     "winston": "^3.13.0",
-    "xterm-headless": "^5.3.0",
     "yaml": "^2.4.1"
   },
   "nx": {

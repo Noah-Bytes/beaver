@@ -155,9 +155,6 @@ dependencies:
   winston:
     specifier: ^3.13.0
     version: 3.13.0
-  xterm-headless:
-    specifier: ^5.3.0
-    version: 5.3.0
   yaml:
     specifier: ^2.4.1
     version: 2.4.2
@@ -1698,13 +1695,6 @@ packages:
   /@bcoe/v8-coverage@0.2.3:
     resolution: {integrity: sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==}
     dev: true
-
-  /@colors/colors@1.5.0:
-    resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==}
-    engines: {node: '>=0.1.90'}
-    requiresBuild: true
-    dev: true
-    optional: true
 
   /@colors/colors@1.6.0:
     resolution: {integrity: sha512-Ir+AOibqzrIsL6ajt3Rz3LskB7OiMVHqltZmspbW/TJuTVuyOMirVqAkjfY6JISiLHgyNqicAC8AyHHGzNd/dA==}
@@ -6333,7 +6323,7 @@ packages:
     dependencies:
       string-width: 4.2.3
     optionalDependencies:
-      '@colors/colors': 1.5.0
+      '@colors/colors': registry.npmmirror.com/@colors/colors@1.5.0
     dev: true
 
   /cli-truncate@2.1.0:
@@ -10847,6 +10837,8 @@ packages:
       webpack: '*'
     peerDependenciesMeta:
       webpack:
+        optional: true
+      webpack-sources:
         optional: true
     dependencies:
       webpack: 5.91.0(@swc/core@1.5.24)
@@ -15964,11 +15956,6 @@ packages:
     engines: {node: '>=0.4'}
     dev: false
 
-  /xterm-headless@5.3.0:
-    resolution: {integrity: sha512-HjKkEgvjlyXfZvI0LdQChOqGL5nDiXge6X2IvoQbOn+oavAKUCX9hKHtDxmWVwxgNCCvXDnfQCYL+3wyHQ9PXA==}
-    deprecated: This package is now deprecated. Move to @xterm/headless instead.
-    dev: false
-
   /y18n@5.0.8:
     resolution: {integrity: sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==}
     engines: {node: '>=10'}
@@ -16049,3 +16036,12 @@ packages:
   /zod@3.23.8:
     resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
     dev: false
+
+  registry.npmmirror.com/@colors/colors@1.5.0:
+    resolution: {integrity: sha512-ooWCrlZP11i8GImSjTHYHLkvFDP48nS4+204nGb1RiX/WXYHmJA2III9/e2DWVabCESdW7hBAEzHRqUn9OUVvQ==, registry: https://packages.aliyun.com/634d7ee774d6ec11116be100/npm/npm-registry/, tarball: https://registry.npmmirror.com/@colors/colors/-/colors-1.5.0.tgz}
+    name: '@colors/colors'
+    version: 1.5.0
+    engines: {node: '>=0.1.90'}
+    requiresBuild: true
+    dev: true
+    optional: true

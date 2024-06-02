@@ -1,26 +1,9 @@
+import { isWin32 } from '@beaver/arteffix-utils';
 import { IRequirement } from '@beaver/types';
-import { isWin32 } from '@beaver/arteffix-utils'
-import { ShellFlow } from '../../src';
-
-jest
-  .mock('shell-env', () => ({
-    shellEnvSync: jest.fn(() => ({
-      PATH: '/mock/path',
-      HOME: '/mock/home',
-    })),
-  }))
-  .mock('strip-ansi', () => {
-    return (data: string) => {
-      return data;
-    };
-  });
-jest.setTimeout(100000);
+import { getShellFlow } from './get-shell-flow';
 
 describe('bin 测试', () => {
-  const shellFlow = new ShellFlow('Beaver', {
-    isMirror: true,
-    homeDir: '/Users/taibai/workspace/beaver/beaver',
-  });
+  const shellFlow = getShellFlow();
 
   beforeAll(async () => {
     await shellFlow.init();
@@ -49,11 +32,11 @@ describe('bin 测试', () => {
 
     if (isWin32) {
       requirements.push({
-        name: 'registry'
-      })
+        name: 'registry',
+      });
       requirements.push({
-        name: 'vs'
-      })
+        name: 'vs',
+      });
     }
 
     for (let i = 0; i < requirements.length; i++) {

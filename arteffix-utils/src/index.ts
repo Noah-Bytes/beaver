@@ -4,6 +4,7 @@ export * from './directory';
 export * from './event';
 export * from './image';
 export * from './is';
+export * from './lodash';
 export * from './response';
 export * from './safe-access';
 export * from './url';
