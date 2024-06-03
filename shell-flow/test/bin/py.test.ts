@@ -1,16 +1,10 @@
-import { ShellFlow } from '../../src';
 import { Py } from '../../src/bin/module/py';
+import { getShellFlow } from './get-shell-flow';
 
 jest.setTimeout(1000000);
 
 describe('zip 测试', () => {
-  const shellFlow = new ShellFlow(
-    'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
-    {
-      isMirror: true,
-    },
-  );
+  const shellFlow = getShellFlow();
   const py = new Py(shellFlow);
 
   it('py 安装', async () => {

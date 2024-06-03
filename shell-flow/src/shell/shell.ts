@@ -82,7 +82,7 @@ export class Shell implements IShellTypes {
        * 参数解释
        * --NoProfile 不加载用户的配置文件
        */
-      this._args = ['-NoProfile'];
+      this._args = ['/D'];
     } else {
       this._terminal = '/bin/bash';
       /**
@@ -386,10 +386,7 @@ export class Shell implements IShellTypes {
     params: IShellRunParams,
     options?: IShellRunOptions,
   ): Promise<string> {
-    if (!this.isInit()) {
-      this.logger.info('start init');
-      this.init(options);
-    }
+    this.init(options);
 
     const { options: ctxOptions, appName } = this._ctx;
 
@@ -404,11 +401,11 @@ export class Shell implements IShellTypes {
 
     this.status = Shell.STATUS.RUNNING;
 
+    const that = this;
+
     if (options?.sudo) {
       await fs.promises.mkdir(this.env['TEMP']!, { recursive: true });
       return new Promise((resolve, reject) => {
-        this.logger.info(`sudo ${msg}`);
-
         sudo.exec(
           msg,
           {
@@ -416,23 +413,17 @@ export class Shell implements IShellTypes {
             env: omit(this.envCache, 'CommonProgramFiles(x86)'),
           },
           (error, stdout, stderr) => {
-            console.log(error, stdout, stderr);
             if (error) {
-              this.status = Shell.STATUS.IDLE;
-              reject(error);
-            } else if (stderr) {
-              this.status = Shell.STATUS.IDLE;
-              reject(stderr);
+              reject(Buffer.isBuffer(stderr) ? stderr.toString() : stderr);
             } else {
-              this.status = Shell.STATUS.IDLE;
-              resolve(stdout as string);
+              const text = Buffer.isBuffer(stdout) ? stdout.toString() : stdout;
+              that.eventBus.emit(that._event_name_data, text);
+              resolve(text || '');
             }
           },
         );
       });
     }
-
-    const that = this;
 
     return new Promise((resolve, reject) => {
       child_process.exec(

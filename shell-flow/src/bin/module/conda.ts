@@ -20,17 +20,17 @@ interface PlatformUrls {
 export class Conda extends BinModule {
   static URLS: PlatformUrls = {
     darwin: {
-      x64: 'https://repo.anaconda.com/miniconda/Miniconda3-py310_23.5.2-0-MacOSX-x86_64.sh',
+      x64: 'https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-MacOSX-x86_64.sh',
       arm64:
-        'https://repo.anaconda.com/miniconda/Miniconda3-py310_23.5.2-0-MacOSX-arm64.sh',
+        'https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-MacOSX-arm64.sh',
     },
     win32: {
-      x64: 'https://github.com/cocktailpeanut/miniconda/releases/download/v23.5.2/Miniconda3-py310_23.5.2-0-Windows-x86_64.exe',
+      x64: 'https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Windows-x86_64.exe',
     },
     linux: {
-      x64: 'https://repo.anaconda.com/miniconda/Miniconda3-py310_23.5.2-0-Linux-x86_64.sh',
+      x64: 'https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Linux-x86_64.sh',
       arm64:
-        'https://repo.anaconda.com/miniconda/Miniconda3-py310_23.5.2-0-Linux-aarch64.sh',
+        'https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Linux-aarch64.sh',
     },
   };
   static INSTALLER = {

@@ -1,8 +1,8 @@
 import { isWin32 } from '@beaver/arteffix-utils';
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
 import { glob } from 'glob';
 import path from 'path';
-import {BinModule} from "./bin-module";
+import { BinModule } from './bin-module';
 
 export class Vs extends BinModule {
   static DOWNLOAD_URL =
