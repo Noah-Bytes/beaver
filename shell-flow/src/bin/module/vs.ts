@@ -111,7 +111,8 @@ export class Vs extends BinModule {
     if (systemInfo.os?.release.startsWith('10')) {
       bin.logger.info(`running installer: $${Vs.FILTER_NAME}`);
 
-      const resp = await this.shell.run(
+      // TODO exec不能回调
+      await this.shell.run(
         {
           message: this.cmd('install'),
         },
@@ -119,7 +120,6 @@ export class Vs extends BinModule {
           sudo: true,
         },
       );
-      bin.logger.info(resp);
 
       bin.logger.info(`installed ${Vs.FILTER_NAME}`);
 
