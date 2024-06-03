@@ -26,14 +26,6 @@ export interface IShellManagerTypes {
    */
   removeShell(name: string): void;
 
-  pauseShell(name: string): void;
-
-  pauseAllShell(): void;
-
-  resumeShell(name: string): void;
-
-  resumeAllShell(): void;
-
   /**
    * 移除所有shell
    */

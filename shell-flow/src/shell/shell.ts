@@ -14,17 +14,13 @@ import {
 } from '@beaver/shell-flow';
 import { IKey } from '@beaver/types';
 import * as child_process from 'child_process';
+import { ChildProcessWithoutNullStreams } from 'child_process';
 import fs from 'fs';
-import * as pty from 'node-pty';
-import os from 'os';
 import path from 'path';
 import process from 'process';
 import { shellEnvSync } from 'shell-env';
-import stripAnsi from 'strip-ansi';
 import sudo from 'sudo-prompt';
 import { Logger } from 'winston';
-
-type IPty = pty.IPty;
 
 export function shellPathSync() {
   const { PATH } = shellEnvSync();
@@ -32,7 +28,6 @@ export function shellPathSync() {
 }
 
 export class Shell implements IShellTypes {
-  static END_FLAG = '__finish__';
   static STATUS = {
     INIT: 0,
     RUNNING: 1,
@@ -52,13 +47,9 @@ export class Shell implements IShellTypes {
   private readonly _args: string[];
   private readonly _event_name_data;
   private readonly _event_name_exit;
-  /**
-   * @deprecated
-   * @private
-   */
-  private ptyProcess: IPty | undefined;
   private readonly logger: Logger;
   private cwd: string | undefined;
+  private spawn?: ChildProcessWithoutNullStreams;
   private readonly _ctx: ShellFlow;
   eventBus: IEventBus;
   readonly groupName: string;
@@ -197,76 +188,6 @@ export class Shell implements IShellTypes {
     }
   }
 
-  /**
-   * @deprecated
-   * @param message
-   * @private
-   */
-  private write(message: string): void {
-    if (!this.ptyProcess) {
-      throw new Error(`${this._name} not initialized`);
-    }
-
-    this.ptyProcess.write(message);
-  }
-
-  /**
-   * @deprecated
-   * @param message
-   * @param options
-   */
-  send(
-    message: string,
-    options: {
-      isRun?: boolean;
-      isFlag?: boolean;
-    },
-  ) {
-    this.write(message);
-
-    if (options.isRun) {
-      if (options.isFlag) {
-        if (isWin32) {
-          // 在win32系统中，用来判断上一条命令执行结果
-          this.write(`& echo ${Shell.END_FLAG}%errorlevel%${Shell.END_FLAG}`);
-        } else {
-          this.write(`; echo ${Shell.END_FLAG}$?${Shell.END_FLAG}`);
-        }
-      }
-
-      this.write(os.EOL);
-    }
-  }
-
-  /**
-   * @deprecated
-   */
-  clear(): void {
-    if (isWin32) {
-      // For Windows
-      this.ptyProcess?.write('\x1Bc');
-    } else {
-      // For Unix-like systems (Linux, macOS)
-      this.ptyProcess?.write('\x1B[2J\x1B[3J\x1B[H');
-    }
-  }
-
-  /**
-   * @deprecated
-   */
-  pause(): void {
-    this.status = Shell.STATUS.STOPPED;
-    this.ptyProcess?.pause();
-  }
-
-  /**
-   * @deprecated
-   */
-  resume(): void {
-    this.status = Shell.STATUS.RUNNING;
-    this.ptyProcess?.resume();
-  }
-
   init(options?: IShellRunOptions): void {
     const { bin } = this._ctx;
     const envs = bin.envs(options?.env);
@@ -277,26 +198,8 @@ export class Shell implements IShellTypes {
     this.cwd = options?.path || options?.cwd || process.cwd();
     this.status = Shell.STATUS.IDLE;
   }
-
-  /**
-   * @deprecated
-   */
-  isInit(): boolean {
-    return !!this.ptyProcess;
-  }
-
-  /**
-   * @deprecated
-   */
   kill() {
-    if (this.ptyProcess) {
-      try {
-        this.ptyProcess.kill();
-      } catch (e) {
-        console.log(e);
-      }
-      this.ptyProcess = undefined;
-    }
+    this.spawn?.kill();
 
     this.eventBus.removeAllListeners();
 
@@ -334,9 +237,7 @@ export class Shell implements IShellTypes {
     params: IShellRunParams,
     options?: IShellRunOptions,
   ): Promise<void> {
-    if (!this.isInit()) {
-      this.init(options);
-    }
+    this.init(options);
 
     const { options: ctxOptions } = this._ctx;
 
@@ -351,35 +252,24 @@ export class Shell implements IShellTypes {
 
     this.status = Shell.STATUS.RUNNING;
 
-    this.send(msg, {
-      isRun: true,
-      isFlag: false,
+    this.spawn = child_process.spawn(msg, {
+      env: this.envCache,
+      cwd: this.cwd,
     });
-  }
 
-  // 自定义过滤函数，移除各种类型的控制字符
-  _filterOutput(data: string) {
-    // 移除 ANSI 控制字符
-    let cleanedData = stripAnsi(data);
+    const that = this;
 
-    // 移除其他类型的控制字符，同时保留换行符
-    cleanedData = cleanedData.replace(
-      /[\u0000-\u0008\u000B-\u001F\u007F-\u009F]+/g,
-      '',
-    ); // 控制字符
-    cleanedData = cleanedData.replace(/\u001b\[\?25[hl]/g, ''); // 光标隐藏和显示
-    cleanedData = cleanedData.replace(/\u001b\[\d+;\d+[Hf]/g, ''); // 光标定位
-    cleanedData = cleanedData.replace(/\u001b\[\d*[JK]/g, ''); // 擦除屏幕
-    cleanedData = cleanedData.replace(/\u001b\[\d*;?\d*[mG]/g, ''); // SGR参数重置
-    cleanedData = cleanedData.replace(/\u001b\]0;.*?\u0007/g, ''); // OSC控制序列
-    cleanedData = cleanedData.replace(/\u001b\[\d+;\d+[rm]/g, ''); // 设置模式和重置模式
-    cleanedData = cleanedData.replace(/\u001b\[\d*P/g, ''); // DCS序列
-    cleanedData = cleanedData.replace(
-      /;管理员: C:\\Windows\\SYSTEM32\\cmd.exe.*/s,
-      '',
-    ); // DCS序列
+    this.spawn.stdout.on('data', (data) => {
+      that.eventBus.emit(that._event_name_data, data);
+    });
 
-    return cleanedData;
+    this.spawn.stderr.on('data', (data) => {
+      that.eventBus.emit(that._event_name_data, data);
+    });
+
+    this.spawn.on('close', (code) => {
+      that.eventBus.emit(that._event_name_exit, code);
+    });
   }
 
   async run(

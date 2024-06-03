@@ -78,41 +78,11 @@ export class ShellManager implements IShellManagerTypes {
     }
   }
 
-  pauseAllShell(groupName: string = this._defaultGroupName): void {
-    for (let shell of this._groupMap.get(groupName) || []) {
-      shell.pause();
-    }
-  }
-
-  pauseShell(name: string): void {
-    let shell = this.getShell(name);
-    if (shell) {
-      shell.pause();
-    }
-  }
-
-  resumeAllShell(groupName: string = this._defaultGroupName): void {
-    for (let shell of this._groupMap.get(groupName) || []) {
-      shell.resume();
-    }
-  }
-
-  resumeShell(name: string): void {
-    let shell = this.getShell(name);
-    if (shell) {
-      shell.resume();
-    }
-  }
-
   async run(name: string, params: IShellRunParams): Promise<string> {
     let shell = this.getShell(name);
 
     if (!shell) {
       throw new Error(`${name} shell not init`);
-    }
-
-    if (!shell?.isInit()) {
-      shell.init();
     }
 
     return await shell.run(params);

@@ -48,27 +48,6 @@ export interface IShellTypes {
     [key: string]: string;
   };
 
-  /**
-   * 给终端发送信息
-   * @param message
-   * @param options 配置
-   */
-  send(
-    message: string,
-    options: {
-      isExe: boolean;
-      isFlag: boolean;
-    },
-  ): void;
-
-  /**
-   * 清理终端
-   */
-  clear(): void;
-
-  pause(): void;
-  resume(): void;
-
   kill(): void;
 
   run(params: IShellRunParams, options?: IShellRunOptions): Promise<string>;
@@ -79,8 +58,6 @@ export interface IShellTypes {
    * 初始化
    */
   init(options?: IShellRunOptions): void;
-
-  isInit(): boolean;
 
   onShellData(func: (data: string) => void): () => void;
   onShellExit(func: (data: string) => void): () => void;
