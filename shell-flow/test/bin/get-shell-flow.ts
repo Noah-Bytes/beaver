@@ -21,7 +21,7 @@ export function getShellFlow() {
         'https://arteffix-github.oss-cn-hangzhou.aliyuncs.com/miniconda/releases/download',
       'https://github.com/cocktailpeanut/bin/': 'https://arteffix-github.oss-cn-hangzhou.aliyuncs.com/cocktailpeanut/bin/'
     },
-    homeDir: 'D:\\art.shell',
-    // homeDir: '/Users/taibai/Documents/我的智流.shell',
+    // homeDir: 'D:\\art.shell',
+    homeDir: '/Users/taibai/Documents/我的智流.shell',
   });
 }

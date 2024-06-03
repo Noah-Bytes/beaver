@@ -52,9 +52,13 @@ export class Shell implements IShellTypes {
   private readonly _args: string[];
   private readonly _event_name_data;
   private readonly _event_name_exit;
+  /**
+   * @deprecated
+   * @private
+   */
   private ptyProcess: IPty | undefined;
   private readonly logger: Logger;
-  private cwd: string | undefined
+  private cwd: string | undefined;
   private readonly _ctx: ShellFlow;
   eventBus: IEventBus;
   readonly groupName: string;
@@ -193,6 +197,11 @@ export class Shell implements IShellTypes {
     }
   }
 
+  /**
+   * @deprecated
+   * @param message
+   * @private
+   */
   private write(message: string): void {
     if (!this.ptyProcess) {
       throw new Error(`${this._name} not initialized`);
@@ -200,6 +209,12 @@ export class Shell implements IShellTypes {
 
     this.ptyProcess.write(message);
   }
+
+  /**
+   * @deprecated
+   * @param message
+   * @param options
+   */
   send(
     message: string,
     options: {
@@ -222,6 +237,10 @@ export class Shell implements IShellTypes {
       this.write(os.EOL);
     }
   }
+
+  /**
+   * @deprecated
+   */
   clear(): void {
     if (isWin32) {
       // For Windows
@@ -232,11 +251,17 @@ export class Shell implements IShellTypes {
     }
   }
 
+  /**
+   * @deprecated
+   */
   pause(): void {
     this.status = Shell.STATUS.STOPPED;
     this.ptyProcess?.pause();
   }
 
+  /**
+   * @deprecated
+   */
   resume(): void {
     this.status = Shell.STATUS.RUNNING;
     this.ptyProcess?.resume();
@@ -249,33 +274,20 @@ export class Shell implements IShellTypes {
       ...this.env,
       ...this.parseEnv(envs),
     };
-
-    this.cwd = options?.path || options?.cwd || process.cwd(),
-
-    // this.ptyProcess = pty.spawn(this._terminal, this.args, {
-    //   name: this.name,
-    //   cols: options?.cols || 100,
-    //   rows: options?.rows || 30,
-    //   cwd: this.cwd,
-    //   env: this.envCache,
-    // });
-    //
-    // this.ptyProcess.onData((data) => {
-    //   this.eventBus.emit(this._event_name_data, this._filterOutput(data));
-    // });
-    //
-    // this.ptyProcess.onExit((result) => {
-    //   this.logger.info(`${this.name} shell exit`);
-    //   this.eventBus.emit(this._event_name_exit, result);
-    // });
-
+    this.cwd = options?.path || options?.cwd || process.cwd();
     this.status = Shell.STATUS.IDLE;
   }
 
+  /**
+   * @deprecated
+   */
   isInit(): boolean {
     return !!this.ptyProcess;
   }
 
+  /**
+   * @deprecated
+   */
   kill() {
     if (this.ptyProcess) {
       try {
@@ -420,56 +432,25 @@ export class Shell implements IShellTypes {
       });
     }
 
+    const that = this;
+
     return new Promise((resolve, reject) => {
       child_process.exec(
         msg,
         {
-          cwd: this.cwd,
           env: this.envCache,
+          cwd: this.cwd,
           encoding: 'utf-8',
         },
         function (error, stdout, stderr) {
           if (error) {
-            reject(stderr)
+            reject(stderr);
           } else {
-            resolve(stdout)
+            that.eventBus.emit(that._event_name_data, stdout);
+            resolve(stdout);
           }
         },
       );
-      // const off = this.onShellData((data) => {
-      //   stream += data;
-      //
-      //   const reg = new RegExp(`${Shell.END_FLAG}(\\d+)${Shell.END_FLAG}`, 'm');
-      //
-      //   const match = stream.match(reg); // 假设退出状态是输出的最后一部分
-      //
-      //   if (match && match.length > 0) {
-      //     let exitStatus = parseInt(
-      //       match[1].replace(Shell.END_FLAG, '').replace(Shell.END_FLAG, ''),
-      //       10,
-      //     );
-      //     off();
-      //
-      //     const result = stream;
-      //
-      //     console.log(exitStatus);
-      //
-      //     this.kill();
-      //
-      //     if (exitStatus === 0) {
-      //       this.status = Shell.STATUS.IDLE;
-      //       resolve(result);
-      //     } else {
-      //       this.status = Shell.STATUS.IDLE;
-      //       reject(new Error(result));
-      //     }
-      //   }
-      // });
-      //
-      // this.send(msg, {
-      //   isRun: true,
-      //   isFlag: true,
-      // });
     });
   }
 
