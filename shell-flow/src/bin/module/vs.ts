@@ -160,7 +160,6 @@ export class Vs extends BinModule {
   override installed(): boolean {
     if (isWin32) {
       const paths = this.getPaths();
-      console.log(paths)
       return !!(paths.MSVC_PATH && paths.BUILD_PATH && paths.CMAKE_PATH);
     }
     return false;

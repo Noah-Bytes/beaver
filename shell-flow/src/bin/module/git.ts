@@ -1,11 +1,11 @@
 import { isWin32 } from '@beaver/arteffix-utils';
 import { ShellFlow } from '@beaver/shell-flow';
-import fs from 'fs';
+import fs from 'fs-extra';
 import path from 'path';
 import { BinModule } from './bin-module';
 
 export class Git extends BinModule {
-  static GIT_CONFIG = '.gitconfig';
+  static GIT_CONFIG = 'gitconfig';
   override readonly dependencies: string[] = ['conda'];
 
   constructor(ctx: ShellFlow) {
@@ -29,12 +29,16 @@ export class Git extends BinModule {
     });
 
     if (isWin32) {
-      const { homeDir, app, absPath } = this._ctx;
-      const gitConfigPath = absPath(Git.GIT_CONFIG);
+      const { app } = this._ctx;
+      const gitConfigPath = this._ctx.absPath(Git.GIT_CONFIG);
       if (!app.exists(gitConfigPath)) {
-        await fs.promises.copyFile(
-          path.resolve(__dirname, '..', 'gitconfig_template'),
+        await fs.outputFile(
           gitConfigPath,
+          `[core]
+  longpaths = true
+[http]
+  postBuffer = 524288000
+`,
         );
       }
     }

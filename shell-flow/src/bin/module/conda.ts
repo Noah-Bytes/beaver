@@ -234,4 +234,11 @@ export class Conda extends BinModule {
     const { bin } = this._ctx;
     await bin.rm(path.resolve(bin.dir, 'miniconda'));
   }
+
+  async clean() {
+    await this.shell.run({
+      message: 'conda clean --all -y',
+    });
+  }
+
 }

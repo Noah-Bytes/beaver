@@ -7,6 +7,14 @@ describe('conda 测试', () => {
     await shellFlow.init();
   });
 
+  it('conda 删除缓存目录', async () => {
+    const conda = shellFlow.bin.getModule('conda');
+    if (conda) {
+      // @ts-ignore
+      await conda.clean();
+    }
+  });
+
   it('conda 安装', async () => {
     const conda = shellFlow.bin.getModule('conda');
     if (conda) {

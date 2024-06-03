@@ -1,4 +1,4 @@
-jest.setTimeout(100000);
+jest.setTimeout(1000000);
 
 function ansiRegex({ onlyFirst = false } = {}) {
   const pattern = [

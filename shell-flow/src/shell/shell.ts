@@ -13,6 +13,7 @@ import {
   ShellFlow,
 } from '@beaver/shell-flow';
 import { IKey } from '@beaver/types';
+import * as child_process from 'child_process';
 import fs from 'fs';
 import * as pty from 'node-pty';
 import os from 'os';
@@ -53,6 +54,7 @@ export class Shell implements IShellTypes {
   private readonly _event_name_exit;
   private ptyProcess: IPty | undefined;
   private readonly logger: Logger;
+  private cwd: string | undefined
   private readonly _ctx: ShellFlow;
   eventBus: IEventBus;
   readonly groupName: string;
@@ -248,22 +250,24 @@ export class Shell implements IShellTypes {
       ...this.parseEnv(envs),
     };
 
-    this.ptyProcess = pty.spawn(this._terminal, this.args, {
-      name: this.name,
-      cols: options?.cols || 100,
-      rows: options?.rows || 30,
-      cwd: options?.path || options?.cwd || process.cwd(),
-      env: this.envCache,
-    });
+    this.cwd = options?.path || options?.cwd || process.cwd(),
 
-    this.ptyProcess.onData((data) => {
-      this.eventBus.emit(this._event_name_data, this._filterOutput(data));
-    });
-
-    this.ptyProcess.onExit((result) => {
-      this.logger.info(`${this.name} shell exit`);
-      this.eventBus.emit(this._event_name_exit, result);
-    });
+    // this.ptyProcess = pty.spawn(this._terminal, this.args, {
+    //   name: this.name,
+    //   cols: options?.cols || 100,
+    //   rows: options?.rows || 30,
+    //   cwd: this.cwd,
+    //   env: this.envCache,
+    // });
+    //
+    // this.ptyProcess.onData((data) => {
+    //   this.eventBus.emit(this._event_name_data, this._filterOutput(data));
+    // });
+    //
+    // this.ptyProcess.onExit((result) => {
+    //   this.logger.info(`${this.name} shell exit`);
+    //   this.eventBus.emit(this._event_name_exit, result);
+    // });
 
     this.status = Shell.STATUS.IDLE;
   }
@@ -274,7 +278,11 @@ export class Shell implements IShellTypes {
 
   kill() {
     if (this.ptyProcess) {
-      this.ptyProcess.kill();
+      try {
+        this.ptyProcess.kill();
+      } catch (e) {
+        console.log(e);
+      }
       this.ptyProcess = undefined;
     }
 
@@ -413,39 +421,55 @@ export class Shell implements IShellTypes {
     }
 
     return new Promise((resolve, reject) => {
-      let stream: string = '';
-      const off = this.onShellData((data) => {
-        stream += data;
-
-        const reg = new RegExp(`${Shell.END_FLAG}(\\d+)${Shell.END_FLAG}`, 'm');
-
-        const match = stream.match(reg); // 假设退出状态是输出的最后一部分
-
-        if (match && match.length > 0) {
-          let exitStatus = parseInt(
-            match[1].replace(Shell.END_FLAG, '').replace(Shell.END_FLAG, ''),
-            10,
-          );
-          off();
-
-          const result = stream;
-
-          // this.kill();
-
-          if (exitStatus === 0) {
-            this.status = Shell.STATUS.IDLE;
-            resolve(result);
+      child_process.exec(
+        msg,
+        {
+          cwd: this.cwd,
+          env: this.envCache,
+          encoding: 'utf-8',
+        },
+        function (error, stdout, stderr) {
+          if (error) {
+            reject(stderr)
           } else {
-            this.status = Shell.STATUS.IDLE;
-            reject(new Error(result));
+            resolve(stdout)
           }
-        }
-      });
-
-      this.send(msg, {
-        isRun: true,
-        isFlag: true,
-      });
+        },
+      );
+      // const off = this.onShellData((data) => {
+      //   stream += data;
+      //
+      //   const reg = new RegExp(`${Shell.END_FLAG}(\\d+)${Shell.END_FLAG}`, 'm');
+      //
+      //   const match = stream.match(reg); // 假设退出状态是输出的最后一部分
+      //
+      //   if (match && match.length > 0) {
+      //     let exitStatus = parseInt(
+      //       match[1].replace(Shell.END_FLAG, '').replace(Shell.END_FLAG, ''),
+      //       10,
+      //     );
+      //     off();
+      //
+      //     const result = stream;
+      //
+      //     console.log(exitStatus);
+      //
+      //     this.kill();
+      //
+      //     if (exitStatus === 0) {
+      //       this.status = Shell.STATUS.IDLE;
+      //       resolve(result);
+      //     } else {
+      //       this.status = Shell.STATUS.IDLE;
+      //       reject(new Error(result));
+      //     }
+      //   }
+      // });
+      //
+      // this.send(msg, {
+      //   isRun: true,
+      //   isFlag: true,
+      // });
     });
   }
 

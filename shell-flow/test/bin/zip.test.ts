@@ -1,27 +1,38 @@
-import { ShellFlow } from '../../src';
-import {Zip} from "../../src/bin/module/zip";
+import {getShellFlow} from "./get-shell-flow";
+import {afterEach} from "node:test";
 
 jest.setTimeout(1000000);
 
 describe('zip 测试', () => {
-  const shellFlow = new ShellFlow(
-    'Beaver',
-    '/Users/taibai/workspace/beaver/beaver',
-    {
-      isMirror: true,
-    },
-  );
-  const zip = new Zip(shellFlow);
+  const shellFlow = getShellFlow()
+
+  beforeAll(async () => {
+    await shellFlow.init();
+  });
+
+  afterEach(async () => {
+    await shellFlow.destroy();
+  })
 
   it('zip 安装', async () => {
-    await zip.install();
+    const zip = shellFlow.bin.getModule('zip')
+    if (zip) {
+      await zip.install()
+    }
   });
 
   it('zip 是否安装', async () => {
-    console.log(zip.installed());
+    const zip = shellFlow.bin.getModule('zip')
+    if (zip) {
+      const result = await zip.installed()
+      console.log(result)
+    }
   })
 
   it('zip 卸载', async () => {
-    await zip.uninstall();
+    const zip = shellFlow.bin.getModule('zip')
+    if (zip) {
+      await zip.uninstall()
+    }
   })
 });
