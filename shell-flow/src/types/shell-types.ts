@@ -1,3 +1,5 @@
+import { Terminal } from '../shell/terminal';
+
 export interface IShellRunOptions {
   cols?: number;
   rows?: number;
@@ -30,7 +32,7 @@ export interface IShellMeta {
   args: string[];
   env: {
     [key: string]: string | undefined;
-  }
+  };
 }
 
 export interface IShellTypes {
@@ -51,6 +53,8 @@ export interface IShellTypes {
   kill(): void;
 
   run(params: IShellRunParams, options?: IShellRunOptions): Promise<string>;
+
+  getPty(): Terminal;
 
   execute(params: IShellRunParams, options?: IShellRunOptions): Promise<void>;
 

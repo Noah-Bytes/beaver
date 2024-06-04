@@ -27,28 +27,33 @@ export class Shell {
     return message;
   }
 
+  /**
+   * @deprecated
+   * @param params
+   * @param ctx
+   */
   async execute(params: IShellAppRunParams, ctx: IAppTypes) {
     params.message = this.parseMessage(params);
+
     const sh = this._ctx.shell.createShell(
       `app/shell/running/${uuid()}`,
       ctx.name,
     );
-    sh.onShellData((data) => {
-      if (params.on) {
-        params.on.forEach((elem) => {
-          this._ctx.eventBus.emit(elem.event, data);
-        });
-      }
-    });
-    sh.execute(params, {
+    await sh.execute(params, {
       cwd: params.cwd,
       path: params.path,
       env: params.env,
-    }).catch((e) => {
-      console.error(e);
     });
 
-    return sh;
+    const that = this;
+
+    sh.getPty().onData((data) => {
+      if (params.on) {
+        params.on.forEach((elem) => {
+          that._ctx.eventBus.emit(elem.event, data);
+        });
+      }
+    });
   }
 
   async run(params: IShellAppRunParams) {

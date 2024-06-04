@@ -32,6 +32,9 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "build-custom-server": {
+      "cache": true
     }
   },
   "release": {
@@ -50,7 +53,8 @@
       "plugin": "@nx/jest/plugin",
       "options": {
         "targetName": "test"
-      }
+      },
+      "exclude": ["arteffix-terminal-e2e/**/*"]
     },
     {
       "plugin": "@nx/next/plugin",
@@ -72,6 +76,20 @@
       "plugin": "@nx/rollup/plugin",
       "options": {
         "buildTargetName": "build"
+      }
+    },
+    {
+      "plugin": "@nx/playwright/plugin",
+      "options": {
+        "targetName": "e2e"
+      }
+    },
+    {
+      "plugin": "@nx/webpack/plugin",
+      "options": {
+        "buildTargetName": "build",
+        "serveTargetName": "serve",
+        "previewTargetName": "preview"
       }
     }
   ],

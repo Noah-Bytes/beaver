@@ -14,13 +14,13 @@ import {
 } from '@beaver/shell-flow';
 import { IKey } from '@beaver/types';
 import * as child_process from 'child_process';
-import { ChildProcessWithoutNullStreams } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
 import { shellEnvSync } from 'shell-env';
 import sudo from 'sudo-prompt';
 import { Logger } from 'winston';
+import { Terminal } from './terminal';
 
 export function shellPathSync() {
   const { PATH } = shellEnvSync();
@@ -49,8 +49,8 @@ export class Shell implements IShellTypes {
   private readonly _event_name_exit;
   private readonly logger: Logger;
   private cwd: string | undefined;
-  private spawn?: ChildProcessWithoutNullStreams;
   private readonly _ctx: ShellFlow;
+  private ptyProcess: Terminal | undefined;
   eventBus: IEventBus;
   readonly groupName: string;
 
@@ -199,7 +199,7 @@ export class Shell implements IShellTypes {
     this.status = Shell.STATUS.IDLE;
   }
   kill() {
-    this.spawn?.kill();
+    this.ptyProcess?.kill();
 
     this.eventBus.removeAllListeners();
 
@@ -233,6 +233,23 @@ export class Shell implements IShellTypes {
     };
   }
 
+  getPty() {
+    if (this.ptyProcess) {
+      return this.ptyProcess;
+    }
+    this.ptyProcess = new Terminal(this._terminal, this._args, {
+      name: this.name,
+      cwd: this.cwd,
+      env: this.envCache,
+    });
+
+    this.ptyProcess.onData((data) => {
+      this._ctx.options?.start?.(this.name, data);
+    });
+
+    return this.ptyProcess;
+  }
+
   async execute(
     params: IShellRunParams,
     options?: IShellRunOptions,
@@ -252,25 +269,9 @@ export class Shell implements IShellTypes {
 
     this.status = Shell.STATUS.RUNNING;
 
-    this.spawn = child_process.spawn(msg, {
-      shell: true,
-      env: this.envCache,
-      cwd: this.cwd,
-    });
+    const ptyProcess = this.getPty();
 
-    const that = this;
-
-    this.spawn.stdout.on('data', (data) => {
-      that.eventBus.emit(that._event_name_data, data);
-    });
-
-    this.spawn.stderr.on('error', (data) => {
-      that.eventBus.emit(that._event_name_data, data);
-    });
-
-    this.spawn.on('exit', (code) => {
-      that.eventBus.emit(that._event_name_exit, code);
-    });
+    ptyProcess.write(msg);
   }
 
   async run(

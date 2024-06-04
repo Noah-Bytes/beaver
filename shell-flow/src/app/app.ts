@@ -1,19 +1,28 @@
 import { safeAccessSync } from '@beaver/arteffix-utils';
 import { MetaFile } from '@beaver/kernel';
 import {
-  createLogger,
   IAppMeta,
   IAppMetaUpdate,
   IAppTypes,
+  ShellFlow,
+  createLogger,
   loader,
   requireImage,
-  ShellFlow,
 } from '@beaver/shell-flow';
-import { IShellApp, IShellAppMeta, IShellAppRun } from '@beaver/types';
+import {
+  IShellApp,
+  IShellAppMeta,
+  IShellAppRun,
+  IShellAppRunParams,
+} from '@beaver/types';
 import fs from 'fs-extra';
 import git, { ReadCommitResult } from 'isomorphic-git';
+import * as pty from 'node-pty';
 import path from 'path';
 import { Logger } from 'winston';
+import { Shell } from '../shell/shell';
+
+type IPty = pty.IPty;
 
 export class App implements IAppTypes {
   static STATUS = {
@@ -36,6 +45,7 @@ export class App implements IAppTypes {
 
   private readonly _ctx: ShellFlow;
   private readonly logger: Logger;
+  private readonly shell: Shell;
 
   constructor(name: string, git: string, ctx: ShellFlow) {
     const { app } = ctx;
@@ -44,6 +54,7 @@ export class App implements IAppTypes {
     this.name = name;
     this.git = git;
     this.logger = createLogger(`app:${name}`);
+    this.shell = new Shell(`app/${this.name}`, 'app', ctx);
 
     ['start', 'install', 'update'].forEach((elem) => {
       const outputStream = fs.createWriteStream(this.absPath(elem + '.log'), {
@@ -234,6 +245,7 @@ export class App implements IAppTypes {
       if (unInstall) {
         const sh = (await this.load(unInstall)) as IShellApp;
         if (sh.run) {
+          await this.stop();
           await this._runs(sh.run);
         }
 
@@ -250,6 +262,23 @@ export class App implements IAppTypes {
     }
   }
 
+  parseMessage(params: IShellAppRunParams): string | string[] {
+    let message: string | string[] = '';
+
+    if (params.messageFn) {
+      const { systemInfo, options } = this._ctx;
+      message = params.messageFn({
+        platform: systemInfo.platform,
+        gpu: systemInfo.GPU,
+        mirror: options?.isMirror,
+      });
+    } else if (params.message) {
+      message = params.message;
+    }
+
+    return message;
+  }
+
   async start(): Promise<void> {
     const { start } = this.meta!;
     if (start) {
@@ -259,7 +288,18 @@ export class App implements IAppTypes {
       const sh = (await this.load(start)) as IShellApp;
 
       if (sh.run) {
-        await this._runs(sh.run);
+        for (let runParam of sh.run) {
+          runParam.params.message = this.parseMessage(runParam.params);
+          if (runParam.params.path) {
+            runParam.params.path = this.absPath(runParam.params.path);
+          }
+
+          await this.shell.execute(runParam.params, {
+            cwd: this.dir,
+            path: runParam.params.path,
+            env: runParam.params.env,
+          });
+        }
       }
 
       await this.updateMeta({
@@ -280,6 +320,7 @@ export class App implements IAppTypes {
       status: App.STATUS.STOPPED,
     });
     shell.removeAllShell(this.name);
+    this.shell.getPty().kill();
     await fs.truncate(this.absPath('start.log'), 0);
   }
 
@@ -316,8 +357,8 @@ export class App implements IAppTypes {
     try {
       this.meta = await fs.readJson(this.absPath(MetaFile.META_NAME));
     } catch (e) {
-      await fs.rm(this.absPath(MetaFile.META_NAME))
-      await this.init()
+      await fs.rm(this.absPath(MetaFile.META_NAME));
+      await this.init();
     }
     return this.meta;
   }

@@ -19,9 +19,13 @@ export function getShellFlow() {
       'https://github.com/lllyasviel': 'https://gitee.com/arteffix',
       'https://github.com/cocktailpeanut/miniconda/releases/download':
         'https://arteffix-github.oss-cn-hangzhou.aliyuncs.com/miniconda/releases/download',
-      'https://github.com/cocktailpeanut/bin/': 'https://arteffix-github.oss-cn-hangzhou.aliyuncs.com/cocktailpeanut/bin/'
+      'https://github.com/cocktailpeanut/bin/':
+        'https://arteffix-github.oss-cn-hangzhou.aliyuncs.com/cocktailpeanut/bin/',
     },
     // homeDir: 'D:\\art.shell',
     homeDir: '/Users/taibai/Documents/我的智流.shell',
+    start(name, data) {
+      console.log(name, data);
+    },
   });
 }
