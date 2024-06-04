@@ -253,6 +253,7 @@ export class Shell implements IShellTypes {
     this.status = Shell.STATUS.RUNNING;
 
     this.spawn = child_process.spawn(msg, {
+      shell: true,
       env: this.envCache,
       cwd: this.cwd,
     });
@@ -263,11 +264,11 @@ export class Shell implements IShellTypes {
       that.eventBus.emit(that._event_name_data, data);
     });
 
-    this.spawn.stderr.on('data', (data) => {
+    this.spawn.stderr.on('error', (data) => {
       that.eventBus.emit(that._event_name_data, data);
     });
 
-    this.spawn.on('close', (code) => {
+    this.spawn.on('exit', (code) => {
       that.eventBus.emit(that._event_name_exit, code);
     });
   }

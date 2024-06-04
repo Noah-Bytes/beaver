@@ -2,7 +2,8 @@ import { safeAccessSync } from '@beaver/arteffix-utils';
 import { MetaFile } from '@beaver/kernel';
 import {
   createLogger,
-  IAppMeta, IAppMetaUpdate,
+  IAppMeta,
+  IAppMetaUpdate,
   IAppTypes,
   loader,
   requireImage,
@@ -184,7 +185,7 @@ export class App implements IAppTypes {
 
     await this.updateMeta({
       status: App.STATUS.INSTALLING,
-    })
+    });
 
     const { bin } = this._ctx;
     const { install } = this.meta;
@@ -203,18 +204,18 @@ export class App implements IAppTypes {
 
         await this.updateMeta({
           status: App.STATUS.INSTALLED,
-        })
+        });
       } else {
         await this.updateMeta({
           status: App.STATUS.INSTALL_ERROR,
-        })
+        });
         // 安装脚本不存在
         this.logger.warn('the installation script does not exist');
       }
     } catch (e) {
       await this.updateMeta({
         status: App.STATUS.INSTALL_ERROR,
-      })
+      });
       this.logger.error(e);
       throw new Error(`Failed to install ${this.name}`);
     }
@@ -238,7 +239,7 @@ export class App implements IAppTypes {
 
         await this.updateMeta({
           status: App.STATUS.INIT,
-        })
+        });
       } else {
         // 安装脚本不存在
         this.logger.warn('the installation script does not exist');
@@ -254,7 +255,7 @@ export class App implements IAppTypes {
     if (start) {
       await this.updateMeta({
         status: App.STATUS.STARTING,
-      })
+      });
       const sh = (await this.load(start)) as IShellApp;
 
       if (sh.run) {
@@ -263,11 +264,11 @@ export class App implements IAppTypes {
 
       await this.updateMeta({
         status: App.STATUS.STARTED,
-      })
+      });
     } else {
       await this.updateMeta({
         status: App.STATUS.START_ERROR,
-      })
+      });
       // 脚本不存在
       throw new Error('the start script does not exist');
     }
@@ -277,7 +278,7 @@ export class App implements IAppTypes {
     const { shell } = this._ctx;
     await this.updateMeta({
       status: App.STATUS.STOPPED,
-    })
+    });
     shell.removeAllShell(this.name);
     await fs.truncate(this.absPath('start.log'), 0);
   }
@@ -306,20 +307,24 @@ export class App implements IAppTypes {
   }
 
   async saveMetadata(): Promise<boolean> {
-    const meta = this.getMeta();
     await fs.writeJson(this.absPath(MetaFile.META_NAME), this.meta);
     return true;
   }
 
   async readMetaData(): Promise<IAppMeta | undefined> {
     safeAccessSync(this.absPath());
-    this.meta = await fs.readJson(this.absPath(MetaFile.META_NAME));
+    try {
+      this.meta = await fs.readJson(this.absPath(MetaFile.META_NAME));
+    } catch (e) {
+      await fs.rm(this.absPath(MetaFile.META_NAME))
+      await this.init()
+    }
     return this.meta;
   }
 
   async updateMeta(meta: IAppMetaUpdate): Promise<void> {
     if (!this.meta) {
-      throw new Error(`${this.name} not initialized`)
+      throw new Error(`${this.name} not initialized`);
     }
     this.meta = {
       ...this.meta,
