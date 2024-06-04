@@ -48,11 +48,17 @@ export class Torch extends BinModule {
         }
         break;
     }
-    await this.shell.run({
+    await this.shell.execute({
       message: options?.isMirror
         ? `${cmd} -i https://pypi.mirrors.ustc.edu.cn/simple/`
         : cmd,
     });
+
+    function sleep(ms: number): Promise<void> {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    await sleep(100000)
   }
 
   override async installed(): Promise<boolean> {

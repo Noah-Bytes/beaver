@@ -261,11 +261,15 @@ export class Shell implements IShellTypes {
     const that = this;
 
     this.spawn.stdout.on('data', (data) => {
-      that.eventBus.emit(that._event_name_data, data);
+      const text = data.toString()
+      console.log(text)
+      that.eventBus.emit(that._event_name_data, text);
     });
 
     this.spawn.stderr.on('error', (data) => {
-      that.eventBus.emit(that._event_name_data, data);
+      const text = data.toString()
+      console.log(text)
+      that.eventBus.emit(that._event_name_data, text);
     });
 
     this.spawn.on('exit', (code) => {
