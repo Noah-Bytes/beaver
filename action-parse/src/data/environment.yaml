@@ -1,0 +1,68 @@
+name: conda environment
+
+jobs:
+  conda:
+    global:
+      download:
+        darwin:
+          x64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-MacOSX-x86_64.sh
+          arm64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-MacOSX-arm64.sh
+        win32:
+          x64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Windows-x86_64.exe
+        linux:
+          x64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Linux-x86_64.sh
+          arm64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Linux-aarch64.sh
+      installer:
+        darwin: installer.sh
+        linux: installer.sh
+        win32: installer.exe
+    steps:
+      - name: download conda
+        uses: action/download
+        with:
+          url: "{{global.download[os.platform][os.arch]}}"
+          file: "{{global.installer[os.platform]}}"
+          path: bin
+      - name: conda install
+        if: os.platform === 'win32'
+        run: start /wait installer.exe /InstallationType=JustMe /Regi sterPython=0 /S /D={{absPath('miniconda')}}
+        with:
+          path: bin
+      - name: conda install for unix
+        if: os.platform === 'linux' || os.platform === 'darwin'
+        run: "base installer.sh -b -p {{bin}} miniconda {{absPath('miniconda')}}"
+        with:
+          path: bin
+      - name: conda config
+        uses: action/shell-conda
+        with:
+          run:
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+            - conda config --set show_channel_urls yes
+            #          - 使得每次创建新环境时，都会自动安装Python 3.10
+            - conda config --add create_default_packages python=3.10
+            #          - 从Conda Forge频道安装pip、brotli和brotlipy这三个包
+            - conda install -y -c conda-forge pip brotli brotlipy
+      - name: rename
+        uses: action/fs
+        with:
+          type: copy
+          path: bin/miniconda
+          from: python.exe
+          to: python3.exe
+      - name: rm install package
+        uses: action/fs
+        with:
+          type: rm
+          path: bin
+          file: "{{global.installer[os.platform]}}"
+
+  git:
+  zip:
+  nodejs:
+  ffmpeg:
+  py:

@@ -45,7 +45,7 @@ export class App implements IAppTypes {
 
   private readonly _ctx: ShellFlow;
   private readonly logger: Logger;
-  private readonly shell: Shell;
+  private shell: Shell;
 
   constructor(name: string, git: string, ctx: ShellFlow) {
     const { app } = ctx;

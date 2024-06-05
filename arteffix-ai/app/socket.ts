@@ -2,4 +2,4 @@
 
 import { io } from "socket.io-client";
 
-export const socket = io(':3333');
+export const socket = io(':19879');

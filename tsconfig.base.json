@@ -15,6 +15,11 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@beaver/action-core": ["action-core/src/index.ts"],
+      "@beaver/action-download": ["action-download/src/index.ts"],
+      "@beaver/action-exec": ["action-exec/src/index.ts"],
+      "@beaver/action-io": ["action-io/src/index.ts"],
+      "@beaver/action-parse": ["action-parse/src/index.ts"],
       "@beaver/arteffix-extension": ["arteffix-extension/src/index.ts"],
       "@beaver/arteffix-library": ["arteffix-library/src/index.ts"],
       "@beaver/arteffix-utils": ["arteffix-utils/src/index.ts"],
@@ -22,6 +27,7 @@
       "@beaver/interceptor": ["interceptor/src/index.ts"],
       "@beaver/kernel": ["beaver-kernel/src/index.ts"],
       "@beaver/shell-flow": ["shell-flow/src/index.ts"],
+      "@beaver/system-info": ["system-info/src/index.ts"],
       "@beaver/types": ["types/src/index.ts"]
     }
   },

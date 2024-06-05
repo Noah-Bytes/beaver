@@ -104,6 +104,9 @@ dependencies:
   jquery:
     specifier: ^3.7.1
     version: 3.7.1
+  json-templates:
+    specifier: ^5.1.0
+    version: 5.1.0
   mime:
     specifier: ^4.0.3
     version: 4.0.3
@@ -304,6 +307,9 @@ devDependencies:
   '@types/jquery':
     specifier: ^3.5.29
     version: 3.5.30
+  '@types/json-templates':
+    specifier: ^3.0.3
+    version: 3.0.3
   '@types/node':
     specifier: 18.16.9
     version: 18.16.9
@@ -4651,6 +4657,10 @@ packages:
 
   /@types/json-schema@7.0.15:
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+    dev: true
+
+  /@types/json-templates@3.0.3:
+    resolution: {integrity: sha512-5NlmREuok2eucnG/sT7rh85qsuxiGzNF1LYQ4caOCeob1eww0Sgw7fBrrug9sZa+BKKHym4U9NgCslWjIr2KFw==}
     dev: true
 
   /@types/json5@0.0.29:
@@ -11014,6 +11024,12 @@ packages:
     resolution: {integrity: sha512-ZClg6AaYvamvYEE82d3Iyd3vSSIjQ+odgjaTzRuO3s7toCdFKczob2i0zCh7JE8kWn17yvAWhUVxvqGwUalsRA==}
     dev: true
 
+  /json-templates@5.1.0:
+    resolution: {integrity: sha512-WIurn7pduz4+HVfXKHlDyNjypO6UuyiMVf/aHScHqp96gl1QK7Nw1XzbFjUxKsDSPImT/Is+eAIbde8ns2EoLw==}
+    dependencies:
+      object-path: 0.11.8
+    dev: false
+
   /json5@1.0.2:
     resolution: {integrity: sha512-g1MWMLBiz8FKi1e4w0UyVL3w+iJceWAFBAaBnnGKOpNa5f8TLktkbre1+s6oICydWAm+HRUGTmI+//xv2hvXYA==}
     hasBin: true
@@ -12112,6 +12128,11 @@ packages:
   /object-keys@1.1.1:
     resolution: {integrity: sha512-NuAESUOUMrlIXOfHKzD6bpPu3tYt3xvjNdRIQ+FeT0lNb4K8WR70CaDxhuNguS2XG+GjkyMwOzsN5ZktImfhLA==}
     engines: {node: '>= 0.4'}
+
+  /object-path@0.11.8:
+    resolution: {integrity: sha512-YJjNZrlXJFM42wTBn6zgOJVar9KFJvzx6sTWDte8sWZF//cnjl0BxHNpfZx+ZffXX63A9q0b1zsFiBX4g4X5KA==}
+    engines: {node: '>= 10.12.0'}
+    dev: false
 
   /object.assign@4.1.5:
     resolution: {integrity: sha512-byy+U7gp+FVwmyzKPYhW2h5l3crpmGsxl7X2s8y43IgxvG4g3QZ6CffDtsNQy1WsmZpQbO+ybo0AlW7TY6DcBQ==}

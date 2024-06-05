@@ -25,4 +25,8 @@ export class Terminal {
   kill() {
     this.ptyProcess.kill();
   }
+
+  pause() {
+    this.ptyProcess.pause();
+  }
 }

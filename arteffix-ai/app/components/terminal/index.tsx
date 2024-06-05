@@ -19,7 +19,7 @@ export default function Terminal() {
         socket.emit('cmd', key);
       });
 
-      socket.on('cmd-res', (msg) => {
+      socket.on('cmd-resp', (msg) => {
         terminal.write(msg);
       });
     }
