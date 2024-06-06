@@ -59,12 +59,14 @@ export interface IWthForFsRm {
 
 export interface IWthForFsOutputFile {
   type: 'outputFile';
+  home?: string;
   file: string;
   path?: string;
   content: string;
 }
 
 export interface IWthForFsDecompress {
+  home?: string;
   type: 'decompress';
   file: string;
   output: string;

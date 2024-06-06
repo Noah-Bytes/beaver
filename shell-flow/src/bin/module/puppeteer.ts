@@ -27,7 +27,7 @@ export class Puppeteer extends BinModule {
         PUPPETEER_CACHE_DIR: dir,
       },
       path: 'bin/puppet',
-      run: `npm install puppeteer ${options?.isMirror ? '--registry=https://registry.npmmirror.com' : ''}`,
+      run: `npm install puppeteer ${options?.mirror ? '--registry=https://registry.npmmirror.com' : ''}`,
     }).run();
   }
 

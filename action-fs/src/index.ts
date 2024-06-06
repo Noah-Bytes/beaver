@@ -62,7 +62,7 @@ export class ActionFs extends ActionUse<IWthForFs> {
     );
   }
 
-  override async run(): Promise<number> {
+  override async run(): Promise<string> {
     switch (this.with.type) {
       case 'copy':
         await this.copy();
@@ -79,6 +79,6 @@ export class ActionFs extends ActionUse<IWthForFs> {
       default:
     }
 
-    return 0;
+    return '0';
   }
 }

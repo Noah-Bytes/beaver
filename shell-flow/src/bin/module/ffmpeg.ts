@@ -1,6 +1,5 @@
 import { ShellFlow } from '@beaver/shell-flow';
 import { BinModule } from './bin-module';
-import {ShellConda} from "@beaver/shell-conda";
 
 export class Ffmpeg extends BinModule {
   constructor(ctx: ShellFlow) {
@@ -8,10 +7,7 @@ export class Ffmpeg extends BinModule {
   }
 
   override async install(): Promise<void> {
-    await new ShellConda({
-      home: this._ctx.homeDir,
-      run: 'conda install -y -c conda-forge ffmpeg',
-    }).run();
+    await this.run('conda install -y -c conda-forge ffmpeg');
   }
 
   override async installed(): Promise<boolean> {
@@ -20,9 +16,6 @@ export class Ffmpeg extends BinModule {
   }
 
   override async uninstall(): Promise<void> {
-    await new ShellConda({
-      home: this._ctx.homeDir,
-      run: 'conda remove -y ffmpeg',
-    }).run();
+    await this.run('conda remove -y ffmpeg');
   }
 }

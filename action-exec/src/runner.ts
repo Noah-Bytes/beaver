@@ -1,6 +1,7 @@
 import { exists } from '@beaver/action-io';
 import { ExecOptions } from '@beaver/types';
 import * as child from 'child_process';
+import { ChildProcessWithoutNullStreams } from 'child_process';
 import * as events from 'events';
 import * as os from 'os';
 import * as stream from 'stream';
@@ -8,9 +9,10 @@ import * as stream from 'stream';
 const IS_WINDOWS = process.platform === 'win32';
 
 export class Runner extends events.EventEmitter {
-  private toolPath: string;
-  private args: string[];
-  private options: ExecOptions;
+  private readonly toolPath: string;
+  private readonly args: string[];
+  private readonly options: ExecOptions;
+  private cp: ChildProcessWithoutNullStreams | undefined;
   constructor(toolPath: string, args?: string[], options?: ExecOptions) {
     super();
 
@@ -325,9 +327,7 @@ export class Runner extends events.EventEmitter {
     return result;
   }
 
-  private _getSpawnOptions(
-    options: ExecOptions
-  ): child.SpawnOptions {
+  private _getSpawnOptions(options: ExecOptions): child.SpawnOptions {
     options = options || <ExecOptions>{};
     const result = <child.SpawnOptions>{};
     result.cwd = options.cwd;
@@ -341,9 +341,7 @@ export class Runner extends events.EventEmitter {
    * Output will be streamed to the live console.
    * Returns promise with return code
    *
-   * @param     tool     path to tool to exec
-   * @param     options  optional exec options.  See ExecOptions
-   * @returns   number
+   * @returns   string
    */
   async exec(): Promise<string> {
     return new Promise<string>(async (resolve, reject) => {
@@ -372,7 +370,7 @@ export class Runner extends events.EventEmitter {
       }
 
       const fileName = this._getSpawnFileName();
-      const cp = IS_WINDOWS
+      this.cp = IS_WINDOWS
         ? child.spawn(
             'cmd.exe',
             ['/D', '/S', '/C', fileName],
@@ -386,8 +384,8 @@ export class Runner extends events.EventEmitter {
 
       let stdbuffer = '';
       let result = '';
-      if (cp.stdout) {
-        cp.stdout.on('data', (data: Buffer) => {
+      if (this.cp.stdout) {
+        this.cp.stdout.on('data', (data: Buffer) => {
           if (this.options.listeners && this.options.listeners.stdout) {
             this.options.listeners.stdout(data);
           }
@@ -411,8 +409,8 @@ export class Runner extends events.EventEmitter {
       }
 
       let errbuffer = '';
-      if (cp.stderr) {
-        cp.stderr.on('data', (data: Buffer) => {
+      if (this.cp.stderr) {
+        this.cp.stderr.on('data', (data: Buffer) => {
           state.processStderr = true;
           if (this.options.listeners && this.options.listeners.stderr) {
             this.options.listeners.stderr(data);
@@ -441,21 +439,21 @@ export class Runner extends events.EventEmitter {
         });
       }
 
-      cp.on('error', (err: Error) => {
+      this.cp.on('error', (err: Error) => {
         state.processError = err.message;
         state.processExited = true;
         state.processClosed = true;
         state.CheckComplete();
       });
 
-      cp.on('exit', (code: number) => {
+      this.cp.on('exit', (code: number) => {
         state.processExitCode = code;
         state.processExited = true;
         this._debug(`Exit code ${code} received from tool '${this.toolPath}'`);
         state.CheckComplete();
       });
 
-      cp.on('close', (code: number) => {
+      this.cp.on('close', (code: number) => {
         state.processExitCode = code;
         state.processExited = true;
         state.processClosed = true;
@@ -472,7 +470,7 @@ export class Runner extends events.EventEmitter {
           this.emit('errline', errbuffer);
         }
 
-        cp.removeAllListeners();
+        this.cp.removeAllListeners();
 
         if (error) {
           reject(error);
@@ -482,13 +480,25 @@ export class Runner extends events.EventEmitter {
       });
 
       if (this.options.input) {
-        if (!cp.stdin) {
+        if (!this.cp.stdin) {
           throw new Error('child process missing stdin');
         }
 
-        cp.stdin.end(this.options.input);
+        this.cp.stdin.end(this.options.input);
       }
     });
+  }
+
+  kill() {
+    /**
+     * child.kill('SIGTERM') 和 child.kill() 都是用来终止子进程的，区别在于是否显式指定信号。
+     * child.kill('SIGTERM') 发送一个明确的终止信号，适用于 Unix 系统。
+     * child.kill() 等同于 child.kill('SIGTERM')，在 Unix 系统上效果相同，但在 Windows 上可能行为不同。
+     * 在 Windows 平台上，使用 SIGKILL 信号更为可靠，虽然这会强制终止进程而不进行任何清理。
+     */
+    if (this.cp && !this.cp.killed) {
+      this.cp.kill();
+    }
   }
 }
 

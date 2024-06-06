@@ -1,28 +1,24 @@
 import { ShellConda } from '@beaver/shell-conda';
-import { IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
 import fs from 'fs';
 import git from 'isomorphic-git';
 import path from 'path';
+import { Module } from '../module';
 import { App } from './app';
-import * as modules from './module';
 
-export class AppManager {
+export class AppManager extends Module<any> {
   private readonly apps: App[] = [];
   private readonly appMap: Map<string, App> = new Map();
 
-  private moduleList: any[] = [];
-  private readonly moduleMap: Map<string, any> = new Map();
-
   private readonly _ctx: ShellFlow;
-  readonly shell: IShellTypes;
 
   private _init: boolean = false;
 
   readonly dir: string;
   constructor(ctx: ShellFlow) {
+    super();
     this.dir = ctx.absPath('apps');
     this._ctx = ctx;
-    this.shell = ctx.shell.createShell('app-manager');
   }
 
   async init() {
@@ -43,20 +39,7 @@ export class AppManager {
       }
 
       this.removeAllModule();
-
-      for (let modulesKey in modules) {
-        // @ts-ignore
-        const mod = modules[modulesKey];
-        if (this.getModule(modulesKey.toLowerCase())) {
-        } else if (typeof mod === 'function') {
-          // @ts-ignore
-          const m = new mod(this._ctx);
-          if (m?.init) {
-            await m.init();
-          }
-          this.createModule(modulesKey.toLowerCase(), m);
-        }
-      }
+      await this.initModule();
     }
   }
 
@@ -156,34 +139,5 @@ export class AppManager {
     await shellConda.run();
 
     return await this.createApp(name, remoteUrl);
-  }
-  getModule(name: string) {
-    return this.moduleMap.get(name);
-  }
-
-  getModules() {
-    return this.moduleList;
-  }
-
-  hasModule(name: string): boolean {
-    return this.moduleMap.has(name);
-  }
-
-  removeAllModule(): void {
-    this.moduleList = [];
-    this.moduleMap.clear();
-  }
-
-  removeModule(name: string) {
-    const m = this.getModule(name);
-    if (m) {
-      this.moduleList = this.moduleList.filter((s) => s !== m);
-      this.moduleMap.delete(name);
-    }
-  }
-
-  createModule(name: string, instantiate: any): void {
-    this.moduleMap.set(name, instantiate);
-    this.moduleList.push(instantiate);
   }
 }

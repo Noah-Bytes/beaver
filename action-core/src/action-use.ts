@@ -8,12 +8,14 @@ export class ActionUse<T extends IStepWith> implements IActionUse<T> {
   with: T;
   errStream: stream.Writable;
   outStream: stream.Writable;
+  silent?: boolean;
 
   constructor(params: T, options?: IActionUseOptions) {
     if (params.home) {
       this.home = params.home;
     }
     this.with = params;
+    this.silent = options?.silent;
     this.errStream = options?.errStream || <stream.Writable>process.stderr;
     this.outStream = options?.outStream || <stream.Writable>process.stdout;
   }
@@ -21,6 +23,8 @@ export class ActionUse<T extends IStepWith> implements IActionUse<T> {
   run(): Promise<string> {
     return Promise.resolve('0');
   }
+
+  kill() {}
 }
 
 export class UseManage {

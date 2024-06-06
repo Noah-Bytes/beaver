@@ -1,40 +1,24 @@
 import { ActionDownload } from '@beaver/action-download';
+import { ActionFs } from '@beaver/action-fs';
 import { ShellConda } from '@beaver/shell-conda';
-import { IShellTypes } from '@beaver/shell-flow';
-import { IKey, IShellAppRequires } from '@beaver/types';
-import { WriteStream } from 'fs';
+import { IShellAppRequires } from '@beaver/types';
 import fs from 'fs-extra';
-import path from 'path';
-import wget from 'wget-improved';
-import { Logger } from 'winston';
-import { createLogger } from '../logger';
+import { Directory } from '../directory';
 import { ShellFlow } from '../shell-flow';
 import { IBinModuleTypes, IBinTypes } from '../types/bin-types';
-import * as modules from './module';
 
-export class Bin implements IBinTypes {
-  private readonly _dir: string;
+export class Bin extends Directory<IBinModuleTypes> implements IBinTypes {
   private readonly _ctx: ShellFlow;
-  readonly logger: Logger;
-  private logStream: WriteStream | undefined;
-  private moduleList: IBinModuleTypes[] = [];
-  private moduleMap: Map<string, IBinModuleTypes> = new Map();
+
   private _installed = {
     conda: new Set<string>(),
     brew: new Set<string>(),
     pip: new Set<string>(),
   };
-  readonly shell: IShellTypes;
-
-  get dir(): string {
-    return this._dir;
-  }
 
   constructor(ctx: ShellFlow) {
+    super(ctx.absPath('bin'));
     this._ctx = ctx;
-    this._dir = ctx.absPath('bin');
-    this.logger = createLogger(`bin`);
-    this.shell = ctx.shell.createShell('bin');
   }
 
   readLog(): Promise<string> {
@@ -42,37 +26,9 @@ export class Bin implements IBinTypes {
   }
 
   async init(): Promise<void> {
-    await fs.promises.mkdir(this._dir, { recursive: true });
-
-    this.removeAllModule();
-
-    this.logStream = fs.createWriteStream(this.absPath('bin.log'), {
-      flags: 'a',
-    });
-    this.shell.onShellData((data) => {
-      this.logStream?.write(data);
-    });
-
-    for (let modulesKey in modules) {
-      // @ts-ignore
-      const mod = modules[modulesKey];
-      if (this.getModule(modulesKey.toLowerCase())) {
-      } else if (typeof mod === 'function') {
-        // @ts-ignore
-        const m = new mod(this._ctx);
-        if (m?.init) {
-          await m.init();
-        }
-        this.logger.info(`初始化 ${modulesKey}`);
-        this.createModule(modulesKey.toLowerCase(), m);
-      }
-    }
-
+    await fs.promises.mkdir(this.dir, { recursive: true });
+    await this.initModule();
     await this.checkInstalled();
-  }
-
-  writeLog(data: string) {
-    this.logStream?.write(data);
   }
 
   async download(url: string, dest: string): Promise<void> {
@@ -84,94 +40,17 @@ export class Bin implements IBinTypes {
     }).run();
   }
 
-  wget(url: string, dest: string): Promise<void> {
-    if (this.exists(dest)) {
-      this.logger.info('File already exists: ' + dest);
-      return Promise.resolve();
-    }
-
-    const { options } = this._ctx;
-    let targetURL = url;
-
-    if (options?.isMirror) {
-      targetURL = this._ctx.mirrorUrl(targetURL);
-      this.logger.info('Using mirror: ' + targetURL);
-    }
-
-    return new Promise((resolve, reject) => {
-      let download = wget.download(targetURL, dest);
-      download.on('error', (err) => {
-        this.logger.error(`start: Download Failed: ${err.message}`);
-        reject(err);
-      });
-      download.on('end', () => {
-        this.logger.info('Download Complete!');
-        resolve();
-      });
-      download.on('progress', (progress) => {
-        this.logger.info(`Download ${progress}`);
-      });
-    });
-  }
-
   async rm(src: string): Promise<void> {
-    this.logger.info(`rm ${src}`);
-    await fs.promises.rm(this.absPath(src), {
-      recursive: true,
-    });
-    this.logger.info(`rm success`);
-  }
-
-  async mv(src: string, dest: string): Promise<void> {
-    this.logger.info(`mv ${src} ${dest}`);
-    await fs.move(this.absPath(src), this.absPath(dest));
-    this.logger.info(`mv success`);
-  }
-
-  exists(...p: string[]): boolean {
-    try {
-      fs.accessSync(this.absPath(...p), fs.constants.F_OK);
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  absPath(...p: string[]): string {
-    return path.resolve(this._dir, ...p);
-  }
-
-  getModule(name: string) {
-    return this.moduleMap.get(name);
-  }
-
-  getModules(): IBinModuleTypes[] {
-    return this.moduleList;
-  }
-
-  hasModule(name: string): boolean {
-    return this.moduleMap.has(name);
-  }
-
-  removeAllModule(): void {
-    this.moduleList = [];
-    this.moduleMap.clear();
-  }
-
-  removeModule(name: string): void {
-    const mod = this.getModule(name);
-    if (mod) {
-      this.moduleList = this.moduleList.filter((s) => s !== mod);
-      this.moduleMap.delete(name);
-    }
-  }
-
-  createModule(name: string, instantiate: IBinModuleTypes): void {
-    this.moduleMap.set(name, instantiate);
-    this.moduleList.push(instantiate);
+    await new ActionFs({
+      type: 'rm',
+      home: this._ctx.homeDir,
+      file: src,
+      path: this.absPath(),
+    }).run();
   }
 
   async checkInstalled(): Promise<void> {
+    const { systemInfo, errStream } = this._ctx;
     const existsConda = this.exists('miniconda');
 
     // 检测 conda 已安装
@@ -179,10 +58,15 @@ export class Bin implements IBinTypes {
 
     if (existsConda) {
       try {
-        const actionConda = new ShellConda({
-          home: this._ctx.homeDir,
-          run: 'conda list',
-        });
+        const actionConda = new ShellConda(
+          {
+            home: this._ctx.homeDir,
+            run: 'conda list',
+          },
+          {
+            silent: true,
+          },
+        );
         const result = await actionConda.run();
 
         const lines = result.split(/[\r\n]+/);
@@ -199,8 +83,8 @@ export class Bin implements IBinTypes {
             }
           }
         }
-      } catch (e) {
-        this.logger.error('conda list', e);
+      } catch (e: any) {
+        errStream.write(`conda list: ${e.message}`);
       }
     }
 
@@ -211,10 +95,15 @@ export class Bin implements IBinTypes {
 
     if (existsConda) {
       try {
-        const actionConda = new ShellConda({
-          home: this._ctx.homeDir,
-          run: 'pip list',
-        });
+        const actionConda = new ShellConda(
+          {
+            home: this._ctx.homeDir,
+            run: 'pip list',
+          },
+          {
+            silent: true,
+          },
+        );
         const result = await actionConda.run();
 
         const lines = result.split(/[\r\n]+/);
@@ -231,20 +120,25 @@ export class Bin implements IBinTypes {
             }
           }
         }
-      } catch (e) {
-        this.logger.error('pip list', e);
+      } catch (e: any) {
+        errStream.write(`pip list: ${e.message}`);
       }
     }
 
     this._installed.pip = pip;
 
-    if (['darwin', 'linux'].includes(this._ctx.systemInfo.platform)) {
+    if (['darwin', 'linux'].includes(systemInfo.platform)) {
       let brew: string[] = [];
       if (this.exists('homebrew')) {
-        const actionConda = new ShellConda({
-          home: this._ctx.homeDir,
-          run: 'brew list -1',
-        });
+        const actionConda = new ShellConda(
+          {
+            home: this._ctx.homeDir,
+            run: 'brew list -1',
+          },
+          {
+            silent: true,
+          },
+        );
         const result = await actionConda.run();
 
         const lines = result.split(/[\r\n]+/);
@@ -277,25 +171,15 @@ export class Bin implements IBinTypes {
   ): Promise<boolean> {
     switch (type) {
       case 'conda':
-        this.logger.info(
-          `检测 ${type}:${name} 安装状态: ${this._installed.conda.has(name)}`,
-        );
         return this._installed.conda.has(name);
       case 'pip':
-        this.logger.info(
-          `检测 ${type}:${name} 安装状态: ${this._installed.pip.has(name)}`,
-        );
         return this._installed.pip.has(name);
       case 'brew':
-        this.logger.info(
-          `检测 ${type}:${name} 安装状态: ${this._installed.brew.has(name)}`,
-        );
         return this._installed.brew.has(name);
       default:
         if (this.hasModule(name)) {
           try {
             const isInstalled = await this.getModule(name)?.installed();
-            this.logger.info(`检测 ${name} 安装状态: ${!!isInstalled}`);
             return !!isInstalled;
           } catch {
             return false;
@@ -324,7 +208,6 @@ export class Bin implements IBinTypes {
     await fs.truncate(this.absPath('bin.log'), 0);
     for (let { name, args, type } of _list) {
       if (await this.checkIsInstalled(name, type)) {
-        this.logger.info(`已安装 ${name}`);
         continue;
       }
 
@@ -381,8 +264,8 @@ export class Bin implements IBinTypes {
   }
 
   private _mergeEnv(
-    existing: IKey<string | string[]>,
-    merge: IKey<string | string[]>,
+    existing: Record<string, string | string[]>,
+    merge: Record<string, string | string[]>,
   ) {
     // merge 'merge' into 'existing'
     for (let key in merge) {
@@ -403,31 +286,5 @@ export class Bin implements IBinTypes {
       }
     }
     return existing;
-  }
-
-  envs(env?: IKey<string | string[]>): IKey<string | string[]> {
-    const envs = this.moduleList
-      .map((elem) => {
-        if (elem.env) {
-          return elem.env();
-        }
-        return undefined;
-      })
-      .filter((x) => !!x);
-
-    // 2. Merge module envs
-    let e: IKey<string | string[]> = {};
-    for (let env of envs) {
-      if (env) {
-        e = this._mergeEnv(e, env);
-      }
-    }
-
-    // 3. Merge override_envs
-    if (env) {
-      e = this._mergeEnv(e, env);
-    }
-
-    return e;
   }
 }

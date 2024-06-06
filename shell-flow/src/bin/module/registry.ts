@@ -1,5 +1,4 @@
 import { isWin32 } from '@beaver/arteffix-utils';
-import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
 import { BinModule } from './bin-module';
 
@@ -24,10 +23,7 @@ export class Registry extends BinModule {
     // 这项设置与 Windows 文件系统是否支持超过 260 个字符的长路径有关。
     const cmd =
       'reg query HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled';
-    const result = await new ShellConda({
-      home: this._ctx.homeDir,
-      run: cmd,
-    }).run();
+    const result = await this.run(cmd);
     let matches = result.replace(cmd, '').match(/(LongPathsEnabled.+)/m);
 
     if (!(matches && matches.length > 0)) {
@@ -44,17 +40,15 @@ export class Registry extends BinModule {
     return false;
   }
   override async install() {
-    await new ShellConda({
-      home: this._ctx.homeDir,
-      run: 'reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f',
-    }).run();
+    await this.run(
+      'reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f',
+    );
   }
 
   override async uninstall() {
-    await new ShellConda({
-      home: this._ctx.homeDir,
-      run: 'reg add "HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 0 /f',
-    }).run();
+    await this.run(
+      'reg add "HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 0 /f',
+    );
     this.isInstalled = false;
   }
 }

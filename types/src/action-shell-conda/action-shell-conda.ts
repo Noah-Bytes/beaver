@@ -1,6 +1,10 @@
-import { IWirtable, IWithForShellConda } from '@beaver/types';
+import {
+  IActionUseOptions,
+  IWirtable,
+  IWithForShellConda,
+} from '@beaver/types';
 
-export interface IActionShellCondaOptions extends IWirtable {}
+export interface IActionShellCondaOptions extends IActionUseOptions {}
 
 export interface IActionShell extends IWirtable {
   run: (params: IWithForShellConda) => Promise<number>;

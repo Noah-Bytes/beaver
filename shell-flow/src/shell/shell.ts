@@ -114,7 +114,7 @@ export class Shell implements IShellTypes {
      */
     this.env['CMAKE_OBJECT_PATH_MAX'] = '1024';
 
-    if (ctx.options?.isMirror) {
+    if (ctx.options?.mirror) {
       // 环境变量镜像设置
       this.env['PIP_INDEX_URL'] = 'https://pypi.tuna.tsinghua.edu.cn/simple';
       this.env['PIP_EXTRA_INDEX_URL'] =
@@ -189,6 +189,7 @@ export class Shell implements IShellTypes {
 
   init(options?: IShellRunOptions): void {
     const { bin } = this._ctx;
+    // @ts-ignore
     const envs = bin.envs(options?.env);
     this.envCache = {
       ...this.env,
@@ -241,7 +242,7 @@ export class Shell implements IShellTypes {
     params = await this.activate(params);
     let msg = this.buildCmd(params);
 
-    if (ctxOptions?.isMirror) {
+    if (ctxOptions?.mirror) {
       msg = mirror(msg);
     }
 
@@ -261,7 +262,7 @@ export class Shell implements IShellTypes {
     params = await this.activate(params);
     let msg = this.buildCmd(params);
 
-    if (ctxOptions?.isMirror) {
+    if (ctxOptions?.mirror) {
       msg = mirror(msg);
     }
 

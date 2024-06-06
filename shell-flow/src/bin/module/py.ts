@@ -18,7 +18,7 @@ export class Py extends BinModule {
     await new ShellConda({
       home: this._ctx.homeDir,
       path: 'bin/py',
-      run: `pip install -r requirements.txt ${options?.isMirror ? '-i https://pypi.mirrors.ustc.edu.cn/simple/' : ''}`,
+      run: `pip install -r requirements.txt ${options?.mirror ? '-i https://pypi.mirrors.ustc.edu.cn/simple/' : ''}`,
     }).run();
   }
 

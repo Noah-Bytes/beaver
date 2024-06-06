@@ -1,7 +1,6 @@
-import { mirror } from '@beaver/action-core';
+import { ActionDownload } from '@beaver/action-download';
 import { createLogger, ShellFlow } from '@beaver/shell-flow';
 import { IShellAppRunParams } from '@beaver/types';
-import { DownloaderHelper } from 'node-downloader-helper';
 import path from 'path';
 // @ts-ignore
 import Pdrive from 'pdrive';
@@ -71,51 +70,28 @@ export class Fs {
     dest: string,
     dir: string,
   ): Promise<void> {
-    const { options } = this._ctx;
+    const { options, mirrorUrl, homeDir, errStream, outStream } = this._ctx;
     let targetURL = url;
 
-    if (options?.isMirror) {
-      targetURL = mirror(targetURL);
+    if (options?.mirror) {
+      targetURL = mirrorUrl(targetURL);
       this.logger.info('Using mirror: ' + targetURL);
     }
 
-    const dl = new DownloaderHelper(targetURL, dir, {
-      fileName: dest,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0',
+    const actionDownload = new ActionDownload(
+      {
+        url: targetURL,
+        home: homeDir,
+        path: dir,
+        file: dest,
       },
-      override: {
-        skip: true,
-        skipSmaller: false,
+      {
+        errStream,
+        outStream,
       },
-      resumeIfFileExists: true,
-      removeOnStop: false,
-      removeOnFail: false,
-      retry: { maxRetries: 3, delay: 5000 },
-    });
-    return new Promise((resolve, reject) => {
-      dl.on('end', () => {
-        this.logger.info('Download Complete!');
-        resolve();
-      });
+    );
 
-      dl.on('error', (e) => {
-        this.logger.error(`event: Download Failed: ${e.message}`);
-      });
-
-      dl.on('progress.throttled', (stats) => {
-        this.logger.info(
-          `Download ${stats.progress} ${stats.downloaded}/${stats.total}`,
-        );
-      });
-
-      this.logger.info(`Downloading ${targetURL} to ${dir}/${dest}`);
-      dl.start().catch((e) => {
-        this.logger.error(`start: Download Failed: ${e.message}`);
-        reject(e);
-      });
-    });
+    await actionDownload.run();
   }
 
   async download(params: IShellAppRunParams) {

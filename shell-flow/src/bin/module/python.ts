@@ -1,10 +1,9 @@
-import type { IBinModuleTypes } from '@beaver/shell-flow';
-import { IShellTypes } from '@beaver/shell-flow';
+import { ActionFs } from '@beaver/action-fs';
 import { ShellFlow } from '@beaver/shell-flow';
-import path from 'path';
 import decompress from 'decompress';
 import fs from 'fs';
-import {BinModule} from "./bin-module";
+import path from 'path';
+import { BinModule } from './bin-module';
 
 // @ts-ignore
 const _decompress = decompress as unknown as typeof decompress.default;
@@ -38,7 +37,7 @@ export class Python extends BinModule {
   }
 
   override async install(): Promise<void> {
-    const { systemInfo, bin } = this._ctx;
+    const { systemInfo, bin, homeDir } = this._ctx;
 
     if (!Python.URLS[systemInfo.platform]) {
       throw new Error(
@@ -53,21 +52,21 @@ export class Python extends BinModule {
     }
 
     const fileName = path.basename(url);
-    const downloadPath = bin.absPath(fileName);
 
     await fs.promises.mkdir(bin.dir, { recursive: true });
     await bin.download(url, fileName);
 
-    try {
-      const pythonPath = bin.absPath('python');
-      bin.logger.info(`decompressing to ${pythonPath}`);
-      await _decompress(downloadPath, pythonPath, { strip: 1 });
+    const actionFs = new ActionFs({
+      home: homeDir,
+      type: 'decompress',
+      file: fileName,
+      path: 'bin',
+      output: 'python',
+      strip: 1,
+    });
+    await actionFs.run();
 
-      bin.logger.info(`remove the compressed file ${downloadPath}`);
-      await fs.promises.rm(downloadPath);
-    } catch (e) {
-      bin.logger.error(e);
-    }
+    await bin.rm(fileName);
   }
 
   override installed(): boolean {
@@ -78,6 +77,5 @@ export class Python extends BinModule {
   override async uninstall(): Promise<void> {
     const { bin } = this._ctx;
     await bin.rm('python');
-    bin.logger.info('remove python');
   }
 }

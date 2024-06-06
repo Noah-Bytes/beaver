@@ -1,12 +1,10 @@
-import { ActionDownload } from '@beaver/action-download';
-import { isDarwin, isWin32 } from '@beaver/arteffix-utils';
+import { ActionFs } from '@beaver/action-fs';
+import { isWin32 } from '@beaver/arteffix-utils';
 import { ShellConda } from '@beaver/shell-conda';
-import fs from 'fs';
 import { glob } from 'glob';
 import path from 'path';
 import { ShellFlow } from '../../shell-flow';
 import { BinModule } from './bin-module';
-import {ActionShell} from "@beaver/action-shell";
 
 interface PlatformUrls {
   [key: string]: {
@@ -77,35 +75,6 @@ export class Conda extends BinModule {
     super('conda', ctx);
   }
 
-  env() {
-    const { bin, systemInfo } = this._ctx;
-    const baseDir = path.resolve(bin.dir, 'miniconda');
-    const base = {
-      CONDA_PREFIX: baseDir,
-      PYTHON: path.join(baseDir, 'python'),
-      PATH: Conda.PATHS[systemInfo.platform].map((p) =>
-        path.resolve(bin.dir, p),
-      ),
-    };
-
-    if (isWin32) {
-      Object.assign(base, {
-        CONDA_BAT: path.join(baseDir, 'condabin/conda.bat'),
-        CONDA_EXE: path.join(baseDir, 'Scripts/conda.exe'),
-        CONDA_PYTHON_EXE: path.join(baseDir, 'Scripts/python'),
-      });
-    }
-
-    if (isDarwin) {
-      Object.assign(base, {
-        TCL_LIBRARY: path.join(baseDir, 'lib/tcl8.6'),
-        TK_LIBRARY: path.join(baseDir, 'lib/tk8.6'),
-      });
-    }
-
-    return base;
-  }
-
   async exists(pattern: string): Promise<boolean> {
     const { systemInfo, bin } = this._ctx;
 
@@ -126,7 +95,7 @@ export class Conda extends BinModule {
     if (this.installed()) {
       return;
     }
-    const { systemInfo, bin, options } = this._ctx;
+    const { systemInfo, bin, homeDir } = this._ctx;
 
     if (!Conda.URLS[systemInfo.platform]) {
       throw new Error(
@@ -141,7 +110,6 @@ export class Conda extends BinModule {
     // 1. download
     const installUrl = Conda.URLS[systemInfo.platform][systemInfo.arch];
     if (!installUrl) {
-      bin.logger.error(`not exists: ${installUrl}`);
       throw new Error(`not exists: ${installUrl}`);
     }
     const installer = Conda.INSTALLER[systemInfo.platform];
@@ -153,56 +121,43 @@ export class Conda extends BinModule {
       ? `start /wait ${installer} /InstallationType=JustMe /RegisterPython=0 /S /D=${installPath}`
       : `/bin/bash ${installer} -b -p ${installPath}`;
 
-    await new ActionShell({
-      home: this._ctx.homeDir,
-      path: 'bin',
-      run: cmd,
-    }).run();
+    await this.run(cmd);
 
     await this.setMirror();
 
-    bin.logger.info('start set config create_default_packages');
-
-    await new ShellConda({
-      home: this._ctx.homeDir,
-      run: [
-        // 使得每次创建新环境时，都会自动安装Python 3.10
-        'conda config --add create_default_packages python=3.10',
-        // 从Conda Forge频道安装pip、brotli和brotlipy这三个包
-        'conda install -y -c conda-forge pip brotli brotlipy',
-      ],
-    }).run();
+    await this.run([
+      // 使得每次创建新环境时，都会自动安装Python 3.10
+      'conda config --add create_default_packages python=3.10',
+      // 从Conda Forge频道安装pip、brotli和brotlipy这三个包
+      'conda install -y -c conda-forge pip brotli brotlipy',
+    ]);
 
     if (isWin32) {
-      bin.logger.info('python.exe to python3.exe');
-      await fs.promises.copyFile(
-        path.resolve(bin.dir, 'miniconda', 'python.exe'),
-        path.resolve(bin.dir, 'miniconda', 'python3.exe'),
-      );
+      const actionFs = new ActionFs({
+        home: homeDir,
+        type: 'copy',
+        from: 'python.exe',
+        to: 'python3.exe',
+        path: 'bin/miniconda',
+      });
+      await actionFs.run();
     }
-
-    bin.logger.info('conda installed');
-
     // 3. remove the installer
     await bin.rm(installer);
   }
 
   async setMirror() {
-    const { bin, options } = this._ctx;
+    const { options } = this._ctx;
     // setting mirror
-    if (options?.isMirror) {
-      bin.logger.info('start set config mirror');
-      await new ShellConda({
-        home: this._ctx.homeDir,
-        run: [
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/',
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/',
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/',
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/',
-          'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/',
-          'conda config --set show_channel_urls yes',
-        ],
-      }).run();
+    if (!!options?.mirror) {
+      await this.run([
+        'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/',
+        'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/',
+        'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/',
+        'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/',
+        'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/',
+        'conda config --set show_channel_urls yes',
+      ]);
     }
   }
 
@@ -213,14 +168,6 @@ export class Conda extends BinModule {
       if (bin.exists(p)) return true;
     }
     return false;
-  }
-
-  onstart(): string[] {
-    if (isWin32) {
-      return ['conda_hook'];
-    }
-
-    return ['eval "$(conda shell.bash hook)"'];
   }
 
   override async uninstall() {

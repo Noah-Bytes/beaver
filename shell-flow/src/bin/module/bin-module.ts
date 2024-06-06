@@ -1,17 +1,13 @@
-import { IBinModuleTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellConda } from '@beaver/shell-conda';
+import { IBinModuleTypes, ShellFlow } from '@beaver/shell-flow';
 
 export class BinModule implements IBinModuleTypes {
   readonly _ctx: ShellFlow;
-  isInstalled = false
+  isInstalled = false;
   readonly dependencies: string[] = [];
-  readonly shell: IShellTypes;
 
   constructor(name: string, ctx: ShellFlow) {
     this._ctx = ctx;
-    this.shell = ctx.shell.createShell(name);
-    this.shell.onShellData(function (data: string) {
-      ctx.bin.writeLog(data);
-    });
   }
 
   install(): Promise<void> {
@@ -24,5 +20,20 @@ export class BinModule implements IBinModuleTypes {
 
   uninstall(): Promise<void> {
     return Promise.resolve(undefined);
+  }
+
+  run(command: string | string[]) {
+    const { homeDir, errStream, outStream } = this._ctx;
+    const shellConda = new ShellConda(
+      {
+        home: homeDir,
+        run: command,
+      },
+      {
+        errStream,
+        outStream,
+      },
+    );
+    return shellConda.run();
   }
 }

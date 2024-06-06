@@ -1,9 +1,8 @@
+import { ActionFs } from '@beaver/action-fs';
 import { isWin32 } from '@beaver/arteffix-utils';
+import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
-import fs from 'fs-extra';
-import path from 'path';
 import { BinModule } from './bin-module';
-import {ShellConda} from "@beaver/shell-conda";
 
 export class Git extends BinModule {
   static GIT_CONFIG = 'gitconfig';
@@ -13,36 +12,21 @@ export class Git extends BinModule {
     super('git', ctx);
   }
 
-  env() {
-    if (isWin32) {
-      const { homeDir } = this._ctx;
-      return {
-        GIT_CONFIG_GLOBAL: path.resolve(homeDir, Git.GIT_CONFIG),
-      };
-    }
-
-    return undefined;
-  }
-
   override async install(): Promise<void> {
-    await new ShellConda({
-      home: this._ctx.homeDir,
-      run: 'conda install -y -c conda-forge git git-lfs',
-    }).run();
+    await this.run('conda install -y -c conda-forge git git-lfs');
 
     if (isWin32) {
-      const { app } = this._ctx;
-      const gitConfigPath = this._ctx.absPath(Git.GIT_CONFIG);
-      if (!app.exists(gitConfigPath)) {
-        await fs.outputFile(
-          gitConfigPath,
-          `[core]
+      const actionFs = new ActionFs({
+        home: this._ctx.homeDir,
+        type: 'outputFile',
+        file: Git.GIT_CONFIG,
+        content: `[core]
   longpaths = true
 [http]
   postBuffer = 524288000
 `,
-        );
-      }
+      });
+      await actionFs.run();
     }
   }
 

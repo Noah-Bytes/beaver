@@ -1,7 +1,6 @@
 import { isWin32 } from '@beaver/arteffix-utils';
 import { ShellFlow } from '@beaver/shell-flow';
 import { BinModule } from './bin-module';
-import {ShellConda} from "@beaver/shell-conda";
 
 export class Cuda extends BinModule {
   constructor(ctx: ShellFlow) {
@@ -10,25 +9,11 @@ export class Cuda extends BinModule {
 
   override async install(): Promise<void> {
     if (isWin32) {
-      await new ShellConda({
-        home: this._ctx.homeDir,
-        run: 'conda install -y cudnn libzlib-wapi -c conda-forge',
-      }).run();
-
-      await new ShellConda({
-        home: this._ctx.homeDir,
-        run: 'conda install -y cuda -c nvidia/label/cuda-12.1.0',
-      }).run();
+      await this.run('conda install -y cudnn libzlib-wapi -c conda-forge');
+      await this.run('conda install -y cuda -c nvidia/label/cuda-12.1.0');
     } else {
-      await new ShellConda({
-        home: this._ctx.homeDir,
-        run: 'conda install -y cudnn -c conda-forge',
-      }).run();
-
-      await new ShellConda({
-        home: this._ctx.homeDir,
-        run: 'conda install -y cuda -c nvidia/label/cuda-12.1.0',
-      }).run();
+      await this.run('conda install -y cudnn -c conda-forge');
+      await this.run('conda install -y cuda -c nvidia/label/cuda-12.1.0');
     }
   }
 
@@ -47,8 +32,6 @@ export class Cuda extends BinModule {
   }
 
   override async uninstall(): Promise<void> {
-    await this.shell.run({
-      message: 'conda remove -y cudnn cuda',
-    });
+    await this.run('conda remove -y cudnn cuda');
   }
 }

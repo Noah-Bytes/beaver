@@ -1,13 +1,10 @@
 import { SystemInfo } from '@beaver/shell-flow';
+import { IWirtable } from '@beaver/types';
 
-export interface IShellFlowOptionsTypes {
-  isMirror?: boolean;
-  mirror?: Record<string, string>;
+export interface IShellFlowOptionsTypes extends IWirtable {
   homeDir?: string;
+  mirror?: Record<string, string>;
   requirement?: (data: string) => void;
-  update?: (name: string, data: string) => void;
-  install?: (name: string, data: string) => void;
-  start?: (name: string, data: string) => void;
 }
 
 export interface IShellFlowTypes {
@@ -19,6 +16,8 @@ export interface IShellFlowTypes {
   changeHomeDir: (dir: string) => Promise<void>;
 
   init: () => Promise<void>;
+
+  initCacheDir: () => Promise<void>;
 
   destroy: () => Promise<void>;
 

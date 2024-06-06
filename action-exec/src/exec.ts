@@ -1,5 +1,5 @@
 import { ExecOptions } from '@beaver/types';
-import { argStringToArray, Runner } from './runner';
+import { Runner } from './runner';
 
 /**
  * Exec a command.
@@ -9,13 +9,12 @@ import { argStringToArray, Runner } from './runner';
  * @param     commandLine        command to execute (can include additional args). Must be correctly escaped.
  * @param     args               optional arguments for tool. Escaping is handled by the lib.
  * @param     options            optional exec options.  See ExecOptions
- * @returns   Promise<number>    exit code
+ * @returns   Runner runner
  */
-export async function exec(
+export function exec(
   commandLine: string,
   args?: string[],
   options?: ExecOptions,
-): Promise<string> {
-  const runner: Runner = new Runner(commandLine, args, options);
-  return runner.exec();
+): Runner {
+  return new Runner(commandLine, args, options);
 }

@@ -1,5 +1,3 @@
-import { Terminal } from '../shell/terminal';
-
 export interface IShellRunOptions {
   cols?: number;
   rows?: number;

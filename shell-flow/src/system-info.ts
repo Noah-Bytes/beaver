@@ -1,9 +1,6 @@
 import os from 'os';
 import systemInfo, { Systeminformation } from 'systeminformation';
-import { createLogger } from './logger';
 import { ISystemInfoTypes } from './types';
-
-const logger = createLogger('system-info');
 
 export class SystemInfo implements ISystemInfoTypes {
   get platform(): 'win32' | 'linux' | 'darwin' {
@@ -85,32 +82,28 @@ export class SystemInfo implements ISystemInfoTypes {
   }
 
   async refresh(): Promise<void> {
-    try {
-      [
-        this._graphics,
-        this._cpu,
-        this._mem,
-        this._battery,
-        this._os,
-        this._shell,
-        this._currentLoad,
-        this._audios,
-        this._bluetoothDevices,
-      ] = await Promise.all([
-        systemInfo.graphics(),
-        systemInfo.cpu(),
-        systemInfo.mem(),
-        systemInfo.battery(),
-        systemInfo.osInfo(),
-        systemInfo.shell(),
-        systemInfo.currentLoad(),
-        systemInfo.audio(),
-        systemInfo.bluetoothDevices(),
-        this.gpu(),
-      ]);
-    } catch (e) {
-      logger.error(e);
-    }
+    [
+      this._graphics,
+      this._cpu,
+      this._mem,
+      this._battery,
+      this._os,
+      this._shell,
+      this._currentLoad,
+      this._audios,
+      this._bluetoothDevices,
+    ] = await Promise.all([
+      systemInfo.graphics(),
+      systemInfo.cpu(),
+      systemInfo.mem(),
+      systemInfo.battery(),
+      systemInfo.osInfo(),
+      systemInfo.shell(),
+      systemInfo.currentLoad(),
+      systemInfo.audio(),
+      systemInfo.bluetoothDevices(),
+      this.gpu(),
+    ]);
   }
 
   async gpu() {

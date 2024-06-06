@@ -19,8 +19,6 @@ export interface IAppTypes {
 
   init: () => Promise<void>;
   getMeta: () => Promise<IAppMeta>;
-  absPath: (...arg: string[]) => string;
-  exists: (...p: string[]) => boolean;
   install: () => Promise<void>;
   load: (filename: string) => Promise<any>;
   unInstall: () => Promise<void>;

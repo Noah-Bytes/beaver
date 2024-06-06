@@ -1,3 +1,4 @@
+import { Runner } from '@beaver/action-exec';
 import { safeAccessSync } from '@beaver/arteffix-utils';
 import { MetaFile } from '@beaver/kernel';
 import {
@@ -5,26 +6,15 @@ import {
   IAppMetaUpdate,
   IAppTypes,
   ShellFlow,
-  createLogger,
   loader,
   requireImage,
 } from '@beaver/shell-flow';
-import {
-  IShellApp,
-  IShellAppMeta,
-  IShellAppRun,
-  IShellAppRunParams,
-} from '@beaver/types';
+import { IShellApp, IShellAppMeta, IShellAppRun } from '@beaver/types';
 import fs from 'fs-extra';
 import git, { ReadCommitResult } from 'isomorphic-git';
-import * as pty from 'node-pty';
-import path from 'path';
-import { Logger } from 'winston';
-import { Shell } from '../shell/shell';
+import { Directory } from '../directory';
 
-type IPty = pty.IPty;
-
-export class App implements IAppTypes {
+export class App extends Directory<any> implements IAppTypes {
   static STATUS = {
     INIT: 0,
     INSTALLED: 1,
@@ -39,31 +29,17 @@ export class App implements IAppTypes {
 
   readonly name: string;
   readonly git: string;
+  private runner: Runner | undefined;
 
   private meta: IAppMeta | undefined;
-  private readonly dir: string;
 
   private readonly _ctx: ShellFlow;
-  private readonly logger: Logger;
-  private shell: Shell;
 
   constructor(name: string, git: string, ctx: ShellFlow) {
-    const { app } = ctx;
-    this.dir = app.absPath(name);
+    super(ctx.app.absPath(name));
     this._ctx = ctx;
     this.name = name;
     this.git = git;
-    this.logger = createLogger(`app:${name}`);
-    this.shell = new Shell(`app/${this.name}`, 'app', ctx);
-
-    ['start', 'install', 'update'].forEach((elem) => {
-      const outputStream = fs.createWriteStream(this.absPath(elem + '.log'), {
-        flags: 'a',
-      });
-      ctx.eventBus.on([name, elem].join(':'), function (data) {
-        outputStream.write(data);
-      });
-    });
   }
 
   readLog(name: string): Promise<string> {
@@ -113,15 +89,6 @@ export class App implements IAppTypes {
     }
 
     throw new Error('meta not');
-  }
-
-  absPath(...arg: string[]): string {
-    return path.resolve(this.dir, ...arg);
-  }
-
-  exists(...p: string[]): boolean {
-    const path = this.absPath(...p);
-    return fs.pathExistsSync(path);
   }
 
   async load(filename: string): Promise<any> {
@@ -175,14 +142,14 @@ export class App implements IAppTypes {
           runParam.params.path = this.absPath(runParam.params.path);
         }
 
-        await method(
-          {
-            cwd: this.dir,
-            git: this.git,
-            ...runParam.params,
-          },
-          this,
-        );
+        // TODO 这里目前只涉及 shell.execute shell.run shell模块的两种方法，其他模块，暂不涉及
+        // 因为涉及到kill操作
+        this.runner = method({
+          cwd: this.dir,
+          git: this.git,
+          ...runParam.params,
+        });
+        await this.runner?.exec();
       } else {
         throw new Error(`method ${runParam.method} not found`);
       }
@@ -220,14 +187,11 @@ export class App implements IAppTypes {
         await this.updateMeta({
           status: App.STATUS.INSTALL_ERROR,
         });
-        // 安装脚本不存在
-        this.logger.warn('the installation script does not exist');
       }
     } catch (e) {
       await this.updateMeta({
         status: App.STATUS.INSTALL_ERROR,
       });
-      this.logger.error(e);
       throw new Error(`Failed to install ${this.name}`);
     }
   }
@@ -253,30 +217,10 @@ export class App implements IAppTypes {
           status: App.STATUS.INIT,
         });
       } else {
-        // 安装脚本不存在
-        this.logger.warn('the installation script does not exist');
       }
     } catch (e) {
-      this.logger.error(e);
       throw new Error(`Failed to install ${this.name}`);
     }
-  }
-
-  parseMessage(params: IShellAppRunParams): string | string[] {
-    let message: string | string[] = '';
-
-    if (params.messageFn) {
-      const { systemInfo, options } = this._ctx;
-      message = params.messageFn({
-        platform: systemInfo.platform,
-        gpu: systemInfo.GPU || 'none',
-        mirror: options?.isMirror,
-      });
-    } else if (params.message) {
-      message = params.message;
-    }
-
-    return message;
   }
 
   async start(): Promise<void> {
@@ -304,13 +248,10 @@ export class App implements IAppTypes {
   }
 
   async stop(): Promise<void> {
-    const { shell } = this._ctx;
+    this.runner?.kill();
     await this.updateMeta({
       status: App.STATUS.STOPPED,
     });
-    shell.removeAllShell(this.name);
-    // this.shell.getPty().kill();kill
-    await fs.truncate(this.absPath('start.log'), 0);
   }
 
   async update(): Promise<void> {

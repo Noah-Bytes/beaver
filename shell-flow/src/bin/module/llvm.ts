@@ -1,5 +1,4 @@
 import { isDarwin } from '@beaver/arteffix-utils';
-import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
 import { BinModule } from './bin-module';
 
@@ -10,15 +9,9 @@ export class LLVM extends BinModule {
 
   override async install(): Promise<void> {
     if (isDarwin) {
-      await new ShellConda({
-        home: this._ctx.homeDir,
-        run: 'brew install llvm',
-      }).run();
+      await this.run('brew install llvm');
     } else {
-      await new ShellConda({
-        home: this._ctx.homeDir,
-        run: 'conda install -y -c conda-forge llvm',
-      }).run();
+      await this.run('conda install -y -c conda-forge llvm');
     }
   }
 
@@ -43,10 +36,7 @@ export class LLVM extends BinModule {
   }
 
   override async uninstall(): Promise<void> {
-    await new ShellConda({
-      home: this._ctx.homeDir,
-      run: 'conda remove -y llvm',
-    }).run();
+    await this.run('conda remove -y llvm');
     this.isInstalled = false;
   }
 }

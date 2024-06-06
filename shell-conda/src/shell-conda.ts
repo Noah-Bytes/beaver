@@ -1,5 +1,5 @@
 import { ActionUse, mirror } from '@beaver/action-core';
-import { exec } from '@beaver/action-exec';
+import { Runner, exec } from '@beaver/action-exec';
 import { exists } from '@beaver/action-io';
 import { isDarwin, isWin32 } from '@beaver/arteffix-utils';
 import { platform } from '@beaver/system-info';
@@ -24,9 +24,9 @@ export function shellPathSync() {
  */
 export class ShellConda extends ActionUse<IWithForShellConda> {
   private readonly env: Record<string, string>;
-  private readonly _terminal: string;
   private readonly _args: string[];
-  private minicondaDir: string;
+  private readonly minicondaDir: string;
+  private runner: Runner | undefined;
 
   static PATHS = {
     darwin: [
@@ -40,6 +40,8 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
 
       'homebrew/bin',
       'homebrew/Cellar',
+
+      'miniconda/bin/aria2',
     ],
     win32: [
       'miniconda/etc/profile.d',
@@ -53,6 +55,8 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
 
       'homebrew/bin',
       'homebrew/Cellar',
+
+      'miniconda/bin/aria2',
     ],
     linux: [
       'miniconda/etc/profile.d',
@@ -65,6 +69,8 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
 
       'homebrew/bin',
       'homebrew/Cellar',
+
+      'miniconda/bin/aria2',
     ],
   };
 
@@ -73,14 +79,12 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
     this.with = params;
     this.minicondaDir = path.resolve(this.home, 'bin', 'miniconda');
     if (isWin32) {
-      this._terminal = 'cmd.exe';
       /**
        * 参数解释
        * --NoProfile 不加载用户的配置文件
        */
       this._args = ['/D'];
     } else {
-      this._terminal = '/bin/bash';
       /**
        * 参数解释
        * --noprofile 启动shell时不读取用户的登录shell配置文件（如.bash_profile、.profile等）。
@@ -189,6 +193,9 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
         CONDA_EXE: path.join(this.minicondaDir, 'Scripts/conda.exe'),
         CONDA_PYTHON_EXE: path.join(this.minicondaDir, 'Scripts/python'),
       });
+      Object.assign(env, {
+        GIT_CONFIG_GLOBAL: path.join(this.home, 'gitconfig'),
+      });
     }
 
     if (isDarwin) {
@@ -289,7 +296,7 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
           ].join(' && '),
           this._args,
           this.getOptions(),
-        );
+        ).exec();
       }
     }
   }
@@ -335,6 +342,7 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
       cwd: this.with?.path
         ? path.resolve(this.home, this.with.path)
         : this.home,
+      silent: this.silent,
       outStream: this.outStream,
       errStream: this.errStream,
       windowsVerbatimArguments: true,
@@ -371,7 +379,12 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
     // step4. check mirror
     command = mirror(command);
 
-    // step5. run
-    return await exec(command, [], this.getOptions());
+    this.runner = exec(command, [], this.getOptions());
+
+    return await this.runner.exec();
+  }
+
+  override kill() {
+    this.runner && this.runner.kill();
   }
 }

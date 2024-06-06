@@ -1,13 +1,10 @@
-import { EventBus } from '@beaver/arteffix-utils';
-import EventEmitter from 'events';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import { Logger } from 'winston';
+import process from 'process';
+import stream from 'stream';
 import { AppManager } from './app';
 import { Bin } from './bin';
-import { createLogger } from './logger';
-import { ShellManager } from './shell/shell-manager';
 import { SystemInfo } from './system-info';
 import { IShellFlowOptionsTypes, IShellFlowTypes } from './types';
 
@@ -29,13 +26,12 @@ export class ShellFlow implements IShellFlowTypes {
   ];
   bin: Bin;
   app: AppManager;
-  shell: ShellManager;
-  eventBus: EventBus = new EventBus(new EventEmitter(), 'shell-flow');
-  readonly appName: string;
   homeDir: string;
+  readonly appName: string;
   readonly systemInfo: SystemInfo;
-  readonly logger: Logger;
   readonly options?: IShellFlowOptionsTypes;
+  readonly errStream;
+  readonly outStream;
   private _init: boolean = false;
   private readonly mirror: Record<string, string>;
 
@@ -44,16 +40,32 @@ export class ShellFlow implements IShellFlowTypes {
     this.appName = appName;
     this.options = options;
     this.mirror = options?.mirror || {};
-
-    this.logger = createLogger('shell-flow');
     this.systemInfo = new SystemInfo();
 
-    this.shell = new ShellManager(this);
     this.bin = new Bin(this);
     this.app = new AppManager(this);
+
+    this.errStream = options?.errStream || <stream.Writable>process.stderr;
+    this.outStream = options?.outStream || <stream.Writable>process.stdout;
   }
 
   async changeHomeDir(dir: string) {}
+
+  async initCacheDir() {
+    try {
+      // 文件目录初始化
+      if (this.homeDir) {
+        await fs.promises.mkdir(this.homeDir, { recursive: true });
+        for (let folder of ShellFlow.CACHE_FOLDERS) {
+          await fs.promises.mkdir(path.resolve(this.homeDir, 'cache', folder), {
+            recursive: true,
+          });
+        }
+      }
+    } catch (e) {
+      this.errStream.write('cache dir initialization failed');
+    }
+  }
 
   async init(): Promise<void> {
     if (this._init) {
@@ -62,31 +74,19 @@ export class ShellFlow implements IShellFlowTypes {
 
     await this.systemInfo.init();
 
-    try {
-      // 文件目录初始化
-      if (this.homeDir) {
-        await fs.promises.mkdir(this.homeDir, { recursive: true });
+    await this.initCacheDir();
 
-        for (let folder of ShellFlow.CACHE_FOLDERS) {
-          await fs.promises.mkdir(path.resolve(this.homeDir, 'cache', folder), {
-            recursive: true,
-          });
-        }
-      }
-    } catch (e) {
-      this.logger.error(`initialization failed`);
-      this.logger.error(e);
-    }
-
-    this.logger.info('开始初始化 bin');
     await this.bin.init();
-    this.logger.info('开始初始化 app');
+    this.outStream.write('bin initialization success');
+
     await this.app.init();
+    this.outStream.write('app initialization success');
 
     this._init = true;
   }
 
   destroy(): Promise<void> {
+    this.outStream.write('shellFlow destroy!');
     return Promise.resolve(undefined);
   }
 

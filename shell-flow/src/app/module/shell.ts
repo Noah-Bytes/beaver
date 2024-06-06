@@ -1,13 +1,11 @@
 import { ShellConda } from '@beaver/shell-conda';
-import { IAppTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
 import { IShellAppRunParams } from '@beaver/types';
 
 export class Shell {
-  private readonly shell: IShellTypes;
   private readonly _ctx: ShellFlow;
   constructor(ctx: ShellFlow) {
     this._ctx = ctx;
-    this.shell = ctx.shell.createShell('app/shell');
   }
 
   parseMessage(params: IShellAppRunParams): string | string[] {
@@ -18,7 +16,7 @@ export class Shell {
       message = params.messageFn({
         platform: systemInfo.platform,
         gpu: systemInfo.GPU,
-        mirror: options?.isMirror,
+        mirror: !!options?.mirror,
       });
     } else if (params.message) {
       message = params.message;
@@ -28,35 +26,27 @@ export class Shell {
   }
 
   /**
-   * @deprecated
    * @param params
-   * @param ctx
    */
-  async execute(params: IShellAppRunParams, ctx: IAppTypes) {
+  execute(params: IShellAppRunParams) {
     params.message = this.parseMessage(params);
-    const shellConda = new ShellConda({
+    return new ShellConda({
       home: this._ctx.homeDir,
       path: params.path || params.cwd,
       envs: params.env,
       venv: params.venv,
       run: params.message,
     });
-    await shellConda.run();
   }
 
-  async run(params: IShellAppRunParams) {
+  run(params: IShellAppRunParams) {
     params.message = this.parseMessage(params);
-    const shellConda = new ShellConda({
+    return new ShellConda({
       home: this._ctx.homeDir,
       path: params.path || params.cwd,
       envs: params.env,
       venv: params.venv,
       run: params.message,
     });
-    await shellConda.run();
-  }
-
-  async stop() {
-    this.shell.kill();
   }
 }

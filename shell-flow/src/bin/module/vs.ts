@@ -1,9 +1,9 @@
 import { isWin32 } from '@beaver/arteffix-utils';
+import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
 import { glob } from 'glob';
 import path from 'path';
 import { BinModule } from './bin-module';
-import {ShellConda} from "@beaver/shell-conda";
 
 export class Vs extends BinModule {
   static DOWNLOAD_URL =
@@ -106,23 +106,18 @@ export class Vs extends BinModule {
 
   override async install(): Promise<void> {
     const { bin, systemInfo } = this._ctx;
-    bin.logger.info(`downloading ${Vs.DOWNLOAD_URL}`);
     await bin.download(Vs.DOWNLOAD_URL, Vs.FILTER_NAME);
 
     if (systemInfo.os?.release.startsWith('10')) {
-      bin.logger.info(`running installer: $${Vs.FILTER_NAME}`);
-
       await new ShellConda({
         home: this._ctx.homeDir,
         run: this.cmd('install'),
         sudo: true,
       }).run();
 
-      bin.logger.info(`installed ${Vs.FILTER_NAME}`);
-
       await bin.rm(Vs.FILTER_NAME);
     } else {
-      bin.logger.warn('Must be Windows 10 or above');
+      this._ctx.errStream.write('Must be Windows 10 or above');
     }
   }
 
@@ -165,12 +160,11 @@ export class Vs extends BinModule {
   override async uninstall(): Promise<void> {
     const { bin } = this._ctx;
     if (isWin32) {
-      const resp = await new ShellConda({
+      await new ShellConda({
         home: this._ctx.homeDir,
         run: this.cmd('uninstall'),
         sudo: true,
       }).run();
-      bin.logger.info(resp);
     }
   }
 

@@ -1,3 +1,4 @@
+import { ActionFs } from '@beaver/action-fs';
 import { ShellFlow } from '@beaver/shell-flow';
 import decompress from 'decompress';
 import path from 'path';
@@ -35,7 +36,7 @@ export class Node extends BinModule {
   }
 
   override async install(): Promise<void> {
-    const { systemInfo, bin } = this._ctx;
+    const { systemInfo, bin, homeDir } = this._ctx;
 
     if (!Node.URLS[systemInfo.platform]) {
       throw new Error(
@@ -50,17 +51,18 @@ export class Node extends BinModule {
     }
 
     const fileName = path.basename(url);
-    const downloadPath = bin.absPath(fileName);
-
     await bin.download(url, fileName);
 
-    try {
-      await _decompress(downloadPath, bin.absPath('node'), { strip: 1 });
-
-      await bin.rm(fileName);
-    } catch (e) {
-      throw new Error(`Failed to decompress ${fileName}`);
-    }
+    const actionFs = new ActionFs({
+      home: homeDir,
+      type: 'decompress',
+      file: fileName,
+      path: 'bin',
+      output: 'node',
+      strip: 1,
+    });
+    await actionFs.run();
+    await bin.rm(fileName);
   }
 
   override installed(): boolean | Promise<boolean> {

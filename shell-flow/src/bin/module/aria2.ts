@@ -14,21 +14,13 @@ export class Aria2 extends BinModule {
   }
 
   override async install(): Promise<void> {
+    const { bin } = this._ctx;
     if (isWin32) {
-      const { bin } = this._ctx;
       const dest = 'aria2-1.36.0-win-64bit-build1.zip';
       await bin.download(Aria2.DOWNLOAD_URL, dest);
-      const shellConda = new ShellConda({
-        home: this._ctx.homeDir,
-        run: `7z x ${dest} -o aria2`,
-      });
-      await shellConda.run();
+      await this.run(`7z x ${dest} -o aria2`);
     } else {
-      const shellConda = new ShellConda({
-        home: this._ctx.homeDir,
-        run: `conda install -y -c conda-forge aria2`,
-      });
-      await shellConda.run();
+      await this.run(`conda install -y -c conda-forge aria2`);
     }
   }
 
@@ -51,15 +43,5 @@ export class Aria2 extends BinModule {
       run: `brew remove aria2`,
     });
     await shellConda.run();
-  }
-
-  env(): { [p: string]: any } | undefined {
-    if (isWin32) {
-      return {
-        PATH: [this._ctx.bin.absPath('aria2')],
-      };
-    }
-
-    return undefined;
   }
 }
