@@ -1,0 +1,33 @@
+{
+  "name": "action-fs",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "action-fs/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/action-fs",
+        "tsConfig": "action-fs/tsconfig.lib.json",
+        "packageJson": "action-fs/package.json",
+        "main": "action-fs/src/index.ts",
+        "assets": ["action-fs/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
+}

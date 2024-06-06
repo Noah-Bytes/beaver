@@ -1,0 +1,33 @@
+{
+  "name": "action-parse",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "action-parse/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/action-parse",
+        "tsConfig": "action-parse/tsconfig.lib.json",
+        "packageJson": "action-parse/package.json",
+        "main": "action-parse/src/index.ts",
+        "assets": ["action-parse/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "arteffix-terminal",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "arteffix-terminal/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "arteffix-terminal:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "arteffix-terminal:build:development"
+        },
+        "production": {
+          "buildTarget": "arteffix-terminal:build:production"
+        }
+      }
+    }
+  }
+}

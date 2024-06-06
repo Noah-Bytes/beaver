@@ -1,0 +1,33 @@
+{
+  "name": "shell-conda",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "shell-conda/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/shell-conda",
+        "tsConfig": "shell-conda/tsconfig.lib.json",
+        "packageJson": "shell-conda/package.json",
+        "main": "shell-conda/src/index.ts",
+        "assets": ["shell-conda/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
+}

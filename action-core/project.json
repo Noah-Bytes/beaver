@@ -1,0 +1,33 @@
+{
+  "name": "action-core",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "action-core/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/action-core",
+        "tsConfig": "action-core/tsconfig.lib.json",
+        "packageJson": "action-core/package.json",
+        "main": "action-core/src/index.ts",
+        "assets": ["action-core/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
+}
