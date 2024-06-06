@@ -1,6 +1,6 @@
 {
   "name": "@beaver/shell-flow",
-  "version": "0.0.19",
+  "version": "0.1.0",
   "peerDependencies": {
     "core-js": "^3.37.1",
     "decompress": "^4.2.1",

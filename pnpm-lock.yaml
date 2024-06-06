@@ -116,9 +116,6 @@ dependencies:
   node-downloader-helper:
     specifier: ^2.1.9
     version: 2.1.9
-  node-pty:
-    specifier: ^1.0.0
-    version: 1.0.0
   osx-temperature-sensor:
     specifier: ^1.0.8
     version: 1.0.8
@@ -11785,10 +11782,6 @@ packages:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  /nan@2.19.0:
-    resolution: {integrity: sha512-nO1xXxfh/RWNxfd/XPfbIfFk5vgLsAxUR9y5O0cHMJu/AW9U95JLXqthYHjEp+8gQ5p96K9jUp8nbVOxCdRbtw==}
-    dev: false
-
   /nanoclone@0.2.1:
     resolution: {integrity: sha512-wynEP02LmIbLpcYw8uBKpcfF6dmg2vcpKqxeH5UcoKEYdExslsdUA4ugFauuaeYdTB76ez6gJW8XAZ6CgkXYxA==}
     dev: true
@@ -11979,13 +11972,6 @@ packages:
   /node-machine-id@1.1.12:
     resolution: {integrity: sha512-QNABxbrPa3qEIfrE6GOJ7BYIuignnJw7iQ2YPbc3Nla1HzRJjXzZOiikfF8m7eAMfichLt3M4VgLOetqgDmgGQ==}
     dev: true
-
-  /node-pty@1.0.0:
-    resolution: {integrity: sha512-wtBMWWS7dFZm/VgqElrTvtfMq4GzJ6+edFI0Y0zyzygUSZMgZdraDUMUhCIvkjhJjme15qWmbyJbtAx4ot4uZA==}
-    requiresBuild: true
-    dependencies:
-      nan: 2.19.0
-    dev: false
 
   /node-releases@2.0.14:
     resolution: {integrity: sha512-y10wOWt8yZpqXmOgRo77WaHEmhYQYGNA6y421PKsKYWEK8aW+cqAphborZDhqfyKrbZEN92CN1X2KbafY2s7Yw==}
