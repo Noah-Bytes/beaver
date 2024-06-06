@@ -8,6 +8,7 @@ export interface IWithForGit {
 export interface IWithForShell {
   home?: string;
   path?: string;
+  args?: string[]
   run: string | string[];
 }
 

@@ -59,8 +59,6 @@ export interface IShellTypes {
    */
   run(params: IShellRunParams, options?: IShellRunOptions): Promise<string>;
 
-  getPty(): Terminal;
-
   execute(params: IShellRunParams, options?: IShellRunOptions): Promise<void>;
 
   /**

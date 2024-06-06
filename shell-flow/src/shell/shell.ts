@@ -20,6 +20,7 @@ import process from 'process';
 import { shellEnvSync } from 'shell-env';
 import sudo from 'sudo-prompt';
 import { Logger } from 'winston';
+import {mirror} from "@beaver/action-core";
 
 export function shellPathSync() {
   const { PATH } = shellEnvSync();
@@ -247,10 +248,6 @@ export class Shell implements IShellTypes {
     this.logger.info(msg);
 
     this.status = Shell.STATUS.RUNNING;
-
-    const ptyProcess = this.getPty();
-
-    ptyProcess.write(msg);
   }
 
   async run(

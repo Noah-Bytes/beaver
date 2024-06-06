@@ -269,7 +269,7 @@ export class App implements IAppTypes {
       const { systemInfo, options } = this._ctx;
       message = params.messageFn({
         platform: systemInfo.platform,
-        gpu: systemInfo.GPU,
+        gpu: systemInfo.GPU || 'none',
         mirror: options?.isMirror,
       });
     } else if (params.message) {
@@ -309,7 +309,7 @@ export class App implements IAppTypes {
       status: App.STATUS.STOPPED,
     });
     shell.removeAllShell(this.name);
-    this.shell.getPty().kill();
+    // this.shell.getPty().kill();kill
     await fs.truncate(this.absPath('start.log'), 0);
   }
 

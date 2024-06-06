@@ -33,36 +33,9 @@ export class Runner extends events.EventEmitter {
     const toolPath = this._getSpawnFileName();
     const args = this._getSpawnArgs(options);
     let cmd = noPrefix ? '' : '[command]'; // omit prefix when piped to a second tool
-    if (IS_WINDOWS) {
-      // Windows + cmd file
-      if (this._isCmdFile()) {
-        cmd += toolPath;
-        for (const a of args) {
-          cmd += ` ${a}`;
-        }
-      }
-      // Windows + verbatim
-      else if (options.windowsVerbatimArguments) {
-        cmd += `"${toolPath}"`;
-        for (const a of args) {
-          cmd += ` ${a}`;
-        }
-      }
-      // Windows (regular)
-      else {
-        cmd += this._windowsQuoteCmdArg(toolPath);
-        for (const a of args) {
-          cmd += ` ${this._windowsQuoteCmdArg(a)}`;
-        }
-      }
-    } else {
-      // OSX/Linux - this can likely be improved with some form of quoting.
-      // creating processes on Unix is fundamentally different than Windows.
-      // on Unix, execvp() takes an arg array.
-      cmd += toolPath;
-      for (const a of args) {
-        cmd += ` ${a}`;
-      }
+    cmd += toolPath;
+    for (const a of args) {
+      cmd += ` ${a}`;
     }
 
     return cmd;
@@ -97,9 +70,7 @@ export class Runner extends events.EventEmitter {
 
   private _getSpawnFileName(): string {
     if (IS_WINDOWS) {
-      if (this._isCmdFile()) {
-        return process.env['COMSPEC'] || 'cmd.exe';
-      }
+      return `chcp 65001 && ${this.toolPath}`;
     }
 
     return this.toolPath;
@@ -355,19 +326,13 @@ export class Runner extends events.EventEmitter {
   }
 
   private _getSpawnOptions(
-    options: ExecOptions,
-    toolPath: string,
+    options: ExecOptions
   ): child.SpawnOptions {
     options = options || <ExecOptions>{};
     const result = <child.SpawnOptions>{};
     result.cwd = options.cwd;
     result.env = options.env;
     result.shell = true;
-    result['windowsVerbatimArguments'] =
-      options.windowsVerbatimArguments || this._isCmdFile();
-    if (options.windowsVerbatimArguments) {
-      result.argv0 = `"${toolPath}"`;
-    }
     return result;
   }
 
@@ -407,11 +372,17 @@ export class Runner extends events.EventEmitter {
       }
 
       const fileName = this._getSpawnFileName();
-      const cp = child.spawn(
-        fileName,
-        this._getSpawnArgs(optionsNonNull),
-        this._getSpawnOptions(this.options, fileName),
-      );
+      const cp = IS_WINDOWS
+        ? child.spawn(
+            'cmd.exe',
+            ['/D', '/S', '/C', fileName],
+            this._getSpawnOptions(this.options),
+          )
+        : child.spawn(
+            fileName,
+            this._getSpawnArgs(optionsNonNull),
+            this._getSpawnOptions(this.options),
+          );
 
       let stdbuffer = '';
       let result = '';

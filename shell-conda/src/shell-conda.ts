@@ -330,10 +330,6 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
   }
 
   private getOptions(): ExecOptions {
-    if (this.with?.path) {
-      console.log(path.resolve(this.home, this.with?.path));
-    }
-
     return {
       env: this.env,
       cwd: this.with?.path

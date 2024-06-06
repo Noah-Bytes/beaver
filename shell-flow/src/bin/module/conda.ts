@@ -150,7 +150,7 @@ export class Conda extends BinModule {
     // 2. run the script
     const installPath = path.resolve(bin.dir, 'miniconda');
     const cmd = isWin32
-      ? `start /wait ${installer} /InstallationType=JustMe /Regi sterPython=0 /S /D=${installPath}`
+      ? `start /wait ${installer} /InstallationType=JustMe /RegisterPython=0 /S /D=${installPath}`
       : `/bin/bash ${installer} -b -p ${installPath}`;
 
     await new ActionShell({

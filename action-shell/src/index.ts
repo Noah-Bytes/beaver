@@ -22,11 +22,11 @@ export class ActionShell extends ActionUse<IWithForShell> {
   override async run() {
     if (Array.isArray(this.with.run)) {
       for (let i = 0; i < this.with.run.length; i++) {
-        await exec(this.with.run[i], [], this.getOptions());
+        await exec(this.with.run[i], this.with.args || [], this.getOptions());
       }
       return '0';
     }
 
-    return await exec(this.with.run, [], this.getOptions());
+    return await exec(this.with.run, this.with.args || [], this.getOptions());
   }
 }

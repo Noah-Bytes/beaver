@@ -34,7 +34,6 @@ export class Shell {
    */
   async execute(params: IShellAppRunParams, ctx: IAppTypes) {
     params.message = this.parseMessage(params);
-    console.log(params);
     const shellConda = new ShellConda({
       home: this._ctx.homeDir,
       path: params.path || params.cwd,
