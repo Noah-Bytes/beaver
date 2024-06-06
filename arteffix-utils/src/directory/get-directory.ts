@@ -1,4 +1,4 @@
-import path from 'path';
+import * as path from 'path';
 import { isDirectory } from './is-directory';
 
 export function getDirectory(p: string) {

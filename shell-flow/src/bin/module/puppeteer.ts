@@ -1,3 +1,4 @@
+import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
 import fs from 'fs';
 import { BinModule } from './bin-module';
@@ -11,28 +12,23 @@ export class Puppeteer extends BinModule {
     const { bin, options } = this._ctx;
     const dir = bin.absPath('puppet');
     await fs.promises.mkdir(dir, { recursive: true });
-    await this.shell.run(
-      {
-        message: `npm init -y`,
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      envs: {
+        PUPPETEER_CACHE_DIR: dir,
       },
-      {
-        path: dir,
-        env: {
-          PUPPETEER_CACHE_DIR: dir,
-        },
+      path: 'bin/puppet',
+      run: 'npm init -y',
+    }).run();
+
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      envs: {
+        PUPPETEER_CACHE_DIR: dir,
       },
-    );
-    await this.shell.run(
-      {
-        message: `npm install puppeteer ${options?.isMirror ? '--registry=https://registry.npmmirror.com' : ''}`,
-      },
-      {
-        path: dir,
-        env: {
-          PUPPETEER_CACHE_DIR: dir,
-        },
-      },
-    );
+      path: 'bin/puppet',
+      run: `npm install puppeteer ${options?.isMirror ? '--registry=https://registry.npmmirror.com' : ''}`,
+    }).run();
   }
 
   override async uninstall(): Promise<void> {

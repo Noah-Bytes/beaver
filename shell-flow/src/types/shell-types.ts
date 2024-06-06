@@ -52,6 +52,11 @@ export interface IShellTypes {
 
   kill(): void;
 
+  /**
+   * @deprecated
+   * @param params
+   * @param options
+   */
   run(params: IShellRunParams, options?: IShellRunOptions): Promise<string>;
 
   getPty(): Terminal;

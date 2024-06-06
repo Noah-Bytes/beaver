@@ -1,5 +1,5 @@
 jest.setTimeout(1000000);
-
+process.env['ARTEFFIX_MIRROR'] = 'true';
 function ansiRegex({ onlyFirst = false } = {}) {
   const pattern = [
     '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',

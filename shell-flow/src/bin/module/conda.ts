@@ -1,9 +1,12 @@
+import { ActionDownload } from '@beaver/action-download';
 import { isDarwin, isWin32 } from '@beaver/arteffix-utils';
+import { ShellConda } from '@beaver/shell-conda';
 import fs from 'fs';
 import { glob } from 'glob';
 import path from 'path';
 import { ShellFlow } from '../../shell-flow';
 import { BinModule } from './bin-module';
+import {ActionShell} from "@beaver/action-shell";
 
 interface PlatformUrls {
   [key: string]: {
@@ -142,44 +145,33 @@ export class Conda extends BinModule {
       throw new Error(`not exists: ${installUrl}`);
     }
     const installer = Conda.INSTALLER[systemInfo.platform];
-
-    bin.logger.info(`Download: ${installUrl}`);
     await bin.download(installUrl, installer);
-
-    bin.logger.info(`Running ${installer}`);
 
     // 2. run the script
     const installPath = path.resolve(bin.dir, 'miniconda');
     const cmd = isWin32
       ? `start /wait ${installer} /InstallationType=JustMe /Regi sterPython=0 /S /D=${installPath}`
-      : `bash ${installer} -b -p ${installPath}`;
+      : `/bin/bash ${installer} -b -p ${installPath}`;
 
-    bin.logger.info(cmd);
-
-    await this.shell.run(
-      {
-        message: cmd,
-        conda: {
-          skip: true,
-        },
-      },
-      {
-        path: bin.dir,
-      },
-    );
+    await new ActionShell({
+      home: this._ctx.homeDir,
+      path: 'bin',
+      run: cmd,
+    }).run();
 
     await this.setMirror();
 
     bin.logger.info('start set config create_default_packages');
 
-    await this.shell.run({
-      message: [
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: [
         // 使得每次创建新环境时，都会自动安装Python 3.10
         'conda config --add create_default_packages python=3.10',
         // 从Conda Forge频道安装pip、brotli和brotlipy这三个包
         'conda install -y -c conda-forge pip brotli brotlipy',
       ],
-    });
+    }).run();
 
     if (isWin32) {
       bin.logger.info('python.exe to python3.exe');
@@ -200,8 +192,9 @@ export class Conda extends BinModule {
     // setting mirror
     if (options?.isMirror) {
       bin.logger.info('start set config mirror');
-      const resp = await this.shell.run({
-        message: [
+      await new ShellConda({
+        home: this._ctx.homeDir,
+        run: [
           'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/',
           'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/',
           'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/',
@@ -209,7 +202,7 @@ export class Conda extends BinModule {
           'conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/',
           'conda config --set show_channel_urls yes',
         ],
-      });
+      }).run();
     }
   }
 
@@ -236,9 +229,9 @@ export class Conda extends BinModule {
   }
 
   async clean() {
-    await this.shell.run({
-      message: 'conda clean --all -y',
-    });
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: `conda clean --all -y`,
+    }).run();
   }
-
 }

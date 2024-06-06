@@ -1,9 +1,8 @@
-import { exists, isRooted, which } from '@beaver/action-io';
+import { exists } from '@beaver/action-io';
 import { ExecOptions } from '@beaver/types';
 import * as child from 'child_process';
 import * as events from 'events';
 import * as os from 'os';
-import * as path from 'path';
 import * as stream from 'stream';
 
 const IS_WINDOWS = process.platform === 'win32';
@@ -363,6 +362,7 @@ export class Runner extends events.EventEmitter {
     const result = <child.SpawnOptions>{};
     result.cwd = options.cwd;
     result.env = options.env;
+    result.shell = true;
     result['windowsVerbatimArguments'] =
       options.windowsVerbatimArguments || this._isCmdFile();
     if (options.windowsVerbatimArguments) {
@@ -380,26 +380,8 @@ export class Runner extends events.EventEmitter {
    * @param     options  optional exec options.  See ExecOptions
    * @returns   number
    */
-  async exec(): Promise<number> {
-    // 如果工具路径无根且包含相对路径，则将其作为根路径
-    if (
-      !isRooted(this.toolPath) &&
-      (this.toolPath.includes('/') ||
-        (IS_WINDOWS && this.toolPath.includes('\\')))
-    ) {
-      // prefer options.cwd if it is specified, however options.cwd may also need to be rooted
-      this.toolPath = path.resolve(
-        process.cwd(),
-        this.options.cwd || process.cwd(),
-        this.toolPath,
-      );
-    }
-
-    // if the tool is only a file name, then resolve it from the PATH
-    // otherwise verify it exists (add extension on Windows if necessary)
-    this.toolPath = await which(this.toolPath, true);
-
-    return new Promise<number>(async (resolve, reject) => {
+  async exec(): Promise<string> {
+    return new Promise<string>(async (resolve, reject) => {
       this._debug(`exec tool: ${this.toolPath}`);
       this._debug('arguments:');
       for (const arg of this.args) {
@@ -432,6 +414,7 @@ export class Runner extends events.EventEmitter {
       );
 
       let stdbuffer = '';
+      let result = '';
       if (cp.stdout) {
         cp.stdout.on('data', (data: Buffer) => {
           if (this.options.listeners && this.options.listeners.stdout) {
@@ -441,6 +424,8 @@ export class Runner extends events.EventEmitter {
           if (!optionsNonNull.silent && optionsNonNull.outStream) {
             optionsNonNull.outStream.write(data);
           }
+
+          result += data.toString();
 
           stdbuffer = this._processLineBuffer(
             data,
@@ -521,7 +506,7 @@ export class Runner extends events.EventEmitter {
         if (error) {
           reject(error);
         } else {
-          resolve(exitCode);
+          resolve(result);
         }
       });
 

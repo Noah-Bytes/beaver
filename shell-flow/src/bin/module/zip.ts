@@ -1,6 +1,7 @@
 import { isWin32 } from '@beaver/arteffix-utils';
 import { ShellFlow } from '@beaver/shell-flow';
 import { BinModule } from './bin-module';
+import {ShellConda} from "@beaver/shell-conda";
 
 export class Zip extends BinModule {
   private readonly packageName: string;
@@ -11,9 +12,10 @@ export class Zip extends BinModule {
   }
 
   override async install(): Promise<void> {
-    await this.shell.run({
-      message: `conda install -y -c conda-forge ${this.packageName}`,
-    });
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: `conda install -y -c conda-forge ${this.packageName}`,
+    }).run();
   }
 
   override async installed(): Promise<boolean> {
@@ -27,9 +29,10 @@ export class Zip extends BinModule {
   }
 
   override async uninstall(): Promise<void> {
-    await this.shell.run({
-      message: `conda remove -y ${this.packageName}`,
-    });
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: `conda remove -y ${this.packageName}`,
+    }).run();
     this.isInstalled = false;
   }
 }

@@ -20,7 +20,6 @@ import process from 'process';
 import { shellEnvSync } from 'shell-env';
 import sudo from 'sudo-prompt';
 import { Logger } from 'winston';
-import { Terminal } from './terminal';
 
 export function shellPathSync() {
   const { PATH } = shellEnvSync();
@@ -50,7 +49,6 @@ export class Shell implements IShellTypes {
   private readonly logger: Logger;
   private cwd: string | undefined;
   private readonly _ctx: ShellFlow;
-  private ptyProcess: Terminal | undefined;
   eventBus: IEventBus;
   readonly groupName: string;
 
@@ -199,8 +197,6 @@ export class Shell implements IShellTypes {
     this.status = Shell.STATUS.IDLE;
   }
   kill() {
-    this.ptyProcess?.kill();
-
     this.eventBus.removeAllListeners();
 
     this.status = Shell.STATUS.KILLED;
@@ -233,23 +229,6 @@ export class Shell implements IShellTypes {
     };
   }
 
-  getPty() {
-    if (this.ptyProcess) {
-      return this.ptyProcess;
-    }
-    this.ptyProcess = new Terminal(this._terminal, this._args, {
-      name: this.name,
-      cwd: this.cwd,
-      env: this.envCache,
-    });
-
-    this.ptyProcess.onData((data) => {
-      this._ctx.options?.start?.(this.name, data);
-    });
-
-    return this.ptyProcess;
-  }
-
   async execute(
     params: IShellRunParams,
     options?: IShellRunOptions,
@@ -262,7 +241,7 @@ export class Shell implements IShellTypes {
     let msg = this.buildCmd(params);
 
     if (ctxOptions?.isMirror) {
-      msg = this._ctx.mirrorUrl(msg);
+      msg = mirror(msg);
     }
 
     this.logger.info(msg);
@@ -286,7 +265,7 @@ export class Shell implements IShellTypes {
     let msg = this.buildCmd(params);
 
     if (ctxOptions?.isMirror) {
-      msg = this._ctx.mirrorUrl(msg);
+      msg = mirror(msg);
     }
 
     this.logger.info(msg);

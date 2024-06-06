@@ -28,6 +28,9 @@ describe('bin 测试', () => {
       {
         name: 'py',
       },
+      {
+        name: 'torch',
+      },
     ];
 
     if (isWin32) {
@@ -69,6 +72,9 @@ describe('bin 测试', () => {
       {
         name: 'py',
       },
+      {
+        name: 'torch',
+      },
     ];
 
     if (isWin32) {
@@ -93,9 +99,9 @@ describe('bin 测试', () => {
       .map((elem) => ({
         name: elem.name,
         type: elem.type,
-        args: elem.args
-      }))
+        args: elem.args,
+      }));
 
-    await shellFlow.bin.install(rs)
+    await shellFlow.bin.install(rs);
   });
 });

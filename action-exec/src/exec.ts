@@ -15,14 +15,7 @@ export async function exec(
   commandLine: string,
   args?: string[],
   options?: ExecOptions,
-): Promise<number> {
-  const commandArgs = argStringToArray(commandLine);
-  if (commandArgs.length === 0) {
-    throw new Error(`Parameter 'commandLine' cannot be null or empty.`);
-  }
-  // Path to tool to execute should be first arg
-  const toolPath = commandArgs[0];
-  args = commandArgs.slice(1).concat(args || []);
-  const runner: Runner = new Runner(toolPath, args, options);
+): Promise<string> {
+  const runner: Runner = new Runner(commandLine, args, options);
   return runner.exec();
 }

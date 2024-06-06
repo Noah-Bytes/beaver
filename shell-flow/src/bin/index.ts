@@ -1,8 +1,9 @@
+import { ActionDownload } from '@beaver/action-download';
+import { ShellConda } from '@beaver/shell-conda';
 import { IShellTypes } from '@beaver/shell-flow';
 import { IKey, IShellAppRequires } from '@beaver/types';
 import { WriteStream } from 'fs';
 import fs from 'fs-extra';
-import { DownloaderHelper } from 'node-downloader-helper';
 import path from 'path';
 import wget from 'wget-improved';
 import { Logger } from 'winston';
@@ -74,50 +75,13 @@ export class Bin implements IBinTypes {
     this.logStream?.write(data);
   }
 
-  download(url: string, dest: string): Promise<void> {
-    if (this.exists(dest)) {
-      this.logger.info('File already exists: ' + dest);
-      return Promise.resolve();
-    }
-
-    const { options } = this._ctx;
-    let targetURL = url;
-
-    if (options?.isMirror) {
-      targetURL = this._ctx.mirrorUrl(targetURL);
-      this.logger.info('Using mirror: ' + targetURL);
-    }
-
-    const dl = new DownloaderHelper(targetURL, this._dir, {
-      fileName: dest,
-      override: true,
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0',
-      },
-    });
-    return new Promise((resolve, reject) => {
-      dl.on('end', () => {
-        this.logger.info('Download Complete!');
-        resolve();
-      });
-
-      dl.on('error', (e) => {
-        this.logger.error(`event: Download Failed: ${e.message}`);
-      });
-
-      dl.on('progress.throttled', (stats) => {
-        this.logger.info(
-          `Download ${stats.progress} ${stats.downloaded}/${stats.total}`,
-        );
-      });
-
-      this.logger.info(`Downloading ${targetURL} to ${this._dir}/${dest}`);
-      dl.start().catch((e) => {
-        this.logger.error(`start: Download Failed: ${e.message}`);
-        reject(e);
-      });
-    });
+  async download(url: string, dest: string): Promise<void> {
+    await new ActionDownload({
+      home: this._ctx.homeDir,
+      url: url,
+      file: dest,
+      path: 'bin',
+    }).run();
   }
 
   wget(url: string, dest: string): Promise<void> {
@@ -215,9 +179,11 @@ export class Bin implements IBinTypes {
 
     if (existsConda) {
       try {
-        const result = await this.shell.run({
-          message: 'conda list',
+        const actionConda = new ShellConda({
+          home: this._ctx.homeDir,
+          run: 'conda list',
         });
+        const result = await actionConda.run();
 
         const lines = result.split(/[\r\n]+/);
         let start;
@@ -234,7 +200,7 @@ export class Bin implements IBinTypes {
           }
         }
       } catch (e) {
-        this.logger.error('conda list', e)
+        this.logger.error('conda list', e);
       }
     }
 
@@ -245,9 +211,11 @@ export class Bin implements IBinTypes {
 
     if (existsConda) {
       try {
-        const result = await this.shell.run({
-          message: 'pip list',
+        const actionConda = new ShellConda({
+          home: this._ctx.homeDir,
+          run: 'pip list',
         });
+        const result = await actionConda.run();
 
         const lines = result.split(/[\r\n]+/);
         let start;
@@ -264,7 +232,7 @@ export class Bin implements IBinTypes {
           }
         }
       } catch (e) {
-        this.logger.error('pip list', e)
+        this.logger.error('pip list', e);
       }
     }
 
@@ -273,9 +241,11 @@ export class Bin implements IBinTypes {
     if (['darwin', 'linux'].includes(this._ctx.systemInfo.platform)) {
       let brew: string[] = [];
       if (this.exists('homebrew')) {
-        const result = await this.shell.run({
-          message: 'brew list -1',
+        const actionConda = new ShellConda({
+          home: this._ctx.homeDir,
+          run: 'brew list -1',
         });
+        const result = await actionConda.run();
 
         const lines = result.split(/[\r\n]+/);
         let start, end;
@@ -325,12 +295,10 @@ export class Bin implements IBinTypes {
         if (this.hasModule(name)) {
           try {
             const isInstalled = await this.getModule(name)?.installed();
-            this.logger.info(
-              `检测 ${name} 安装状态: ${!!isInstalled}`,
-            );
+            this.logger.info(`检测 ${name} 安装状态: ${!!isInstalled}`);
             return !!isInstalled;
           } catch {
-            return false
+            return false;
           }
         }
         return false;
@@ -379,9 +347,11 @@ export class Bin implements IBinTypes {
         }
 
         if (cmd) {
-          await this.shell.run({
-            message: cmd,
+          const condaShell = new ShellConda({
+            home: this._ctx.homeDir,
+            run: cmd,
           });
+          await condaShell.run();
         }
       } else {
         for (let n of _name) {

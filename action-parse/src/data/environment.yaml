@@ -20,8 +20,8 @@ jobs:
       - name: download conda
         uses: action/download
         with:
-          url: "{{global.download[os.platform][os.arch]}}"
-          file: "{{global.installer[os.platform]}}"
+          url: '{{global.download[os.platform][os.arch]}}'
+          file: '{{global.installer[os.platform]}}'
           path: bin
       - name: conda install
         if: os.platform === 'win32'
@@ -30,7 +30,7 @@ jobs:
           path: bin
       - name: conda install for unix
         if: os.platform === 'linux' || os.platform === 'darwin'
-        run: "base installer.sh -b -p {{bin}} miniconda {{absPath('miniconda')}}"
+        run: "base installer.sh -b -p {{bin}} miniconda {{absPath('/bin/miniconda')}}"
         with:
           path: bin
       - name: conda config
@@ -59,10 +59,78 @@ jobs:
         with:
           type: rm
           path: bin
-          file: "{{global.installer[os.platform]}}"
+          file: '{{global.installer[os.platform]}}'
 
   git:
+    env:
+      GIT_CONFIG_GLOBAL: "{{absPath('gitconfig')}}"
+    steps:
+      - name: install git
+        uses: action/shell-conda
+        with:
+          run: conda install -y -c conda-forge git git-lfs
+      - name: set git config
+        uses: action/fs
+        if: os.platform === 'win32'
+        with:
+          type: outputFile
+          file: gitconfig
+          content: "[core]\nlongpaths = true\n[http]\npostBuffer = 524288000\n"
   zip:
+    steps:
+      - name: install zip for win
+        uses: action/shell-conda
+        if: os.platform === 'win32'
+        with:
+          run: conda install -y -c conda-forge 7zip
+      - name: install zip for unix
+        uses: action/shell-conda
+        if: os.platform === 'linux' || os.platform === 'darwin'
+        with:
+          run: conda install -y -c conda-forge p7zip
   nodejs:
+    global:
+      download:
+        darwin:
+          x64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-darwin-x64.tar.gz
+          arm64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-darwin-arm64.tar.gz
+        win32:
+          x64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-win-x64.zip
+        linux:
+          x64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-linux-x64.tar.gz
+          arm64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-linux-arm64.tar.gz
+      installer:
+        darwin: node-v18.16.0.tar.gz
+        linux: node-v18.16.0.tar.gz
+        win32: node-v18.16.0.zip
+    steps:
+      - name: download nodejs
+        uses: action/download
+        with:
+          url: '{{global.download[os.platform][os.arch]}}'
+          file: '{{global.installer[os.platform]}}'
+          path: bin
+      - name: nodejs decompress
+        uses: action/fs
+        with:
+          type: decompress
+          file: '{{global.installer[os.platform]}}'
+          output: 'node'
+          strip: 1
+          path: bin
+
   ffmpeg:
+    steps:
+      - name: install ffmpeg
+        uses: action/shell-conda
+        run: conda install -y -c conda-forge ffmpeg
   py:
+    steps:
+      - name: git pull py
+        uses: action/shell-conda
+        path: bin
+        run: git clone https://github.com/pinokiocomputer/python py
+      - name: pip install
+        uses: action/shell-conda
+        path: bin/py
+        run: pip install -r requirements.txt -i https://pypi.mirrors.ustc.edu.cn/simple/

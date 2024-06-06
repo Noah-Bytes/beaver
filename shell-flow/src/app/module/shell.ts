@@ -1,4 +1,4 @@
-import { uuid } from '@beaver/arteffix-utils';
+import { ShellConda } from '@beaver/shell-conda';
 import { IAppTypes, IShellTypes, ShellFlow } from '@beaver/shell-flow';
 import { IShellAppRunParams } from '@beaver/types';
 
@@ -34,42 +34,27 @@ export class Shell {
    */
   async execute(params: IShellAppRunParams, ctx: IAppTypes) {
     params.message = this.parseMessage(params);
-
-    const sh = this._ctx.shell.createShell(
-      `app/shell/running/${uuid()}`,
-      ctx.name,
-    );
-    await sh.execute(params, {
-      cwd: params.cwd,
-      path: params.path,
-      env: params.env,
+    console.log(params);
+    const shellConda = new ShellConda({
+      home: this._ctx.homeDir,
+      path: params.path || params.cwd,
+      envs: params.env,
+      venv: params.venv,
+      run: params.message,
     });
-
-    const that = this;
-
-    sh.getPty().onData((data) => {
-      if (params.on) {
-        params.on.forEach((elem) => {
-          that._ctx.eventBus.emit(elem.event, data);
-        });
-      }
-    });
+    await shellConda.run();
   }
 
   async run(params: IShellAppRunParams) {
     params.message = this.parseMessage(params);
-
-    const result = await this.shell.run(params, {
-      cwd: params.cwd,
-      path: params.path,
-      env: params.env,
+    const shellConda = new ShellConda({
+      home: this._ctx.homeDir,
+      path: params.path || params.cwd,
+      envs: params.env,
+      venv: params.venv,
+      run: params.message,
     });
-
-    if (params.on) {
-      params.on.forEach((elem) => {
-        this._ctx.eventBus.emit(elem.event, result);
-      });
-    }
+    await shellConda.run();
   }
 
   async stop() {

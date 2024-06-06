@@ -1,4 +1,5 @@
 import { isWin32 } from '@beaver/arteffix-utils';
+import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
 import { BinModule } from './bin-module';
 
@@ -23,9 +24,10 @@ export class Registry extends BinModule {
     // 这项设置与 Windows 文件系统是否支持超过 260 个字符的长路径有关。
     const cmd =
       'reg query HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled';
-    let result = await this.shell.run({
-      message: cmd,
-    });
+    const result = await new ShellConda({
+      home: this._ctx.homeDir,
+      run: cmd,
+    }).run();
     let matches = result.replace(cmd, '').match(/(LongPathsEnabled.+)/m);
 
     if (!(matches && matches.length > 0)) {
@@ -35,29 +37,24 @@ export class Registry extends BinModule {
     let chunks = matches[1].split(/\s+|__/);
 
     if (chunks.length >= 3) {
-      this.isInstalled = Number(chunks[2]) === 1
+      this.isInstalled = Number(chunks[2]) === 1;
       return this.isInstalled;
     }
 
     return false;
   }
   override async install() {
-    // 1. Set registry to allow long paths
-    await this.shell.run(
-      {
-        message:
-          'reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f',
-      }
-    );
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: 'reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f',
+    }).run();
   }
 
   override async uninstall() {
-    await this.shell.run(
-      {
-        message:
-          'reg add "HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 0 /f',
-      }
-    );
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: 'reg add "HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 0 /f',
+    }).run();
     this.isInstalled = false;
   }
 }

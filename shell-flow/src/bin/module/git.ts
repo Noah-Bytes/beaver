@@ -3,6 +3,7 @@ import { ShellFlow } from '@beaver/shell-flow';
 import fs from 'fs-extra';
 import path from 'path';
 import { BinModule } from './bin-module';
+import {ShellConda} from "@beaver/shell-conda";
 
 export class Git extends BinModule {
   static GIT_CONFIG = 'gitconfig';
@@ -24,9 +25,10 @@ export class Git extends BinModule {
   }
 
   override async install(): Promise<void> {
-    await this.shell.run({
-      message: 'conda install -y -c conda-forge git git-lfs',
-    });
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: 'conda install -y -c conda-forge git git-lfs',
+    }).run();
 
     if (isWin32) {
       const { app } = this._ctx;
@@ -57,10 +59,10 @@ export class Git extends BinModule {
   }
 
   override async uninstall(): Promise<void> {
-    const { bin } = this._ctx;
-    await this.shell.run({
-      message: 'conda remove -y git git-lfs',
-    });
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: 'conda remove -y git git-lfs',
+    }).run();
     this.isInstalled = false;
   }
 }

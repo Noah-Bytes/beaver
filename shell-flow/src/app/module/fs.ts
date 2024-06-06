@@ -1,3 +1,4 @@
+import { mirror } from '@beaver/action-core';
 import { createLogger, ShellFlow } from '@beaver/shell-flow';
 import { IShellAppRunParams } from '@beaver/types';
 import { DownloaderHelper } from 'node-downloader-helper';
@@ -74,7 +75,7 @@ export class Fs {
     let targetURL = url;
 
     if (options?.isMirror) {
-      targetURL = this._ctx.mirrorUrl(targetURL);
+      targetURL = mirror(targetURL);
       this.logger.info('Using mirror: ' + targetURL);
     }
 

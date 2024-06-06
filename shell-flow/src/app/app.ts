@@ -288,18 +288,7 @@ export class App implements IAppTypes {
       const sh = (await this.load(start)) as IShellApp;
 
       if (sh.run) {
-        for (let runParam of sh.run) {
-          runParam.params.message = this.parseMessage(runParam.params);
-          if (runParam.params.path) {
-            runParam.params.path = this.absPath(runParam.params.path);
-          }
-
-          await this.shell.execute(runParam.params, {
-            cwd: this.dir,
-            path: runParam.params.path,
-            env: runParam.params.env,
-          });
-        }
+        await this._runs(sh.run);
       }
 
       await this.updateMeta({

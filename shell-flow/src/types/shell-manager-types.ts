@@ -31,5 +31,10 @@ export interface IShellManagerTypes {
    */
   removeAllShell(): void;
 
+  /**
+   * @deprecated
+   * @param name
+   * @param params
+   */
   run(name: string, params: IShellRunParams): Promise<string>;
 }

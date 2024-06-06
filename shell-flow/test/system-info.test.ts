@@ -1,4 +1,4 @@
-import { SystemInfo } from '../src/system-info';
+import { SystemInfo } from '../src/';
 
 describe('system-info 系统信息', () => {
   let systemInfo: SystemInfo = new SystemInfo();

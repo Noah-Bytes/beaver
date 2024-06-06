@@ -97,8 +97,8 @@ export async function findInPath(tool: string): Promise<string[]> {
   // across platforms.
   const directories: string[] = [];
 
-  if (process.env.PATH) {
-    for (const p of process.env.PATH.split(path.delimiter)) {
+  if (process.env['PATH']) {
+    for (const p of process.env['PATH'].split(path.delimiter)) {
       if (p) {
         directories.push(p);
       }

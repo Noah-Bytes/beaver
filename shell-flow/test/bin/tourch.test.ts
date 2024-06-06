@@ -1,24 +1,34 @@
-import { ShellFlow } from '../../src';
-import { Torch } from '../../src/bin/module/torch';
+import { spawn } from 'child_process';
+import { getShellFlow } from './get-shell-flow';
 
 jest.setTimeout(1000000);
 
 describe('torch 测试', () => {
-  const shellFlow = new ShellFlow('Beaver', {
-    homeDir: '/Users/taibai/workspace/beaver/beaver',
-    isMirror: true,
+  const shellFlow = getShellFlow();
+
+  beforeAll(async () => {
+    await shellFlow.init();
   });
-  const torch = new Torch(shellFlow);
 
   it('torch 安装', async () => {
-    await torch.install();
+    const torch = shellFlow.bin.getModule('torch');
+    if (torch) {
+      await torch.install();
+    }
   });
 
   it('torch 是否安装', async () => {
-    console.log(torch.installed());
+    const torch = shellFlow.bin.getModule('torch');
+    if (torch) {
+      const result = await torch.installed();
+      console.log(result);
+    }
   });
 
   it('torch 卸载', async () => {
-    await torch.uninstall();
+    const torch = shellFlow.bin.getModule('torch');
+    if (torch) {
+      await torch.uninstall();
+    }
   });
 });

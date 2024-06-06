@@ -1,3 +1,4 @@
+import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
 import { BinModule } from './bin-module';
 
@@ -48,11 +49,12 @@ export class Torch extends BinModule {
         }
         break;
     }
-    await this.shell.run({
-      message: options?.isMirror
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: options?.isMirror
         ? `${cmd} -i https://pypi.mirrors.ustc.edu.cn/simple/`
         : cmd,
-    });
+    }).run();
   }
 
   override async installed(): Promise<boolean> {
@@ -65,8 +67,9 @@ export class Torch extends BinModule {
   }
 
   override async uninstall(): Promise<void> {
-    await this.shell.run({
-      message: 'pip3 uninstall torch torchvision torchaudio',
-    });
+    await new ShellConda({
+      home: this._ctx.homeDir,
+      run: 'pip3 uninstall torch torchvision torchaudio',
+    }).run();
   }
 }

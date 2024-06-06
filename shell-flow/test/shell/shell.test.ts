@@ -1,4 +1,4 @@
-import { ShellFlow } from '../../src/shell-flow';
+import { ShellFlow } from '../../src/';
 import { Shell } from '../../src/shell/shell';
 
 describe('终端测试', () => {
@@ -14,7 +14,7 @@ describe('终端测试', () => {
   jest.setTimeout(20000);
 
   beforeAll(async () => {
-    await shellFlow.init()
+    await shellFlow.init();
     shell.init();
     shell1.init();
     sync.init();
@@ -25,10 +25,10 @@ describe('终端测试', () => {
       isRun: false,
     });
     shell.send(' -lh', {
-      isRun: true
+      isRun: true,
     });
     shell.send('pwd', {
-      isRun: true
+      isRun: true,
     });
   });
 

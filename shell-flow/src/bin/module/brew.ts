@@ -1,6 +1,7 @@
 import { ShellFlow } from '@beaver/shell-flow';
 import decompress from 'decompress';
 import { BinModule } from './bin-module';
+import {ShellConda} from "@beaver/shell-conda";
 
 // @ts-ignore
 const _decompress = decompress as unknown as typeof decompress.default;
@@ -21,14 +22,15 @@ export class Brew extends BinModule {
 
     try {
       await _decompress(bin.absPath(fileName), bin.dir, { strip: 1 });
+      await new ShellConda({
+        home: this._ctx.homeDir,
+        run: `xcode-select --install`,
+      }).run();
 
-      await this.shell.run({
-        message: 'xcode-select --install',
-      });
-
-      await this.shell.run({
-        message: 'brew install gettext --force-bottle',
-      });
+      await new ShellConda({
+        home: this._ctx.homeDir,
+        run: `brew install gettext --force-bottle`,
+      }).run();
 
       await bin.rm(fileName);
     } catch (e) {

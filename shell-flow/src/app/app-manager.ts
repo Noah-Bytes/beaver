@@ -1,3 +1,4 @@
+import { ShellConda } from '@beaver/shell-conda';
 import { IShellTypes, ShellFlow } from '@beaver/shell-flow';
 import fs from 'fs';
 import git from 'isomorphic-git';
@@ -146,14 +147,13 @@ export class AppManager {
       cmd = `git clone ${remoteUrl} ${name}`;
     }
 
-    await this.shell.run(
-      {
-        message: cmd,
-      },
-      {
-        path: this.dir,
-      },
-    );
+    const shellConda = new ShellConda({
+      home: this._ctx.homeDir,
+      path: 'apps',
+      run: cmd,
+    });
+
+    await shellConda.run();
 
     return await this.createApp(name, remoteUrl);
   }
