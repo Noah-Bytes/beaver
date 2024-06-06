@@ -124,7 +124,6 @@
     "mime": "^4.0.3",
     "next": "14.2.3",
     "node-downloader-helper": "^2.1.9",
-    "node-pty": "^1.0.0",
     "osx-temperature-sensor": "^1.0.8",
     "pdrive": "^0.0.23",
     "react": "18.3.1",
