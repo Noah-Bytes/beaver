@@ -387,4 +387,8 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
   override kill() {
     this.runner && this.runner.kill();
   }
+
+  write(key: string) {
+    this.runner?.write(key);
+  }
 }

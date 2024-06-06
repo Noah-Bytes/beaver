@@ -1,6 +1,6 @@
 {
   "name": "@beaver/shell-flow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "peerDependencies": {
     "core-js": "^3.37.1",
     "decompress": "^4.2.1",
@@ -9,7 +9,6 @@
     "glob": "^10.3.15",
     "isomorphic-git": "^1.25.10",
     "node-downloader-helper": "^2.1.9",
-    "node-pty": "^1.0.0",
     "pdrive": "^0.0.23",
     "rimraf": "^5.0.7",
     "shell-env": "^4.0.1",

@@ -500,6 +500,12 @@ export class Runner extends events.EventEmitter {
       this.cp.kill();
     }
   }
+
+  write(key: string) {
+    if (this.cp && !this.cp.killed) {
+      this.cp.stdin.write(key);
+    }
+  }
 }
 
 class ExecState extends events.EventEmitter {
