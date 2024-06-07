@@ -56,7 +56,6 @@ export class Fs {
         params.drive[driveKey] = linkPath;
       }
 
-      console.log('call drive.create');
       await drive.create({
         uri: params.git,
         drive: params.drive,

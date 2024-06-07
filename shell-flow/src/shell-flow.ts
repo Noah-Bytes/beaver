@@ -100,7 +100,7 @@ export class ShellFlow implements IShellFlowTypes {
   mirrorUrl(url: string): string {
     for (let mirrorKey in this.mirror) {
       if (url.includes(mirrorKey)) {
-        return url.replace(new RegExp(mirrorKey, 'gm'), this.mirror[mirrorKey]);
+        url.replace(new RegExp(mirrorKey, 'gm'), this.mirror[mirrorKey]);
       }
     }
 

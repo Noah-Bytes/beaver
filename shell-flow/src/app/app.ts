@@ -5,6 +5,7 @@ import {
   IAppMeta,
   IAppMetaUpdate,
   IAppTypes,
+  IStep,
   ShellFlow,
   loader,
   requireImage,
@@ -26,6 +27,7 @@ export class App extends Directory<any> implements IAppTypes {
     INSTALL_ERROR: 7,
     START_ERROR: 8,
   };
+  steps: IStep[] = [];
 
   readonly name: string;
   readonly git: string;
@@ -44,6 +46,12 @@ export class App extends Directory<any> implements IAppTypes {
 
   readLog(name: string): Promise<string> {
     return fs.readFile(this.absPath(name + '.log'), 'utf8');
+  }
+
+  setSteps(runs: IShellAppRun[]) {
+    this.steps = runs.map((run) => ({
+      run,
+    }));
   }
 
   async init() {
@@ -85,6 +93,7 @@ export class App extends Directory<any> implements IAppTypes {
       return {
         ...m,
         dir: this.dir,
+        steps: this.steps,
       };
     }
 
@@ -134,24 +143,40 @@ export class App extends Directory<any> implements IAppTypes {
     }
   }
 
-  private async _runs(runParams: IShellAppRun[]) {
-    for (let runParam of runParams) {
+  private async _runs() {
+    for (let step of this.steps) {
+      if (step.status) {
+        continue;
+      }
+
+      const runParam = step.run;
       const method = this._method(runParam.method);
       if (method) {
         if (runParam.params.path) {
           runParam.params.path = this.absPath(runParam.params.path);
         }
 
-        // TODO 这里目前只涉及 shell.execute shell.run shell模块的两种方法，其他模块，暂不涉及
-        // 因为涉及到kill操作
-        this.runner = method({
-          cwd: this.dir,
-          git: this.git,
-          ...runParam.params,
-        });
-        await this.runner?.run();
+        try {
+          // TODO 这里目前只涉及 shell.execute shell.run shell模块的两种方法，其他模块，暂不涉及
+          // 因为涉及到kill操作
+          this.runner = await method({
+            cwd: this.dir,
+            git: this.git,
+            ...runParam.params,
+          });
+          if (this.runner?.run) {
+            await this.runner?.run();
+          }
+          step.status = true;
+        } catch (e: any) {
+          step.status = false;
+          step.message = e.message;
+        }
       } else {
-        throw new Error(`method ${runParam.method} not found`);
+        const msg = `method ${runParam.method} not found`;
+        step.status = false;
+        step.message = msg;
+        throw new Error(msg);
       }
     }
   }
@@ -177,7 +202,8 @@ export class App extends Directory<any> implements IAppTypes {
         }
 
         if (sh.run) {
-          await this._runs(sh.run);
+          this.setSteps(sh.run);
+          await this._runs();
         }
 
         await this.updateMeta({
@@ -210,7 +236,8 @@ export class App extends Directory<any> implements IAppTypes {
         const sh = (await this.load(unInstall)) as IShellApp;
         if (sh.run) {
           await this.stop();
-          await this._runs(sh.run);
+          this.setSteps(sh.run);
+          await this._runs();
         }
 
         await this.updateMeta({
@@ -219,7 +246,8 @@ export class App extends Directory<any> implements IAppTypes {
       } else {
       }
     } catch (e) {
-      throw new Error(`Failed to install ${this.name}`);
+      console.log(e);
+      throw new Error(`Failed to unInstall ${this.name}`);
     }
   }
 
@@ -232,7 +260,8 @@ export class App extends Directory<any> implements IAppTypes {
       const sh = (await this.load(start)) as IShellApp;
 
       if (sh.run) {
-        await this._runs(sh.run);
+        this.setSteps(sh.run);
+        await this._runs();
       }
 
       await this.updateMeta({
@@ -261,12 +290,17 @@ export class App extends Directory<any> implements IAppTypes {
       const sh = (await this.load(update)) as IShellApp;
 
       if (sh.run) {
-        await this._runs(sh.run);
+        this.setSteps(sh.run);
+        await this._runs();
       }
     } else {
       // 脚本不存在
       throw new Error('the start script does not exist');
     }
+  }
+
+  async retry(): Promise<void> {
+    await this._runs();
   }
 
   logs(): Promise<ReadCommitResult[]> {
