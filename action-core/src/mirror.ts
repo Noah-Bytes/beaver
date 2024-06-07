@@ -24,6 +24,8 @@ const MIRROR_CONFIG: Record<string, string> = {
     'https://pypi.tuna.tsinghua.edu.cn/simple',
   'https://download.pytorch.org/whl/cpu':
     'https://pypi.tuna.tsinghua.edu.cn/simple',
+  'https://github.com/cocktailpeanut/comfymp4':
+    'https://gitee.com/arteffix/comfymp4',
 };
 
 export function mirror(str: string) {

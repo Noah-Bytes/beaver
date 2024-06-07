@@ -11,12 +11,11 @@ import {
 } from '@beaver/types';
 import * as path from 'path';
 import * as process from 'process';
-// import { shellEnvSync } from 'shell-env';
+import { shellEnvSync } from 'shell-env';
 
 export function shellPathSync() {
-  // const { PATH } = shellEnvSync();
-  // return PATH;
-  return {};
+  const { PATH } = shellEnvSync();
+  return PATH;
 }
 
 /**
@@ -384,8 +383,10 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
     return await this.runner.exec();
   }
 
-  override kill() {
-    this.runner && this.runner.kill();
+  override async kill() {
+    if (this.runner) {
+      await this.runner.kill();
+    }
   }
 
   write(key: string) {

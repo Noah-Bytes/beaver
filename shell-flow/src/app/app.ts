@@ -311,7 +311,7 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   async stop(): Promise<void> {
-    this.runner?.kill();
+    await this.runner?.kill();
     await this.updateMeta({
       status: App.STATUS.STOPPED,
     });

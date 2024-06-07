@@ -24,7 +24,9 @@ export class ActionUse<T extends IStepWith> implements IActionUse<T> {
     return Promise.resolve('0');
   }
 
-  kill() {}
+  kill(): Promise<void> {
+    return Promise.resolve(undefined);
+  }
 }
 
 export class UseManage {

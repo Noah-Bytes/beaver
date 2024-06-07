@@ -13,4 +13,5 @@ export interface IActionUse<T> {
   silent?: boolean;
 
   run: () => Promise<string>;
+  kill: () => Promise<void>;
 }

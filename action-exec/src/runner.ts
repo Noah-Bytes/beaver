@@ -5,6 +5,8 @@ import { ChildProcess } from 'child_process';
 import * as events from 'events';
 import * as os from 'os';
 import * as stream from 'stream';
+// @ts-ignore
+import kill from 'tree-kill-promise';
 
 const IS_WINDOWS = process.platform === 'win32';
 
@@ -494,7 +496,7 @@ export class Runner extends events.EventEmitter {
     });
   }
 
-  kill() {
+  async kill() {
     /**
      * child.kill('SIGTERM') 和 child.kill() 都是用来终止子进程的，区别在于是否显式指定信号。
      * child.kill('SIGTERM') 发送一个明确的终止信号，适用于 Unix 系统。
@@ -502,7 +504,7 @@ export class Runner extends events.EventEmitter {
      * 在 Windows 平台上，使用 SIGKILL 信号更为可靠，虽然这会强制终止进程而不进行任何清理。
      */
     if (this.cp && !this.cp.killed) {
-      this.cp.kill();
+      await kill(this.cp.pid, 'SIGKILL');
     }
   }
 
