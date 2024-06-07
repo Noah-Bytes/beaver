@@ -12,22 +12,34 @@ export class Shell {
    * @param params
    */
   execute(params: IShellAppRunParams) {
-    return new ShellConda({
-      home: this._ctx.homeDir,
-      path: params.path || params.cwd,
-      envs: params.env,
-      venv: params.venv,
-      run: params.message,
-    });
+    return new ShellConda(
+      {
+        home: this._ctx.homeDir,
+        path: params.path || params.cwd,
+        envs: params.env,
+        venv: params.venv,
+        run: params.message,
+      },
+      {
+        errStream: this._ctx.errStream,
+        outStream: this._ctx.outStream,
+      },
+    );
   }
 
   run(params: IShellAppRunParams) {
-    return new ShellConda({
-      home: this._ctx.homeDir,
-      path: params.path || params.cwd,
-      envs: params.env,
-      venv: params.venv,
-      run: params.message,
-    });
+    return new ShellConda(
+      {
+        home: this._ctx.homeDir,
+        path: params.path || params.cwd,
+        envs: params.env,
+        venv: params.venv,
+        run: params.message,
+      },
+      {
+        errStream: this._ctx.errStream,
+        outStream: this._ctx.outStream,
+      },
+    );
   }
 }

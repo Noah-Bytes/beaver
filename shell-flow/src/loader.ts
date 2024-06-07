@@ -3,9 +3,6 @@ import fs from 'fs-extra';
 import path from 'path';
 import vm from 'vm';
 import yaml from 'yaml';
-import { createLogger } from './logger';
-
-const logger = createLogger(`loader`);
 
 export async function loader(filePath: string) {
   const extension = path.extname(filePath);
