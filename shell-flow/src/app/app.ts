@@ -61,7 +61,7 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   setSteps(runs: IShellAppRun[]) {
-    this.steps = runs.map((run) => {
+    this.meta!.steps = runs.map((run) => {
       run.params.message = this.parseMessage(run.params);
       delete run.params.messageFn;
       return {
@@ -90,6 +90,7 @@ export class App extends Directory<any> implements IAppTypes {
         name: this.name,
         git: this.git,
         status: App.STATUS.INIT,
+        steps: [],
       };
 
       await this.saveMetadata();
@@ -110,7 +111,6 @@ export class App extends Directory<any> implements IAppTypes {
       return {
         ...m,
         dir: this.dir,
-        steps: this.steps,
       };
     }
 
@@ -178,7 +178,7 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   private async _runs() {
-    for (let step of this.steps) {
+    for (let step of this.meta!.steps) {
       if (step.status !== App.STEP_STATUS.INIT) {
         continue;
       }
@@ -334,9 +334,9 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   async retry(): Promise<void> {
-    for (let i = 0; i < this.steps.length; i++) {
-      if (this.steps[i].status === App.STEP_STATUS.ERROR) {
-        this.steps[i].status = App.STEP_STATUS.INIT;
+    for (let i = 0; i < this.meta!.steps.length; i++) {
+      if (this.meta!.steps[i].status === App.STEP_STATUS.ERROR) {
+        this.meta!.steps[i].status = App.STEP_STATUS.INIT;
         break;
       }
     }
@@ -344,9 +344,9 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   async jump(): Promise<void> {
-    for (let i = 0; i < this.steps.length; i++) {
-      if (this.steps[i].status === App.STEP_STATUS.ERROR) {
-        this.steps[i].status = App.STEP_STATUS.SKIP;
+    for (let i = 0; i < this.meta!.steps.length; i++) {
+      if (this.meta!.steps[i].status === App.STEP_STATUS.ERROR) {
+        this.meta!.steps[i].status = App.STEP_STATUS.SKIP;
         break;
       }
     }

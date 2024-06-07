@@ -7,7 +7,7 @@ export interface IAppMeta extends IShellAppMeta {
   git: string;
   dir: string;
   lastModified?: number;
-  steps?: IStep[];
+  steps: IStep[];
 }
 
 export interface IAppMetaUpdate {
