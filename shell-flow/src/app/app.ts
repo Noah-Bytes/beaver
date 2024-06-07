@@ -10,7 +10,12 @@ import {
   loader,
   requireImage,
 } from '@beaver/shell-flow';
-import { IShellApp, IShellAppMeta, IShellAppRun } from '@beaver/types';
+import {
+  IShellApp,
+  IShellAppMeta,
+  IShellAppRun,
+  IShellAppRunParams,
+} from '@beaver/types';
 import fs from 'fs-extra';
 import git, { ReadCommitResult } from 'isomorphic-git';
 import { Directory } from '../directory';
@@ -56,10 +61,14 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   setSteps(runs: IShellAppRun[]) {
-    this.steps = runs.map((run) => ({
-      status: App.STEP_STATUS.INIT,
-      run,
-    }));
+    this.steps = runs.map((run) => {
+      run.params.message = this.parseMessage(run.params);
+      delete run.params.messageFn;
+      return {
+        status: App.STEP_STATUS.INIT,
+        run,
+      };
+    });
   }
 
   async init() {
@@ -106,6 +115,23 @@ export class App extends Directory<any> implements IAppTypes {
     }
 
     throw new Error('meta not');
+  }
+
+  parseMessage(params: IShellAppRunParams): string | string[] {
+    let message: string | string[] = '';
+
+    if (params.messageFn) {
+      const { systemInfo, options } = this._ctx;
+      message = params.messageFn({
+        platform: systemInfo.platform,
+        gpu: systemInfo.GPU,
+        mirror: !!options?.mirror,
+      });
+    } else if (params.message) {
+      message = params.message;
+    }
+
+    return message;
   }
 
   async load(filename: string): Promise<any> {

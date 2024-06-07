@@ -1,4 +1,4 @@
-import { IShellAppMeta, IShellAppRun } from '@beaver/types';
+import {IShellAppMeta, IShellAppRun, IShellAppRunParams} from '@beaver/types';
 import { ReadCommitResult } from 'isomorphic-git';
 
 export interface IAppMeta extends IShellAppMeta {
@@ -28,6 +28,7 @@ export interface IAppTypes {
   setSteps: (runs: IShellAppRun[]) => void;
   init: () => Promise<void>;
   getMeta: () => Promise<IAppMeta>;
+  parseMessage: (params: IShellAppRunParams) => string | string[]
   install: () => Promise<void>;
   load: (filename: string) => Promise<any>;
   readLog: (name: string) => Promise<string>;
