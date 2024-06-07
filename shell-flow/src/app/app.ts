@@ -27,6 +27,13 @@ export class App extends Directory<any> implements IAppTypes {
     INSTALL_ERROR: 7,
     START_ERROR: 8,
   };
+  static STEP_STATUS = {
+    INIT: 0,
+    SUCCESS: 1,
+    ERROR: 2,
+    SKIP: 3,
+  };
+
   steps: IStep[] = [];
 
   readonly name: string;
@@ -50,6 +57,7 @@ export class App extends Directory<any> implements IAppTypes {
 
   setSteps(runs: IShellAppRun[]) {
     this.steps = runs.map((run) => ({
+      status: App.STEP_STATUS.INIT,
       run,
     }));
   }
@@ -145,7 +153,7 @@ export class App extends Directory<any> implements IAppTypes {
 
   private async _runs() {
     for (let step of this.steps) {
-      if (step.status) {
+      if (step.status !== App.STEP_STATUS.INIT) {
         continue;
       }
 
@@ -167,14 +175,14 @@ export class App extends Directory<any> implements IAppTypes {
           if (this.runner?.run) {
             await this.runner?.run();
           }
-          step.status = true;
+          step.status = App.STEP_STATUS.SUCCESS;
         } catch (e: any) {
-          step.status = false;
+          step.status = App.STEP_STATUS.ERROR;
           step.message = e.message;
         }
       } else {
         const msg = `method ${runParam.method} not found`;
-        step.status = false;
+        step.status = App.STEP_STATUS.ERROR;
         step.message = msg;
         throw new Error(msg);
       }
@@ -300,7 +308,23 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   async retry(): Promise<void> {
+    for (let i = 0; i < this.steps.length; i++) {
+      if (this.steps[i].status === App.STEP_STATUS.ERROR) {
+        this.steps[i].status = App.STEP_STATUS.INIT;
+        break;
+      }
+    }
     await this._runs();
+  }
+
+  async jump(): Promise<void> {
+    for (let i = 0; i < this.steps.length; i++) {
+      if (this.steps[i].status === App.STEP_STATUS.ERROR) {
+        this.steps[i].status = App.STEP_STATUS.SKIP;
+        break;
+      }
+    }
+    return Promise.resolve(undefined);
   }
 
   logs(): Promise<ReadCommitResult[]> {

@@ -15,7 +15,7 @@ export interface IAppMetaUpdate {
 }
 
 export interface IStep {
-  status?: boolean;
+  status: number;
   run: IShellAppRun;
   message?: string;
 }
@@ -41,4 +41,5 @@ export interface IAppTypes {
   stop: () => Promise<void>;
   update: () => Promise<void>;
   retry: () => Promise<void>;
+  jump: () => Promise<void>;
 }
