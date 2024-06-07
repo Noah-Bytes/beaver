@@ -1,7 +1,7 @@
 import { exists } from '@beaver/action-io';
 import { ExecOptions } from '@beaver/types';
 import * as child from 'child_process';
-import { ChildProcessWithoutNullStreams } from 'child_process';
+import { ChildProcess } from 'child_process';
 import * as events from 'events';
 import * as os from 'os';
 import * as stream from 'stream';
@@ -12,7 +12,7 @@ export class Runner extends events.EventEmitter {
   private readonly toolPath: string;
   private readonly args: string[];
   private readonly options: ExecOptions;
-  private cp: ChildProcessWithoutNullStreams | undefined;
+  private cp: ChildProcess | undefined;
   constructor(toolPath: string, args?: string[], options?: ExecOptions) {
     super();
 
@@ -370,6 +370,11 @@ export class Runner extends events.EventEmitter {
       }
 
       const fileName = this._getSpawnFileName();
+      /**
+       * /D：禁用注册表中的 AutoRun 命令。
+       * /S：修改命令字符串的处理方式。
+       * /C："echo Hello, World!" 是要执行的命令。
+       */
       this.cp = IS_WINDOWS
         ? child.spawn(
             'cmd.exe',
@@ -470,7 +475,7 @@ export class Runner extends events.EventEmitter {
           this.emit('errline', errbuffer);
         }
 
-        this.cp.removeAllListeners();
+        this.cp?.removeAllListeners();
 
         if (error) {
           reject(error);
@@ -503,7 +508,7 @@ export class Runner extends events.EventEmitter {
 
   write(key: string) {
     if (this.cp && !this.cp.killed) {
-      this.cp.stdin.write(key);
+      this.cp.stdin?.write(key);
     }
   }
 }

@@ -1,11 +1,9 @@
-import * as modules from './bin/module';
-
 export class Module<T> {
   private moduleList: T[] = [];
   private moduleMap: Map<string, T> = new Map();
 
   constructor() {}
-  async initModule(): Promise<void> {
+  async initModule(modules: any): Promise<void> {
     for (let modulesKey in modules) {
       // @ts-ignore
       const mod = modules[modulesKey];

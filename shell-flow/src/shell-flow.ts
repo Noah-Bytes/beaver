@@ -63,13 +63,13 @@ export class ShellFlow implements IShellFlowTypes {
         }
       }
     } catch (e) {
-      this.errStream.write('cache dir initialization failed');
+      this.errStream.write('cache dir initialization failed \n');
     }
   }
 
   async init(): Promise<void> {
     if (this._init) {
-      throw new Error('shell-flow already initialized');
+      throw new Error('shell-flow already initialized \n');
     }
 
     await this.systemInfo.init();
@@ -77,16 +77,16 @@ export class ShellFlow implements IShellFlowTypes {
     await this.initCacheDir();
 
     await this.bin.init();
-    this.outStream.write('bin initialization success');
+    this.outStream.write('bin initialization success \n');
 
     await this.app.init();
-    this.outStream.write('app initialization success');
+    this.outStream.write('app initialization success \n');
 
     this._init = true;
   }
 
   destroy(): Promise<void> {
-    this.outStream.write('shellFlow destroy!');
+    this.outStream.write('shellFlow destroy! \n');
     return Promise.resolve(undefined);
   }
 

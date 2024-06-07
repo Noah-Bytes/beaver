@@ -1,6 +1,6 @@
-import { Runner } from '@beaver/action-exec';
 import { safeAccessSync } from '@beaver/arteffix-utils';
 import { MetaFile } from '@beaver/kernel';
+import { ShellConda } from '@beaver/shell-conda';
 import {
   IAppMeta,
   IAppMetaUpdate,
@@ -29,7 +29,7 @@ export class App extends Directory<any> implements IAppTypes {
 
   readonly name: string;
   readonly git: string;
-  private runner: Runner | undefined;
+  private runner: ShellConda | undefined;
 
   private meta: IAppMeta | undefined;
 
@@ -149,7 +149,7 @@ export class App extends Directory<any> implements IAppTypes {
           git: this.git,
           ...runParam.params,
         });
-        await this.runner?.exec();
+        await this.runner?.run();
       } else {
         throw new Error(`method ${runParam.method} not found`);
       }

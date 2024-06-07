@@ -4,7 +4,6 @@ import { IWirtable } from '@beaver/types';
 export interface IShellFlowOptionsTypes extends IWirtable {
   homeDir?: string;
   mirror?: Record<string, string>;
-  requirement?: (data: string) => void;
 }
 
 export interface IShellFlowTypes {

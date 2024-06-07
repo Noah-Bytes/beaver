@@ -1,4 +1,4 @@
-import { IWirtable } from '../action/wirtable';
+import { IWirtable } from '../action/';
 
 export interface ExecOptions extends IWirtable {
   /** optional working directory.  defaults to current */

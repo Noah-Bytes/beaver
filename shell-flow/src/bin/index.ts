@@ -6,6 +6,7 @@ import fs from 'fs-extra';
 import { Directory } from '../directory';
 import { ShellFlow } from '../shell-flow';
 import { IBinModuleTypes, IBinTypes } from '../types/bin-types';
+import * as modules from './module';
 
 export class Bin extends Directory<IBinModuleTypes> implements IBinTypes {
   private readonly _ctx: ShellFlow;
@@ -27,7 +28,7 @@ export class Bin extends Directory<IBinModuleTypes> implements IBinTypes {
 
   async init(): Promise<void> {
     await fs.promises.mkdir(this.dir, { recursive: true });
-    await this.initModule();
+    await this.initModule(modules);
     await this.checkInstalled();
   }
 

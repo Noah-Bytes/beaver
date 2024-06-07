@@ -5,6 +5,7 @@ import git from 'isomorphic-git';
 import path from 'path';
 import { Module } from '../module';
 import { App } from './app';
+import * as modules from './module';
 
 export class AppManager extends Module<any> {
   private readonly apps: App[] = [];
@@ -39,7 +40,8 @@ export class AppManager extends Module<any> {
       }
 
       this.removeAllModule();
-      await this.initModule();
+
+      await this.initModule(modules);
     }
   }
 

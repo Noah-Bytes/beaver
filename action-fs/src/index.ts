@@ -11,6 +11,9 @@ import * as decompress from 'decompress';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
+// @ts-ignore
+const _decompress = decompress as unknown as typeof decompress.default;
+
 export class ActionFs extends ActionUse<IWthForFs> {
   constructor(params: IWthForFs, options?: IDownloadOptions) {
     super(params, options);
@@ -24,7 +27,7 @@ export class ActionFs extends ActionUse<IWthForFs> {
     try {
       await fs.copy(source, target);
       this.outStream.write(`copy success`);
-    } catch (e) {
+    } catch (e: any) {
       this.errStream.write(`copy error: ${e.message}`);
       throw e;
     }
@@ -41,7 +44,7 @@ export class ActionFs extends ActionUse<IWthForFs> {
         retryDelay: 1000,
       });
       this.outStream.write(`remove success`);
-    } catch (e) {
+    } catch (e: any) {
       this.outStream.write(`remove error: ${e.message}`);
       throw e;
     }
@@ -51,13 +54,13 @@ export class ActionFs extends ActionUse<IWthForFs> {
     const params = this.with as IWthForFsDecompress;
     const p = path.resolve(this.home, params.path, params?.file || '');
     const output = path.resolve(this.home, params.path, params?.output || '');
-    await decompress(p, output, { strip: params.strip || 0 });
+    await _decompress(p, output, { strip: params.strip || 0 });
   }
 
   async outputFile() {
     const params = this.with as IWthForFsOutputFile;
     await fs.outputFile(
-      path.resolve(this.home, params.path, params?.file || ''),
+      path.resolve(this.home, params.path || '', params?.file || ''),
       params.content,
     );
   }
