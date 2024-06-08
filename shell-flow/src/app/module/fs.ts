@@ -1,19 +1,16 @@
 import { ActionDownload } from '@beaver/action-download';
-import { createLogger, ShellFlow } from '@beaver/shell-flow';
+import { ShellFlow } from '@beaver/shell-flow';
 import { IShellAppRunParams } from '@beaver/types';
 import path from 'path';
 // @ts-ignore
 import Pdrive from 'pdrive';
 import { rimraf } from 'rimraf';
-import { Logger } from 'winston';
 
 export class Fs {
   private readonly _ctx: ShellFlow;
-  readonly logger: Logger;
 
   constructor(private readonly ctx: any) {
     this._ctx = ctx;
-    this.logger = createLogger(`fs`);
   }
 
   async share(params: IShellAppRunParams) {
@@ -74,7 +71,7 @@ export class Fs {
 
     if (options?.mirror) {
       targetURL = mirrorUrl(targetURL);
-      this.logger.info('Using mirror: ' + targetURL);
+      outStream.write('Using mirror: ' + targetURL);
     }
 
     const actionDownload = new ActionDownload(

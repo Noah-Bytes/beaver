@@ -5,16 +5,14 @@
   "projectType": "library",
   "targets": {
     "build": {
-      "executor": "@nx/rollup:rollup",
+      "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/beaver-kernel",
-        "main": "beaver-kernel/src/index.ts",
         "tsConfig": "beaver-kernel/tsconfig.lib.json",
-        "assets": [],
-        "project": "beaver-kernel/package.json",
-        "compiler": "swc",
-        "format": ["cjs", "esm"]
+        "packageJson": "beaver-kernel/package.json",
+        "main": "beaver-kernel/src/index.ts",
+        "assets": ["beaver-kernel/*.md"]
       }
     },
     "nx-release-publish": {

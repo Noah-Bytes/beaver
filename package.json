@@ -144,6 +144,7 @@
     "systeminformation": "^5.22.7",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
+    "tree-kill-promise": "^3.0.14",
     "tslib": "^2.6.2",
     "wget-improved": "^3.4.0",
     "winston": "^3.13.0",

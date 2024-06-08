@@ -1,3 +1,4 @@
+import { mirror } from '@beaver/action-core';
 import {
   createModuleEventBus,
   IEventBus,
@@ -5,7 +6,6 @@ import {
   omit,
 } from '@beaver/arteffix-utils';
 import {
-  createLogger,
   IShellMeta,
   IShellRunOptions,
   IShellRunParams,
@@ -19,8 +19,6 @@ import path from 'path';
 import process from 'process';
 import { shellEnvSync } from 'shell-env';
 import sudo from 'sudo-prompt';
-import { Logger } from 'winston';
-import {mirror} from "@beaver/action-core";
 
 export function shellPathSync() {
   const { PATH } = shellEnvSync();
@@ -47,7 +45,6 @@ export class Shell implements IShellTypes {
   private readonly _args: string[];
   private readonly _event_name_data;
   private readonly _event_name_exit;
-  private readonly logger: Logger;
   private cwd: string | undefined;
   private readonly _ctx: ShellFlow;
   eventBus: IEventBus;
@@ -87,7 +84,6 @@ export class Shell implements IShellTypes {
     this._event_name_data = `shell:data:${name}`;
     this._event_name_exit = `shell:exit:${name}`;
 
-    this.logger = createLogger(`shell:${name}`);
     this.eventBus = createModuleEventBus(`shell:event:${name}`);
 
     this.env = Object.assign({}, process.env) as Record<string, string>;
@@ -203,7 +199,7 @@ export class Shell implements IShellTypes {
 
     this.status = Shell.STATUS.KILLED;
 
-    this.logger.info(`${this.name} shell killed`);
+    console.log(`${this.name} shell killed`);
   }
 
   onShellData(func: (data: string) => any) {
@@ -246,7 +242,7 @@ export class Shell implements IShellTypes {
       msg = mirror(msg);
     }
 
-    this.logger.info(msg);
+    console.log(msg);
 
     this.status = Shell.STATUS.RUNNING;
   }
@@ -266,7 +262,7 @@ export class Shell implements IShellTypes {
       msg = mirror(msg);
     }
 
-    this.logger.info(msg);
+    console.log(msg);
 
     this.status = Shell.STATUS.RUNNING;
 

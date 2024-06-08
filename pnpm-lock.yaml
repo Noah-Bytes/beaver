@@ -176,6 +176,9 @@ dependencies:
   tailwindcss-animate:
     specifier: ^1.0.7
     version: 1.0.7(tailwindcss@3.4.3)
+  tree-kill-promise:
+    specifier: ^3.0.14
+    version: 3.0.14
   tslib:
     specifier: ^2.6.2
     version: 2.6.2
@@ -15393,6 +15396,18 @@ packages:
     dependencies:
       punycode: 2.3.1
     dev: true
+
+  /tree-kill-promise@3.0.14:
+    resolution: {integrity: sha512-HMWDVJq3oby7uxA2AKVThX5fKkF7GPT3FhjNb75tG/6P4tQBtIhElaSucFHFMlBV5f3e+KPqIlHsJVZjueKX/A==}
+    engines: {node: '>=14'}
+    dependencies:
+      tree-kill: 1.2.2
+    dev: false
+
+  /tree-kill@1.2.2:
+    resolution: {integrity: sha512-L0Orpi8qGpRG//Nd+H90vFB+3iHnue1zSSGmNOOCh1GLJ7rUKVwV2HvijphGQS2UmhUZewS9VgvxYIdgr+fG1A==}
+    hasBin: true
+    dev: false
 
   /trim-repeated@2.0.0:
     resolution: {integrity: sha512-QUHBFTJGdOwmp0tbOG505xAgOp/YliZP/6UgafFXYZ26WT1bvQmSMJUvkeVSASuJJHbqsFbynTvkd5W8RBTipg==}
