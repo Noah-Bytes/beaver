@@ -22,4 +22,9 @@ jest
     return (data: string) => {
       return data.replace(regex, '');
     };
+  })
+  .mock('tree-kill-promise', () => {
+    return (data: string) => {
+      return data.replace(regex, '');
+    };
   });

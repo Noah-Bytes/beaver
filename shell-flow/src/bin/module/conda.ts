@@ -124,7 +124,7 @@ export class Conda extends BinModule {
       ? `start /wait ${installer} /InstallationType=JustMe /RegisterPython=0 /S /D=${installPath}`
       : `/bin/bash ${installer} -b -p ${installPath}`;
 
-    await this.run(cmd);
+    await this.runNotConda(cmd);
 
     await this.setMirror();
 
