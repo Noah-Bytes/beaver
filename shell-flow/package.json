@@ -1,6 +1,6 @@
 {
   "name": "@beaver/shell-flow",
-  "version": "0.1.12",
+  "version": "0.1.14",
   "peerDependencies": {
     "core-js": "^3.37.1",
     "decompress": "^4.2.1",
@@ -15,6 +15,7 @@
     "strip-ansi": "^7.1.0",
     "sudo-prompt": "^9.2.1",
     "systeminformation": "^5.22.9",
-    "winston": "^3.13.0"
+    "winston": "^3.13.0",
+    "yaml": "^2.4.4"
   }
 }

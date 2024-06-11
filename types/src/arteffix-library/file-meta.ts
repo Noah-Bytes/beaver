@@ -76,7 +76,7 @@ export interface IFileBaseMetaUpdate extends IMetaFileMetaUpdate {
   /**
    * 在哪些文件夹
    */
-  folders?: Pick<Folder, 'id' | 'name'>[];
+  folders?: string[];
 
   /**
    * 来源地址

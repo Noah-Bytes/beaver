@@ -92,10 +92,13 @@ export class Conda extends BinModule {
   }
 
   override async install(): Promise<void> {
+    const { systemInfo, bin, homeDir, outStream, errStream } = this._ctx;
+
+    outStream.write('start install conda');
     if (this.installed()) {
+      outStream.write('conda is installed');
       return;
     }
-    const { systemInfo, bin, homeDir } = this._ctx;
 
     if (!Conda.URLS[systemInfo.platform]) {
       throw new Error(
