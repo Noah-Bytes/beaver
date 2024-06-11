@@ -5,6 +5,7 @@ import { BinModule } from './bin-module';
 export class Registry extends BinModule {
   readonly description =
     'Look for a dialog requesting admin permission and approve it to proceed. This will allow long paths on your machine, which is required for installing certain python packages.';
+  override readonly dependencies: string[] = ['conda'];
 
   constructor(ctx: ShellFlow) {
     super('registry', ctx);
@@ -23,7 +24,7 @@ export class Registry extends BinModule {
     // 这项设置与 Windows 文件系统是否支持超过 260 个字符的长路径有关。
     const cmd =
       'reg query HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled';
-    const result = await this.run(cmd);
+    const result = await this.runNotConda(cmd);
     let matches = result.replace(cmd, '').match(/(LongPathsEnabled.+)/m);
 
     if (!(matches && matches.length > 0)) {
@@ -40,13 +41,13 @@ export class Registry extends BinModule {
     return false;
   }
   override async install() {
-    await this.run(
+    await this.runNotConda(
       'reg add HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled /t REG_DWORD /d 1 /f',
     );
   }
 
   override async uninstall() {
-    await this.run(
+    await this.runNotConda(
       'reg add "HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem" /v LongPathsEnabled /t REG_DWORD /d 0 /f',
     );
     this.isInstalled = false;

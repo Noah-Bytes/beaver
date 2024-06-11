@@ -1,3 +1,4 @@
+import { ActionShell } from '@beaver/action-shell';
 import { ShellConda } from '@beaver/shell-conda';
 import { IBinModuleTypes, ShellFlow } from '@beaver/shell-flow';
 
@@ -25,6 +26,21 @@ export class BinModule implements IBinModuleTypes {
   run(command: string | string[]) {
     const { homeDir, errStream, outStream } = this._ctx;
     const shellConda = new ShellConda(
+      {
+        home: homeDir,
+        run: command,
+      },
+      {
+        errStream,
+        outStream,
+      },
+    );
+    return shellConda.run();
+  }
+
+  runNotConda(command: string | string[]): Promise<string> {
+    const { homeDir, errStream, outStream } = this._ctx;
+    const shellConda = new ActionShell(
       {
         home: homeDir,
         run: command,

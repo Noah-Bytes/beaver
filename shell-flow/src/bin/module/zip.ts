@@ -4,6 +4,7 @@ import { BinModule } from './bin-module';
 
 export class Zip extends BinModule {
   private readonly packageName: string;
+  override readonly dependencies: string[] = ['conda'];
 
   constructor(ctx: ShellFlow) {
     super('zip', ctx);

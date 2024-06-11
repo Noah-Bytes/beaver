@@ -11,7 +11,7 @@ export class Vs extends BinModule {
   static FILTER_NAME = 'vs_buildtools.exe';
   readonly description =
     'Look for a dialog requesting admin permission and approve it to proceed. This will install Microsoft visual studio build tools, which is required for building several python wheels.';
-  override readonly dependencies: string[] = ['zip'];
+  override readonly dependencies: string[] = ['conda', 'zip'];
 
   private _env: { [key: string]: string[] | string } = {};
 
