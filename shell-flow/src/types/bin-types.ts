@@ -2,7 +2,6 @@ import { IKey, IShellAppRequires } from '@beaver/types';
 import { ShellFlow } from '../shell-flow';
 
 export interface IBinTypes {
-  readLog: () => Promise<string>;
   init: () => Promise<void>;
   download: (url: string, dest: string) => Promise<void>;
   rm: (src: string) => Promise<void>;

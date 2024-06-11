@@ -22,10 +22,6 @@ export class Bin extends Directory<IBinModuleTypes> implements IBinTypes {
     this._ctx = ctx;
   }
 
-  readLog(): Promise<string> {
-    return fs.readFile(this.absPath('bin.log'), 'utf8');
-  }
-
   async init(): Promise<void> {
     await fs.promises.mkdir(this.dir, { recursive: true });
     await this.initModule(modules);
@@ -206,7 +202,6 @@ export class Bin extends Directory<IBinModuleTypes> implements IBinTypes {
         this._isMatch(systemInfo.arch, elem.arch) &&
         this._isMatch(systemInfo.GPU!, elem.gpu),
     );
-    await fs.truncate(this.absPath('bin.log'), 0);
     for (let { name, args, type } of _list) {
       if (await this.checkIsInstalled(name, type)) {
         continue;
