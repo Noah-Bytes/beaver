@@ -33,7 +33,13 @@ export class Brew extends BinModule {
   override installed(): boolean {
     const { bin } = this._ctx;
 
-    return bin.exists('homebrew');
+    if (this.isInstalled) {
+      return true;
+    }
+
+    this.isInstalled = bin.exists('homebrew');
+
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {

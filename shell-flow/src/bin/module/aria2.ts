@@ -26,11 +26,18 @@ export class Aria2 extends BinModule {
 
   override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
-    if (isWin32) {
-      return bin.exists('aria2');
+
+    if (this.isInstalled) {
+      return true;
     }
 
-    return await bin.checkIsInstalled('aria2', 'brew');
+    if (isWin32) {
+      this.isInstalled = bin.exists('aria2');
+    } else {
+      this.isInstalled = await bin.checkIsInstalled('aria2', 'brew');
+    }
+
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {

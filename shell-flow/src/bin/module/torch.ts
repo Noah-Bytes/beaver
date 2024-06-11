@@ -57,11 +57,14 @@ export class Torch extends BinModule {
 
   override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
+    if (this.isInstalled) {
+      return this.isInstalled;
+    }
     if (bin.hasModule('conda')) {
-      return !!bin.getModule('conda')?.exists?.('torch*');
+      this.isInstalled = !!bin.getModule('conda')?.exists?.('torch*');
     }
 
-    return false;
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {

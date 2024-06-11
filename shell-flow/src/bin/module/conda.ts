@@ -166,11 +166,19 @@ export class Conda extends BinModule {
 
   override installed(): boolean {
     const { bin, systemInfo } = this._ctx;
+
+    if (this.isInstalled) {
+      return true;
+    }
+
     // @ts-ignore
     for (let p of Conda.PATHS[systemInfo.platform]) {
-      if (bin.exists(p)) return true;
+      if (bin.exists(p)) {
+        this.isInstalled = true;
+        break;
+      }
     }
-    return false;
+    return this.isInstalled;
   }
 
   override async uninstall() {

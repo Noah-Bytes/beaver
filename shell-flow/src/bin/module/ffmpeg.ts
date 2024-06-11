@@ -12,7 +12,12 @@ export class Ffmpeg extends BinModule {
 
   override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
-    return bin.checkIsInstalled('ffmpeg', 'conda');
+    if (this.isInstalled) {
+      return true;
+    }
+
+    this.isInstalled = await bin.checkIsInstalled('ffmpeg', 'conda');
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {

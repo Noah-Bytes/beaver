@@ -67,7 +67,12 @@ export class Node extends BinModule {
 
   override installed(): boolean | Promise<boolean> {
     const { bin } = this._ctx;
-    return bin.exists('node');
+    if (this.isInstalled) {
+      return true;
+    }
+
+    this.isInstalled = bin.exists('node');
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {

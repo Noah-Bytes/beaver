@@ -20,15 +20,21 @@ export class Cuda extends BinModule {
   override async installed(): Promise<boolean> {
     const { bin } = this._ctx;
 
+    if (this.isInstalled) {
+      return true;
+    }
+
     const cudnn = await bin.checkIsInstalled('cudnn', 'conda');
     const cuda = await bin.checkIsInstalled('cuda', 'conda');
 
     if (isWin32) {
       const libzlib = await bin.checkIsInstalled('libzlib-wapi', 'conda');
-      return cudnn && cuda && libzlib;
+      this.isInstalled = cudnn && cuda && libzlib;
+    } else {
+      this.isInstalled = cudnn && cuda;
     }
 
-    return cudnn && cuda;
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {

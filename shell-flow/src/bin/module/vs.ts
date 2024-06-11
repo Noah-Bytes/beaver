@@ -150,11 +150,18 @@ export class Vs extends BinModule {
   }
 
   override installed(): boolean {
+    if (this.isInstalled) {
+      return true;
+    }
     if (isWin32) {
       const paths = this.getPaths();
-      return !!(paths.MSVC_PATH && paths.BUILD_PATH && paths.CMAKE_PATH);
+      this.isInstalled = !!(
+        paths.MSVC_PATH &&
+        paths.BUILD_PATH &&
+        paths.CMAKE_PATH
+      );
     }
-    return false;
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {

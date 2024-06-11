@@ -38,10 +38,13 @@ export class Puppeteer extends BinModule {
 
   override installed(): boolean | Promise<boolean> {
     const { bin } = this._ctx;
-    return (
+    if (this.isInstalled) {
+      return true;
+    }
+    this.isInstalled =
       bin.exists('puppet') &&
       bin.exists('puppet', 'node_modules') &&
-      bin.exists('puppet', 'chrome')
-    );
+      bin.exists('puppet', 'chrome');
+    return this.isInstalled;
   }
 }

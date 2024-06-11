@@ -1,6 +1,6 @@
+import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
 import { BinModule } from './bin-module';
-import {ShellConda} from "@beaver/shell-conda";
 
 export class Py extends BinModule {
   constructor(ctx: ShellFlow) {
@@ -24,7 +24,11 @@ export class Py extends BinModule {
 
   override installed(): boolean | Promise<boolean> {
     const { bin } = this._ctx;
-    return bin.exists('py');
+    if (this.isInstalled) {
+      return true;
+    }
+    this.isInstalled = bin.exists('py');
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {

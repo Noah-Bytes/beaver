@@ -71,7 +71,11 @@ export class Python extends BinModule {
 
   override installed(): boolean {
     const { bin } = this._ctx;
-    return bin.exists('python');
+    if (this.isInstalled) {
+      return true;
+    }
+    this.isInstalled = bin.exists('python');
+    return this.isInstalled;
   }
 
   override async uninstall(): Promise<void> {
