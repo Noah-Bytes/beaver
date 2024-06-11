@@ -22,5 +22,5 @@ export interface IBinModuleTypes {
   installed: () => boolean | Promise<boolean>;
   uninstall: () => Promise<void>;
   run: (command: string | string[]) => Promise<string>;
-  runNotConda: (command: string | string[]) => Promise<string>;
+  runNotConda: (command: string | string[], path?: string) => Promise<string>;
 }
