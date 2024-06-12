@@ -259,6 +259,12 @@ export class Bin extends Directory<IBinModuleTypes> implements IBinTypes {
     return this._isInstalled(name, type);
   }
 
+  /**
+   * @deprecated
+   * @param existing
+   * @param merge
+   * @private
+   */
   private _mergeEnv(
     existing: Record<string, string | string[]>,
     merge: Record<string, string | string[]>,
