@@ -10,23 +10,8 @@ export class SystemInfo implements ISystemInfoTypes {
     return this._arch;
   }
   private readonly _platform: 'win32' | 'linux' | 'darwin';
-  get shell(): string | undefined {
-    return this._shell;
-  }
-  get bluetoothDevices(): Systeminformation.BluetoothDeviceData[] | undefined {
-    return this._bluetoothDevices;
-  }
-  get audios(): Systeminformation.AudioData[] | undefined {
-    return this._audios;
-  }
-  get currentLoad(): Systeminformation.CurrentLoadData | undefined {
-    return this._currentLoad;
-  }
   get os(): Systeminformation.OsData | undefined {
     return this._os;
-  }
-  get battery(): Systeminformation.BatteryData | undefined {
-    return this._battery;
   }
   get mem(): Systeminformation.MemData | undefined {
     return this._mem;
@@ -36,9 +21,6 @@ export class SystemInfo implements ISystemInfoTypes {
   }
   get system(): Systeminformation.SystemData | undefined {
     return this._system;
-  }
-  get time(): Systeminformation.TimeData | undefined {
-    return systemInfo.time();
   }
 
   get graphics(): Systeminformation.GraphicsData | undefined {
@@ -60,14 +42,7 @@ export class SystemInfo implements ISystemInfoTypes {
   private readonly _arch: 'x64' | 'arm64';
 
   private _os: Systeminformation.OsData | undefined;
-  private _currentLoad: Systeminformation.CurrentLoadData | undefined;
-  private _audios: Systeminformation.AudioData[] | undefined;
-  private _bluetoothDevices:
-    | Systeminformation.BluetoothDeviceData[]
-    | undefined;
   private _shell: string | undefined;
-
-  private _battery: Systeminformation.BatteryData | undefined;
 
   private _GPUs: string[] | undefined;
   private _GPU: string | undefined;
@@ -82,28 +57,15 @@ export class SystemInfo implements ISystemInfoTypes {
   }
 
   async refresh(): Promise<void> {
-    [
-      this._graphics,
-      this._cpu,
-      this._mem,
-      this._battery,
-      this._os,
-      this._shell,
-      this._currentLoad,
-      this._audios,
-      this._bluetoothDevices,
-    ] = await Promise.all([
-      systemInfo.graphics(),
-      systemInfo.cpu(),
-      systemInfo.mem(),
-      systemInfo.battery(),
-      systemInfo.osInfo(),
-      systemInfo.shell(),
-      systemInfo.currentLoad(),
-      systemInfo.audio(),
-      systemInfo.bluetoothDevices(),
-      this.gpu(),
-    ]);
+    [this._graphics, this._cpu, this._mem, this._os, this._shell] =
+      await Promise.all([
+        systemInfo.graphics(),
+        systemInfo.cpu(),
+        systemInfo.mem(),
+        systemInfo.osInfo(),
+        systemInfo.shell(),
+        this.gpu(),
+      ]);
   }
 
   async gpu() {

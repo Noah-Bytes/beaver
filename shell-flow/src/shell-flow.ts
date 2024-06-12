@@ -7,6 +7,7 @@ import { AppManager } from './app';
 import { Bin } from './bin';
 import { SystemInfo } from './system-info';
 import { IShellFlowOptionsTypes, IShellFlowTypes } from './types';
+import {ExecutionTime} from "@beaver/arteffix-utils";
 
 export class ShellFlow implements IShellFlowTypes {
   static CACHE_FOLDERS = [
@@ -71,17 +72,10 @@ export class ShellFlow implements IShellFlowTypes {
     if (this._init) {
       throw new Error('shell-flow already initialized \n');
     }
-
     await this.systemInfo.init();
-
     await this.initCacheDir();
-
     await this.bin.init();
-    this.outStream.write('bin initialization success \n');
-
     await this.app.init();
-    this.outStream.write('app initialization success \n');
-
     this._init = true;
   }
 

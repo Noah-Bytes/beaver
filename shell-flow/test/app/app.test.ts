@@ -1,6 +1,8 @@
 import { afterEach } from 'node:test';
 import { getShellFlow } from '../bin/get-shell-flow';
 
+const appName = 'chatTTS'
+
 describe('app 测试', () => {
   const shellFlow = getShellFlow();
 
@@ -17,14 +19,14 @@ describe('app 测试', () => {
   });
 
   it('install app', async () => {
-    const app = await shellFlow.app.getApp('comfyui');
+    const app = await shellFlow.app.getApp(appName);
     if (app) {
       await app.install();
     }
   });
 
   it('uninstall app', async () => {
-    const app = await shellFlow.app.getApp('comfyui');
+    const app = await shellFlow.app.getApp(appName);
     if (app) {
       await app.unInstall();
     }
@@ -36,7 +38,7 @@ describe('app 测试', () => {
   });
 
   it('app 启动', async () => {
-    const app = await shellFlow.app.getApp('comfyui');
+    const app = await shellFlow.app.getApp(appName);
     if (app) {
       await app.start();
     }

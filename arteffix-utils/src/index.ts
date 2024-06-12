@@ -2,6 +2,7 @@ export * from './comfyui';
 export * from './constant';
 export * from './directory';
 export * from './event';
+export * from './execution-time';
 export * from './image';
 export * from './is';
 export * from './lodash';
