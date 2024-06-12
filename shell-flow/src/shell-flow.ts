@@ -72,10 +72,23 @@ export class ShellFlow implements IShellFlowTypes {
     if (this._init) {
       throw new Error('shell-flow already initialized \n');
     }
+
+    ExecutionTime.getInstance().start('systemInfo.init')
     await this.systemInfo.init();
+    ExecutionTime.getInstance().end()
+
+    ExecutionTime.getInstance().start('initCacheDir')
     await this.initCacheDir();
+    ExecutionTime.getInstance().end()
+
+    ExecutionTime.getInstance().start('bin.init')
     await this.bin.init();
+    ExecutionTime.getInstance().end()
+
+    ExecutionTime.getInstance().start('app.init')
     await this.app.init();
+    ExecutionTime.getInstance().end()
+
     this._init = true;
   }
 
