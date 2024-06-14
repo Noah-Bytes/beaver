@@ -1,8 +1,8 @@
 import { ActionFs } from '@beaver/action-fs';
 import { ShellFlow } from '@beaver/shell-flow';
-import decompress from 'decompress';
-import fs from 'fs';
-import path from 'path';
+import * as decompress from 'decompress';
+import * as fs from 'fs';
+import * as path from 'path';
 import { BinModule } from './bin-module';
 
 // @ts-ignore

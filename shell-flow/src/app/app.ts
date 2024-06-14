@@ -16,7 +16,7 @@ import {
   IShellAppRun,
   IShellAppRunParams,
 } from '@beaver/types';
-import fs from 'fs-extra';
+import * as fs from 'fs-extra';
 import git, { ReadCommitResult } from 'isomorphic-git';
 import { Directory } from '../directory';
 
@@ -178,7 +178,7 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   private async _runs() {
-    for (let step of this.meta!.steps) {
+    for (let step of this.meta?.steps || []) {
       if (step.status !== App.STEP_STATUS.INIT) {
         continue;
       }
@@ -334,6 +334,9 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   async retry(): Promise<void> {
+    if (!this.meta?.steps) {
+      return;
+    }
     for (let i = 0; i < this.meta!.steps.length; i++) {
       if (this.meta!.steps[i].status === App.STEP_STATUS.ERROR) {
         this.meta!.steps[i].status = App.STEP_STATUS.INIT;
@@ -344,9 +347,12 @@ export class App extends Directory<any> implements IAppTypes {
   }
 
   async jump(): Promise<void> {
-    for (let i = 0; i < this.meta!.steps.length; i++) {
-      if (this.meta!.steps[i].status === App.STEP_STATUS.ERROR) {
-        this.meta!.steps[i].status = App.STEP_STATUS.SKIP;
+    if (!this.meta?.steps) {
+      return;
+    }
+    for (let i = 0; i < (this.meta?.steps || []).length; i++) {
+      if (this.meta.steps[i].status === App.STEP_STATUS.ERROR) {
+        this.meta.steps[i].status = App.STEP_STATUS.SKIP;
         break;
       }
     }

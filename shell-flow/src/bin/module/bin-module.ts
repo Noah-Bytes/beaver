@@ -38,7 +38,10 @@ export class BinModule implements IBinModuleTypes {
     return shellConda.run();
   }
 
-  runNotConda(command: string | string[], path?: string): Promise<string> {
+  runNotConda(
+    command: string | string[],
+    path?: string,
+  ): Promise<string | string[]> {
     const { homeDir, errStream, outStream } = this._ctx;
     const shellConda = new ActionShell(
       {

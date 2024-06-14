@@ -1,6 +1,7 @@
 import { IActionUse, IActionUseOptions, IStepWith } from '@beaver/types';
 import * as process from 'process';
 import * as stream from 'stream';
+import { Core } from './core';
 import { HOME } from './global';
 
 export class ActionUse<T extends IStepWith> implements IActionUse<T> {
@@ -20,7 +21,7 @@ export class ActionUse<T extends IStepWith> implements IActionUse<T> {
     this.outStream = options?.outStream || <stream.Writable>process.stdout;
   }
 
-  run(): Promise<string> {
+  run(): Promise<string | string[]> {
     return Promise.resolve('0');
   }
 
@@ -30,11 +31,14 @@ export class ActionUse<T extends IStepWith> implements IActionUse<T> {
 }
 
 export class UseManage {
-  private useMap: Map<string, ActionUse<IStepWith>> = new Map();
+  private useMap: Map<string, typeof ActionUse<IStepWith>> = new Map();
+  private _ctx: Core;
 
-  constructor() {}
+  constructor(ctx: Core) {
+    this._ctx = ctx;
+  }
 
-  register(name: string, use: ActionUse<IStepWith>) {
+  register(name: string, use: typeof ActionUse<IStepWith>) {
     if (this.useMap.has(name)) {
       console.warn(`${name} 已存在`);
       return;
@@ -42,14 +46,21 @@ export class UseManage {
     this.useMap.set(name, use);
   }
 
-  async run(name: string, params: any) {
+  run(name: string, params: any) {
     if (!this.useMap.has(name)) {
       throw new Error(`${name} does not exist`);
     }
 
     const Use = this.useMap.get(name);
-    // @ts-ignore
-    const process = new Use(params);
-    await process.run();
+    return new Use(
+      {
+        home: this._ctx.options.homeDir,
+        ...params,
+      },
+      {
+        errStream: this._ctx.options.errStream,
+        outStream: this._ctx.options.outStream,
+      },
+    );
   }
 }

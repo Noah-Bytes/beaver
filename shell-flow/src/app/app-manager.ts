@@ -1,8 +1,8 @@
 import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
-import fs from 'fs';
+import * as fs from 'fs';
 import git from 'isomorphic-git';
-import path from 'path';
+import * as path from 'path';
 import { Module } from '../module';
 import { App } from './app';
 import * as modules from './module';

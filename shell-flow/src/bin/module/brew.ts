@@ -1,5 +1,5 @@
 import { ShellFlow } from '@beaver/shell-flow';
-import decompress from 'decompress';
+import * as decompress from 'decompress';
 import { BinModule } from './bin-module';
 
 // @ts-ignore

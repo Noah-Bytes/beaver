@@ -2,7 +2,7 @@ import { ActionFs } from '@beaver/action-fs';
 import { isWin32 } from '@beaver/arteffix-utils';
 import { ShellConda } from '@beaver/shell-conda';
 import { glob } from 'glob';
-import path from 'path';
+import * as path from 'path';
 import { ShellFlow } from '../../shell-flow';
 import { BinModule } from './bin-module';
 

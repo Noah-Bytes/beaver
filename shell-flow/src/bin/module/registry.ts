@@ -24,7 +24,10 @@ export class Registry extends BinModule {
     // 这项设置与 Windows 文件系统是否支持超过 260 个字符的长路径有关。
     const cmd =
       'reg query HKLM\\SYSTEM\\CurrentControlSet\\Control\\FileSystem /v LongPathsEnabled';
-    const result = await this.runNotConda(cmd);
+    let result = await this.runNotConda(cmd);
+    if (Array.isArray(result)) {
+      result = result.join('')
+    }
     let matches = result.replace(cmd, '').match(/(LongPathsEnabled.+)/m);
 
     if (!(matches && matches.length > 0)) {

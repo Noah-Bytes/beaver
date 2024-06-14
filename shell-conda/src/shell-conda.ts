@@ -9,6 +9,7 @@ import {
   IKey,
   IWithForShellConda,
 } from '@beaver/types';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as process from 'process';
 import { shellEnvSync } from 'shell-env';
@@ -26,6 +27,7 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
   private readonly _args: string[];
   private readonly minicondaDir: string;
   private runner: Runner | undefined;
+  private isInstalled = false;
 
   static PATHS = {
     darwin: [
@@ -386,6 +388,34 @@ export class ShellConda extends ActionUse<IWithForShellConda> {
   override async kill() {
     if (this.runner) {
       await this.runner.kill();
+    }
+  }
+
+  isInstall(): boolean {
+    if (this.isInstalled) {
+      return true;
+    }
+
+    // @ts-ignore
+    for (let p of Conda.PATHS[systemInfo.platform]) {
+      if (this.exists(p)) {
+        this.isInstalled = true;
+        break;
+      }
+    }
+    return this.isInstalled;
+  }
+
+  absPath(...p: string[]): string {
+    return path.resolve(this.home, 'bin', ...p);
+  }
+
+  exists(...p: string[]): boolean {
+    try {
+      fs.accessSync(this.absPath(...p), fs.constants.F_OK);
+      return true;
+    } catch (e) {
+      return false;
     }
   }
 

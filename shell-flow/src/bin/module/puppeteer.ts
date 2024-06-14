@@ -1,6 +1,6 @@
 import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
-import fs from 'fs';
+import * as fs from 'fs';
 import { BinModule } from './bin-module';
 
 export class Puppeteer extends BinModule {

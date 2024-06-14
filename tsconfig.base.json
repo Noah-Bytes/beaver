@@ -17,8 +17,11 @@
     "paths": {
       "@beaver/action-core": ["action-core/src/index.ts"],
       "@beaver/action-download": ["action-download/src/index.ts"],
+      "@beaver/action-drive": ["action-drive/src/index.ts"],
       "@beaver/action-exec": ["action-exec/src/index.ts"],
+      "@beaver/action-flow": ["action-flow/src/index.ts"],
       "@beaver/action-fs": ["action-fs/src/index.ts"],
+      "@beaver/action-git": ["action-git/src/index.ts"],
       "@beaver/action-io": ["action-io/src/index.ts"],
       "@beaver/action-parse": ["action-parse/src/index.ts"],
       "@beaver/action-shell": ["action-shell/src/index.ts"],

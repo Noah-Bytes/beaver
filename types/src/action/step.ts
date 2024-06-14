@@ -3,12 +3,13 @@ export interface IWithForGit {
   type: string;
   url?: string;
   dir?: string;
+  path?: string;
 }
 
 export interface IWithForShell {
   home?: string;
   path?: string;
-  args?: string[]
+  args?: string[];
   run: string | string[];
 }
 
@@ -25,8 +26,9 @@ export interface IWithForShellConda {
 export interface IWthForDrive {
   home?: string;
   uri?: string;
-  ln: Record<string, string>;
+  ln: Record<string, string | string[]>;
   peers?: string[];
+  path?: string;
 }
 
 export interface IWthForDownload {
@@ -81,12 +83,17 @@ export type IStepWith =
   | IWthForDrive
   | IWthForDownload
   | IWthForFsCopy
-  | IWthForFsRm;
+  | IWthForFsRm
 
 export interface IStep {
   name: string;
+  status?: number;
   uses?: string;
   run?: string;
+  async?: boolean;
+  startTime?: number;
+  endTime?: number;
   if?: string;
   with: IStepWith;
+  result?: string | string[];
 }

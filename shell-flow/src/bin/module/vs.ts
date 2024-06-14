@@ -2,7 +2,7 @@ import { isWin32 } from '@beaver/arteffix-utils';
 import { ShellConda } from '@beaver/shell-conda';
 import { ShellFlow } from '@beaver/shell-flow';
 import { glob } from 'glob';
-import path from 'path';
+import * as path from 'path';
 import { BinModule } from './bin-module';
 
 export class Vs extends BinModule {

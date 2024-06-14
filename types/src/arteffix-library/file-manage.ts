@@ -28,4 +28,6 @@ export interface IFileManage<
   ) => Promise<IFileExtend<M, U>>;
 
   pushRecycleBin: (id: string) => Promise<M>;
+
+  export: (ids: string[], targetDir: string) => Promise<void>;
 }

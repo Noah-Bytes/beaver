@@ -1,23 +1,30 @@
 import { ActionUse } from '@beaver/action-core';
 import { IDownloadOptions, IWthForDownload } from '@beaver/types';
+import * as fs from 'fs-extra';
 import { DownloaderHelper } from 'node-downloader-helper';
 import * as os from 'os';
 import * as path from 'path';
 
 export class ActionDownload extends ActionUse<IWthForDownload> {
+  private logs: string[] = [];
+  private dl?: DownloaderHelper;
+
   constructor(params: IWthForDownload, options?: IDownloadOptions) {
     super(params, options);
   }
 
-  private getLogs(msg: string) {
-    return msg + os.EOL;
+  private log(msg: string) {
+    this.outStream.write(msg + os.EOL);
+    this.logs.push(msg);
   }
 
-  private _download(): Promise<string> {
+  private async _download(): Promise<string | string[]> {
     let targetURL = this.with.url;
     const dir = path.resolve(this.home, this.with.path);
 
-    const dl = new DownloaderHelper(targetURL, dir, {
+    await fs.promises.mkdir(dir, { recursive: true });
+
+    this.dl = new DownloaderHelper(targetURL, dir, {
       fileName: this.with.file,
       headers: {
         'User-Agent':
@@ -33,45 +40,45 @@ export class ActionDownload extends ActionUse<IWthForDownload> {
       retry: { maxRetries: 3, delay: 5000 },
     });
 
-    this.outStream.write(
-      this.getLogs(`Downloading ${targetURL} to ${dir}/${this.with.file}`),
-    );
+    this.log(`Downloading ${targetURL} to ${dir}/${this.with.file}`);
 
     return new Promise((resolve, reject) => {
-      dl.on('end', () => {
-        this.outStream.write(this.getLogs('Download Complete!'));
-        resolve('0');
+      this.dl.on('end', () => {
+        this.log('Download Complete!');
+        resolve(this.logs);
       });
 
-      dl.on('error', (e) => {
-        this.errStream.write(this.getLogs(`Download Failed: ${e.message}`));
-        reject(e);
+      this.dl.on('error', (e) => {
+        this.log(`Download Failed: ${e.message}`);
+        reject(this.logs);
       });
 
-      dl.on('progress.throttled', (stats) => {
-        this.outStream.write(
-          this.getLogs(
-            `Download ${stats.progress.toFixed(0)}% ${stats.downloaded}/${stats.total}`,
-          ),
+      this.dl.on('progress.throttled', (stats) => {
+        this.log(
+          `Download ${stats.progress.toFixed(0)}% ${stats.downloaded}/${stats.total}`,
         );
       });
 
-      dl.on('skip', (stats) => {
-        this.outStream.write(this.getLogs(`File already exists`));
-        resolve('0');
+      this.dl.on('skip', (stats) => {
+        this.log(`File already exists`);
+        resolve(this.logs);
       });
 
-      dl.start().catch((e) => {
-        this.errStream.write(this.getLogs(`Download Failed: ${e.message}`));
-        reject(e);
+      this.dl.start().catch((e) => {
+        this.log(`Download Failed: ${e.message}`);
+        reject(this.logs);
       });
     });
   }
 
-  override async run(): Promise<string> {
+  override async run(): Promise<string | string[]> {
     if (this.with.url && this.with.path && this.with.file) {
       return await this._download();
     }
     return '0';
+  }
+
+  async kill(): Promise<void> {
+    await this.dl?.stop();
   }
 }

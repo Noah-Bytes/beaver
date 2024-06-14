@@ -1,9 +1,11 @@
 import { ActionUse } from '@beaver/action-core';
-import { exec } from '@beaver/action-exec';
+import { exec, Runner } from '@beaver/action-exec';
 import { ExecOptions, IDownloadOptions, IWithForShell } from '@beaver/types';
 import * as path from 'path';
 
 export class ActionShell extends ActionUse<IWithForShell> {
+  private runner?: Runner;
+
   constructor(params: IWithForShell, options?: IDownloadOptions) {
     super(params, options);
   }
@@ -20,13 +22,25 @@ export class ActionShell extends ActionUse<IWithForShell> {
   }
 
   override async run() {
+    const result: string[] = [];
     if (Array.isArray(this.with.run)) {
       for (let i = 0; i < this.with.run.length; i++) {
-        await exec(this.with.run[i], this.with.args || [], this.getOptions()).exec();
+        this.runner = exec(
+          this.with.run[i],
+          this.with.args || [],
+          this.getOptions(),
+        );
+        const resp = await this.runner.exec();
+        result.push(resp);
       }
-      return '0';
+      return result;
     }
 
-    return await exec(this.with.run, this.with.args || [], this.getOptions()).exec();
+    this.runner = exec(this.with.run, this.with.args || [], this.getOptions());
+    return await this.runner.exec();
+  }
+
+  async kill(): Promise<void> {
+    await this.runner?.kill();
   }
 }

@@ -1,7 +1,7 @@
 import { ActionDownload } from '@beaver/action-download';
 import { ShellFlow } from '@beaver/shell-flow';
 import { IShellAppRunParams } from '@beaver/types';
-import path from 'path';
+import * as path from 'path';
 // @ts-ignore
 import Pdrive from 'pdrive';
 import { rimraf } from 'rimraf';

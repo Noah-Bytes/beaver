@@ -1,6 +1,7 @@
 export * from './action';
 export * from './action-download';
 export * from './action-exec';
+export * from './action-flow';
 export * from './action-io';
 export * from './action-shell-conda';
 export * from './arteffix-extension';

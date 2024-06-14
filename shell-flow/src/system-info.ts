@@ -1,5 +1,5 @@
-import os from 'os';
-import systemInfo, { Systeminformation } from 'systeminformation';
+import * as os from 'os';
+import * as systemInfo from 'systeminformation';
 import { ISystemInfoTypes } from './types';
 
 export class SystemInfo implements ISystemInfoTypes {
@@ -10,20 +10,20 @@ export class SystemInfo implements ISystemInfoTypes {
     return this._arch;
   }
   private readonly _platform: 'win32' | 'linux' | 'darwin';
-  get os(): Systeminformation.OsData | undefined {
+  get os(): any | undefined {
     return this._os;
   }
-  get mem(): Systeminformation.MemData | undefined {
+  get mem(): any | undefined {
     return this._mem;
   }
-  get cpu(): Systeminformation.CpuData | undefined {
+  get cpu(): any | undefined {
     return this._cpu;
   }
-  get system(): Systeminformation.SystemData | undefined {
+  get system(): any | undefined {
     return this._system;
   }
 
-  get graphics(): Systeminformation.GraphicsData | undefined {
+  get graphics(): any | undefined {
     return this._graphics;
   }
 
@@ -41,15 +41,15 @@ export class SystemInfo implements ISystemInfoTypes {
 
   private readonly _arch: 'x64' | 'arm64';
 
-  private _os: Systeminformation.OsData | undefined;
+  private _os: any | undefined;
   private _shell: string | undefined;
 
   private _GPUs: string[] | undefined;
   private _GPU: string | undefined;
-  private _graphics: Systeminformation.GraphicsData | undefined;
-  private _system: Systeminformation.SystemData | undefined;
-  private _cpu: Systeminformation.CpuData | undefined;
-  private _mem: Systeminformation.MemData | undefined;
+  private _graphics: any | undefined;
+  private _system: any | undefined;
+  private _cpu: any | undefined;
+  private _mem: any | undefined;
 
   async init(): Promise<void> {
     this._system = await systemInfo.system();
@@ -75,7 +75,7 @@ export class SystemInfo implements ISystemInfoTypes {
       this.graphics.controllers &&
       this.graphics.controllers.length > 0
     ) {
-      gpus = this.graphics.controllers.map((x) => {
+      gpus = this.graphics.controllers.map((x: any) => {
         return x.vendor.toLowerCase();
       });
     } else {

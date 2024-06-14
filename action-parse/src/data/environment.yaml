@@ -30,7 +30,7 @@ jobs:
           path: bin
       - name: conda install for unix
         if: os.platform === 'linux' || os.platform === 'darwin'
-        run: "base installer.sh -b -p {{bin}} miniconda {{absPath('/bin/miniconda')}}"
+        run: "base installer.sh -b -p installer.exe miniconda {{absPath('/bin/miniconda')}}"
         with:
           path: bin
       - name: conda config

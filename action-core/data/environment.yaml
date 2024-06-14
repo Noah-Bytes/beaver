@@ -1,0 +1,144 @@
+name: conda environment
+
+jobs:
+  conda:
+    global:
+      download:
+        darwin:
+          x64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-MacOSX-x86_64.sh
+          arm64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-MacOSX-arm64.sh
+        win32:
+          x64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Windows-x86_64.exe
+        linux:
+          x64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Linux-x86_64.sh
+          arm64: https://repo.anaconda.com/miniconda/Miniconda3-py310_24.4.0-0-Linux-aarch64.sh
+      installer:
+        darwin: installer.sh
+        linux: installer.sh
+        win32: installer.exe
+    steps:
+      - name: download conda
+        uses: action/download
+        with:
+          url: '{{global.download[os.platform][os.arch]}}'
+          file: '{{global.installer[os.platform]}}'
+          path: bin
+      - name: conda install
+        if: "{{os.platform === 'win32'}}"
+        run: "cmd /c \"if not exist {{absPath('bin/miniconda')}} (start /wait {{global.installer[os.platform]}} /InstallationType=JustMe /RegisterPython=0 /S /D={{absPath('bin/miniconda')}}) else (echo Miniconda already installed.)\""
+        with:
+          path: bin
+      - name: conda install for unix
+        if: "{{os.platform === 'linux' || os.platform === 'darwin'}}"
+        run: "/bin/bash -c 'if [ ! -d \"{{absPath('bin/miniconda')}}\" ]; then /bin/bash installer.sh -b -p {{absPath('bin/miniconda')}}; else echo \"Miniconda already installed.\"; fi'"
+        with:
+          path: bin
+      - name: conda config
+        uses: action/shell-conda
+        with:
+          run:
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/bioconda/
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/menpo/
+            - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+            - conda config --set show_channel_urls yes
+            #          - 使得每次创建新环境时，都会自动安装Python 3.10
+            - conda config --add create_default_packages python=3.10
+            #          - 从Conda Forge频道安装pip、brotli和brotlipy这三个包
+            - conda install -y -c conda-forge pip brotli brotlipy
+      - name: python rename
+        uses: action/fs
+        async: false
+        if: "{{os.platform === 'win32'}}"
+        with:
+          type: copy
+          path: bin/miniconda
+          from: python.exe
+          to: python3.exe
+      - name: remove conda install package
+        uses: action/fs
+        async: false
+        with:
+          type: rm
+          path: bin
+          file: '{{global.installer[os.platform]}}'
+
+  git:
+    steps:
+      - name: install git
+        uses: action/shell-conda
+        with:
+          run: conda install -y -c conda-forge git git-lfs
+      - name: set git config
+        uses: action/fs
+        if: "{{os.platform === 'win32'}}"
+        with:
+          type: outputFile
+          file: gitconfig
+          content: "[core]\nlongpaths = true\n[http]\npostBuffer = 524288000\n"
+  zip:
+    steps:
+      - name: install zip for win
+        uses: action/shell-conda
+        async: false
+        if: "{{os.platform === 'win32'}}"
+        with:
+          run: conda install -y -c conda-forge 7zip
+      - name: install zip for unix
+        uses: action/shell-conda
+        async: false
+        if: "{{os.platform === 'linux' || os.platform === 'darwin'}}"
+        with:
+          run: conda install -y -c conda-forge p7zip
+  nodejs:
+    global:
+      download:
+        darwin:
+          x64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-darwin-x64.tar.gz
+          arm64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-darwin-arm64.tar.gz
+        win32:
+          x64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-win-x64.zip
+        linux:
+          x64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-linux-x64.tar.gz
+          arm64: https://nodejs.org/dist/v18.16.0/node-v18.16.0-linux-arm64.tar.gz
+      installer:
+        darwin: node-v18.16.0.tar.gz
+        linux: node-v18.16.0.tar.gz
+        win32: node-v18.16.0.zip
+    steps:
+      - name: download nodejs
+        uses: action/download
+        with:
+          url: '{{global.download[os.platform][os.arch]}}'
+          file: '{{global.installer[os.platform]}}'
+          path: bin
+      - name: nodejs decompress
+        uses: action/fs
+        async: false
+        with:
+          type: decompress
+          file: '{{global.installer[os.platform]}}'
+          output: 'node'
+          strip: 1
+          path: bin
+
+  ffmpeg:
+    steps:
+      - name: install ffmpeg
+        uses: action/shell-conda
+        async: false
+        with:
+          run: conda install -y -c conda-forge ffmpeg
+  py:
+    steps:
+      - name: git pull py
+        uses: action/shell-conda
+        with:
+          path: bin
+          run: git clone https://github.com/pinokiocomputer/python py
+      - name: pip install requirements
+        uses: action/shell-conda
+        with:
+          path: bin/py
+          run: pip install -r requirements.txt -i https://pypi.mirrors.ustc.edu.cn/simple/

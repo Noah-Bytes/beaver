@@ -12,6 +12,6 @@ export interface IActionUse<T> {
   errStream?: stream.Writable;
   silent?: boolean;
 
-  run: () => Promise<string>;
+  run: () => Promise<string | string[]>;
   kill: () => Promise<void>;
 }

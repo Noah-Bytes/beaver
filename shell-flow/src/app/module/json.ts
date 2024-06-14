@@ -1,7 +1,7 @@
 import { loader, ShellFlow } from '@beaver/shell-flow';
 import { IShellAppRunParams } from '@beaver/types';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 
 export class Json {
   private readonly _ctx: ShellFlow;

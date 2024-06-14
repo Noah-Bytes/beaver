@@ -8,6 +8,7 @@ export interface IMetaFileMeta {
 }
 
 export interface IMetaFileMetaUpdate {
+  id?: string;
   name?: string;
 }
 
@@ -47,6 +48,8 @@ export interface IMetaFile<
   exists: (...p: string[]) => boolean;
 
   getFileName: (name?: string) => string;
+
+  getFileAbsPath: () => string;
 
   remove: () => Promise<void>;
 }

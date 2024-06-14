@@ -23,19 +23,25 @@ export class ActionFs extends ActionUse<IWthForFs> {
     const params = this.with as IWthForFsCopy;
     const source = path.resolve(this.home, params.path, params.from);
     const target = path.resolve(this.home, params.path, params.to);
+    const result = [];
+    result.push(`copy ${source} to ${target}`);
     this.outStream.write(`copy ${source} to ${target}`);
     try {
       await fs.copy(source, target);
+      result.push(`copy success`);
       this.outStream.write(`copy success`);
     } catch (e: any) {
       this.errStream.write(`copy error: ${e.message}`);
-      throw e;
+      throw new Error(`copy error: ${e.message}`);
     }
+
+    return result;
   }
 
   async rm() {
     const params = this.with as IWthForFsRm;
     const p = path.resolve(this.home, params.path, params?.file || '');
+    const result = [`remove ${p}`];
     this.outStream.write(`remove ${p}`);
     try {
       await fs.rm(p, {
@@ -44,44 +50,45 @@ export class ActionFs extends ActionUse<IWthForFs> {
         retryDelay: 1000,
       });
       this.outStream.write(`remove success`);
+      result.push(`remove success`);
     } catch (e: any) {
       this.outStream.write(`remove error: ${e.message}`);
-      throw e;
+      throw new Error(`remove error: ${e.message}`);
     }
+
+    return result;
   }
 
   async decompress() {
     const params = this.with as IWthForFsDecompress;
     const p = path.resolve(this.home, params.path, params?.file || '');
     const output = path.resolve(this.home, params.path, params?.output || '');
+    const result = [`decompress ${p} to ${output}`];
     await _decompress(p, output, { strip: params.strip || 0 });
+    result.push('decompress success');
+    return result;
   }
 
   async outputFile() {
     const params = this.with as IWthForFsOutputFile;
-    await fs.outputFile(
-      path.resolve(this.home, params.path || '', params?.file || ''),
-      params.content,
-    );
+    const p = path.resolve(this.home, params.path || '', params?.file || '');
+    const result = [`outputFile ${p}`];
+    await fs.outputFile(p, params.content);
+
+    result.push('outputFile success');
+    return result;
   }
 
-  override async run(): Promise<string> {
+  override async run(): Promise<string | string[]> {
     switch (this.with.type) {
       case 'copy':
-        await this.copy();
-        break;
+        return await this.copy();
       case 'rm':
-        await this.rm();
-        break;
+        return await this.rm();
       case 'decompress':
-        await this.decompress();
-        break;
+        return await this.decompress();
       case 'outputFile':
-        await this.outputFile();
-        break;
-      default:
+        return await this.outputFile();
     }
-
-    return '0';
   }
 }

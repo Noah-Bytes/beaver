@@ -93,4 +93,8 @@ export class MetaFile<M extends IMetaFileMeta, U extends IMetaFileMetaUpdate>
   public getFileName(name?: string): string {
     return `${name ? name : this.meta.id}.${this.meta.ext}`;
   }
+
+  getFileAbsPath(): string {
+    return this.absPath(this.getFileName());
+  }
 }

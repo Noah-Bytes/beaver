@@ -118,4 +118,17 @@ export class FileManage<
 
     return file.getMeta();
   }
+
+  async export(ids: string[], targetDir: string): Promise<void> {
+    await fs.ensureDir(targetDir);
+    for (let i = 0; i < ids.length; i++) {
+      const file = this.getFile(ids[i]);
+      if (file) {
+        await fs.copyFile(
+          file.getFileAbsPath(),
+          path.resolve(targetDir, file.getFileName()),
+        );
+      }
+    }
+  }
 }

@@ -1,8 +1,8 @@
 import { parse } from 'csv-parse';
-import fs from 'fs-extra';
-import path from 'path';
-import vm from 'vm';
-import yaml from 'yaml';
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import * as vm from 'vm';
+import * as yaml from 'yaml';
 
 export async function loader(filePath: string) {
   const extension = path.extname(filePath);

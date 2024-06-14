@@ -1,0 +1,8 @@
+- name: A play to test vars
+  hosts: localhost
+  tasks:
+    - name: Print variable
+      ansible.builtin.debug:
+        msg: "hello {{  }}"
+      vars:
+        task_var: world

@@ -2,7 +2,7 @@ import { ActionDownload } from '@beaver/action-download';
 import { ActionFs } from '@beaver/action-fs';
 import { ShellConda } from '@beaver/shell-conda';
 import { IShellAppRequires } from '@beaver/types';
-import fs from 'fs-extra';
+import * as fs from 'fs-extra';
 import { Directory } from '../directory';
 import { ShellFlow } from '../shell-flow';
 import { IBinModuleTypes, IBinTypes } from '../types/bin-types';

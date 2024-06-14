@@ -7,6 +7,7 @@ import * as os from 'os';
 import * as stream from 'stream';
 // @ts-ignore
 import kill from 'tree-kill-promise';
+import { stripAnsi } from './strip-ansi';
 
 const IS_WINDOWS = process.platform === 'win32';
 
@@ -36,7 +37,7 @@ export class Runner extends events.EventEmitter {
   private _getCommandString(options: ExecOptions, noPrefix?: boolean): string {
     const toolPath = this._getSpawnFileName();
     const args = this._getSpawnArgs(options);
-    let cmd = noPrefix ? '' : '[command]'; // omit prefix when piped to a second tool
+    let cmd = noPrefix ? '' : ''; // omit prefix when piped to a second tool
     cmd += toolPath;
     for (const a of args) {
       cmd += ` ${a}`;
@@ -401,7 +402,7 @@ export class Runner extends events.EventEmitter {
             optionsNonNull.outStream.write(data);
           }
 
-          result += data.toString();
+          result += stripAnsi(data.toString());
 
           stdbuffer = this._processLineBuffer(
             data,
@@ -416,6 +417,7 @@ export class Runner extends events.EventEmitter {
       }
 
       let errbuffer = '';
+      let errorResult = '';
       if (this.cp.stderr) {
         this.cp.stderr.on('data', (data: Buffer) => {
           state.processStderr = true;
@@ -433,6 +435,8 @@ export class Runner extends events.EventEmitter {
               : optionsNonNull.outStream;
             s.write(data);
           }
+
+          errorResult += stripAnsi(data.toString());
 
           errbuffer = this._processLineBuffer(
             data,
@@ -480,7 +484,7 @@ export class Runner extends events.EventEmitter {
         this.cp?.removeAllListeners();
 
         if (error) {
-          reject(error);
+          reject(new Error(errorResult));
         } else {
           resolve(result);
         }

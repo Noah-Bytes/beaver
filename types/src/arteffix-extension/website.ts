@@ -27,7 +27,7 @@ export interface IWebsite {
 
   getMeta: () => IWebsiteMeta;
 
-  init: () => void;
+  init: (options?: IDragOptions) => void;
   initImage: () => void;
   initSvg: () => void;
   initLink: () => void;

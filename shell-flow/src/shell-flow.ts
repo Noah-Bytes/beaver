@@ -1,8 +1,8 @@
-import fs from 'fs';
-import os from 'os';
-import path from 'path';
-import process from 'process';
-import stream from 'stream';
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
+import * as process from 'process';
+import * as stream from 'stream';
 import { AppManager } from './app';
 import { Bin } from './bin';
 import { SystemInfo } from './system-info';

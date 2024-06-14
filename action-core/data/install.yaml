@@ -1,0 +1,83 @@
+name: comfyui install
+path: apps/comfyui
+jobs:
+  install:
+    global:
+      install:
+        darwin:
+          apple: pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
+          cpu: pip3 install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
+        win32:
+          nvidia: pip3 install torch torchvision torchaudio xformers --index-url https://download.pytorch.org/whl/cu121
+          amd: pip3 install torch-directml --index-url https://download.pytorch.org/whl/cu12
+          cpu: pip3 install torch torchvision torchaudio -i https://pypi.tuna.tsinghua.edu.cn/simple
+        linux:
+          nvidia: pip3 install torch torchvision torchaudio xformers --index-url https://download.pytorch.org/whl/cu121
+          amd: pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.7
+          cpu: pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
+    steps:
+      - name: git pull app
+        uses: actions/git
+        with:
+          type: clone
+          url: https://github.com/comfyanonymous/ComfyUI.git
+          dir: app
+
+      - name: git pull ComfyUI-Manager
+        uses: actions/git
+        with:
+          type: clone
+          url: https://github.com/ltdrdata/ComfyUI-Manager
+          dir: app/custom_nodes/ComfyUI-Manager
+
+      - name: install cuda-12.1.0
+        uses: action/shell-conda
+        if: "{{os.gpu == 'nvidia'}}"
+        with:
+          venv: env
+          path: app
+          run: conda install -y nvidia/label/cuda-12.1.0::cuda
+
+      - name: install requirements
+        uses: action/shell-conda
+        with:
+          venv: env
+          path: app
+          run:
+            - "{{global.install[os.platform][os.gpu]}}"
+            - pip install -r requirements.txt  -i https://pypi.tuna.tsinghua.edu.cn/simple
+
+      - name: mkdir workflows
+        run: mkdir workflows
+        with:
+          path: app
+
+      - name: clone ComfyUI_examples comfymp4
+        uses: action/shell-conda
+        with:
+          path: app/workflows
+          run:
+            - git clone https://github.com/comfyanonymous/ComfyUI_examples
+            - git clone https://github.com/cocktailpeanut/comfymp4
+
+      - name: drive
+        uses: action/drive
+        with:
+          uri: https://github.com/comfyanonymous/ComfyUI.git
+          ln:
+            checkpoints: app/models/checkpoints
+            clip: app/models/clip
+            clip_vision: app/models/clip_vision
+            configs: app/models/configs
+            controlnet: app/models/controlnet
+            embeddings: app/models/embeddings
+            loras: app/models/loras
+            upscale_models: app/models/upscale_models
+            vae: app/models/vae
+          peers:
+            - https://github.com/ArtEffix/stable-diffusion-webui-forge.git
+      - name: ln
+        uses: action/drive
+        with:
+          ln:
+            output: app/output

@@ -26,7 +26,7 @@ export async function getGpuInfo(): Promise<[string, string[]]> {
   } else if (gpus.length > 0) {
     gpu = gpus[0];
   } else {
-    gpu = 'none';
+    gpu = 'cpu';
   }
 
   return [gpu, gpus];
