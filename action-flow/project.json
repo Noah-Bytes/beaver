@@ -1,0 +1,33 @@
+{
+  "name": "action-flow",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "action-flow/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/action-flow",
+        "tsConfig": "action-flow/tsconfig.lib.json",
+        "packageJson": "action-flow/package.json",
+        "main": "action-flow/src/index.ts",
+        "assets": ["action-flow/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
+}

@@ -44,3 +44,4 @@ Thumbs.db
 .next
 out
 .vscode/extensions.json
+.npmrc

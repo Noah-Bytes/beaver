@@ -81,7 +81,7 @@ jobs:
     steps:
       - name: install zip for win
         uses: action/shell-conda
-        async: false
+        sync: false
         if: "{{os.platform === 'win32'}}"
         with:
           run: conda install -y -c conda-forge 7zip
